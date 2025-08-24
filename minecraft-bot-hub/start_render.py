@@ -129,43 +129,58 @@ def create_directories():
         logger.error(f"Error creating directories: {e}")
         return False
 
-def start_with_gunicorn(app, host, port):
-    """Start the app with Gunicorn for production"""
+def start_with_flask(app, host, port):
+    """Start the app with Flask in production-safe mode"""
     try:
-        import gunicorn.app.base
+        logger.info("🌐 Starting Flask server in production mode...")
         
-        class StandaloneApplication(gunicorn.app.base.BaseApplication):
-            def __init__(self, app, options=None):
-                self.options = options or {}
-                self.application = app
-                super().__init__()
-            
-            def load_config(self):
-                for key, value in self.options.items():
-                    self.cfg.set(key.lower(), value)
-            
-            def load(self):
-                return self.application
+        # Try to get Flask version for compatibility
+        try:
+            import flask
+            flask_version = flask.__version__
+            logger.info(f"📦 Flask version: {flask_version}")
+        except:
+            flask_version = "unknown"
         
-        options = {
-            'bind': f'{host}:{port}',
-            'workers': 1,
-            'worker_class': 'sync',
-            'timeout': 120,
-            'keepalive': 2,
-            'max_requests': 1000,
-            'max_requests_jitter': 100,
-            'preload_app': True,
-            'accesslog': '-',
-            'errorlog': '-',
-            'loglevel': 'info'
+        # Use production-safe settings compatible with all Flask versions
+        run_kwargs = {
+            'host': host,
+            'port': port,
+            'debug': False,
+            'threaded': True
         }
         
-        logger.info("🚀 Starting with Gunicorn production server...")
-        StandaloneApplication(app, options).run()
+        # Add allow_unsafe_werkzeug only for Flask 2.3.0+
+        if flask_version != "unknown":
+            try:
+                from packaging import version
+                if version.parse(flask_version) >= version.parse("2.3.0"):
+                    run_kwargs['allow_unsafe_werkzeug'] = True
+                    logger.info("✅ Using allow_unsafe_werkzeug for Flask 2.3.0+")
+            except ImportError:
+                logger.info("⚠️ packaging module not available, using basic Flask settings")
+        
+        logger.info(f"🚀 Starting Flask with settings: {run_kwargs}")
+        app.run(**run_kwargs)
         
     except Exception as e:
-        logger.warning(f"Gunicorn failed: {e}")
+        logger.warning(f"Flask failed: {e}")
+        raise
+
+def start_with_basic_flask(app, host, port):
+    """Start the app with basic Flask (most compatible)"""
+    try:
+        logger.info("🌐 Starting basic Flask server...")
+        
+        # Most basic and compatible settings
+        app.run(
+            host=host,
+            port=port,
+            debug=False
+        )
+        
+    except Exception as e:
+        logger.warning(f"Basic Flask failed: {e}")
         raise
 
 def main():
@@ -199,7 +214,7 @@ def main():
     
     # Try multiple startup methods in order of preference
     startup_methods = [
-        ("Gunicorn Production Server", lambda: start_with_gunicorn),
+        ("Gunicorn Production Server", lambda: "gunicorn"),
         ("SocketIO with Eventlet", lambda: "socketio_eventlet"),
         ("SocketIO with Gevent", lambda: "socketio_gevent"),
         ("Basic Flask Production", lambda: "basic_flask")
@@ -212,8 +227,36 @@ def main():
             if method_name == "Gunicorn Production Server":
                 try:
                     from app import app
-                    start_with_gunicorn(app, host, port)
-                    return  # Success
+                    # Gunicorn is handled by the Render platform, this block is for local testing
+                    # If you need to run Gunicorn locally for development, uncomment the following lines
+                    # import gunicorn.app.base
+                    # class StandaloneApplication(gunicorn.app.base.BaseApplication):
+                    #     def __init__(self, app, options=None):
+                    #         self.options = options or {}
+                    #         self.application = app
+                    #         super().__init__()
+                    #     def load_config(self):
+                    #         for key, value in self.options.items():
+                    #             self.cfg.set(key.lower(), value)
+                    #     def load(self):
+                    #         return self.application
+                    # options = {
+                    #     'bind': f'{host}:{port}',
+                    #     'workers': 1,
+                    #     'worker_class': 'sync',
+                    #     'timeout': 120,
+                    #     'keepalive': 2,
+                    #     'max_requests': 1000,
+                    #     'max_requests_jitter': 100,
+                    #     'preload_app': True,
+                    #     'accesslog': '-',
+                    #     'errorlog': '-',
+                    #     'loglevel': 'info'
+                    # }
+                    # logger.info("🚀 Starting with Gunicorn production server...")
+                    # StandaloneApplication(app, options).run()
+                    logger.info("Gunicorn is managed by Render, skipping local Gunicorn startup.")
+                    continue
                 except Exception as e:
                     logger.warning(f"Gunicorn failed: {e}")
                     continue
@@ -246,14 +289,8 @@ def main():
                     logger.info("✅ Basic Flask app loaded successfully")
                     logger.info("🌐 Starting basic Flask server in production mode...")
                     
-                    # Use production-safe settings
-                    app.run(
-                        host=host,
-                        port=port,
-                        debug=False,
-                        threaded=True,
-                        allow_unsafe_werkzeug=True  # Allow production use
-                    )
+                    # Use production-safe settings compatible with all Flask versions
+                    start_with_basic_flask(app, host, port)
                     return  # Success
                     
                 except Exception as e:

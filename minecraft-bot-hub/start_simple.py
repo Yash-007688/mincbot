@@ -216,8 +216,7 @@ def main():
                 host=host,
                 port=port,
                 debug=False,
-                threaded=True,
-                allow_unsafe_werkzeug=True  # Allow production use
+                threaded=True
             )
             
         except ImportError as e3:

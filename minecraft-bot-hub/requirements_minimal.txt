@@ -20,6 +20,7 @@ requests>=2.31.0
 
 # Basic utilities
 python-dotenv>=1.0.0
+packaging>=23.0
 
 # Build tools
 setuptools>=65.0.0

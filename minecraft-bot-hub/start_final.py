@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🚀 Minecraft Bot Hub - Production Startup Script for Render
-Optimized for cloud hosting with proper error handling and logging
+🚀 Minecraft Bot Hub - Final Bulletproof Startup Script
+Handles all Flask versions and provides multiple fallback options
 """
 
 import os
@@ -15,8 +15,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler('app.log')
+        logging.StreamHandler(sys.stdout)
     ]
 )
 
@@ -104,13 +103,6 @@ def check_dependencies():
         except ImportError:
             logger.warning("⚠️ No async library available, will use basic Flask")
     
-    # Check production server (optional)
-    try:
-        import gunicorn
-        logger.info("✅ Gunicorn available")
-    except ImportError:
-        logger.warning("⚠️ Gunicorn not available, will use basic Flask")
-    
     if missing_deps:
         logger.error(f"❌ Missing critical dependencies: {missing_deps}")
         return False
@@ -128,6 +120,45 @@ def create_directories():
         return True
     except Exception as e:
         logger.error(f"Error creating directories: {e}")
+        return False
+
+def start_socketio_eventlet(app, host, port):
+    """Start with SocketIO and Eventlet"""
+    try:
+        from app_production import app, socketio
+        logger.info("✅ SocketIO app loaded successfully")
+        socketio.run(app, host=host, port=port, debug=False, log_output=True)
+        return True
+    except Exception as e:
+        logger.warning(f"SocketIO Eventlet failed: {e}")
+        return False
+
+def start_socketio_gevent(app, host, port):
+    """Start with SocketIO and Gevent"""
+    try:
+        os.environ['SOCKETIO_ASYNC_MODE'] = 'gevent'
+        from app_production import app, socketio
+        logger.info("✅ SocketIO app with Gevent loaded successfully")
+        socketio.run(app, host=host, port=port, debug=False, log_output=True)
+        return True
+    except Exception as e:
+        logger.warning(f"SocketIO Gevent failed: {e}")
+        return False
+
+def start_basic_flask(app, host, port):
+    """Start with basic Flask (most compatible)"""
+    try:
+        logger.info("🌐 Starting basic Flask server...")
+        
+        # Most basic and compatible settings - no version-specific parameters
+        app.run(
+            host=host,
+            port=port,
+            debug=False
+        )
+        return True
+    except Exception as e:
+        logger.warning(f"Basic Flask failed: {e}")
         return False
 
 def main():
@@ -159,73 +190,39 @@ def main():
     logger.info(f"  ⚙️ Management: {os.environ.get('MANAGEMENT_SYSTEMS_ENABLED', 'true')}")
     logger.info(f"  💾 Database: {os.environ.get('DATABASE_ENABLED', 'true')}")
     
-    try:
-        # Import and start the production app
-        logger.info("🔄 Attempting to load production application...")
-        from app_production import app, socketio
-        
-        logger.info("✅ Production application loaded successfully")
-        logger.info("🌐 Starting production server with SocketIO...")
-        
-        # Start the production server
-        socketio.run(
-            app,
-            host=host,
-            port=port,
-            debug=False,
-            log_output=True
-        )
-        
-    except ImportError as e:
-        logger.warning(f"Production app import failed: {e}")
-        logger.info("🔄 Falling back to basic Flask app...")
-        
+    # Try multiple startup methods in order of preference
+    startup_methods = [
+        ("SocketIO with Eventlet", lambda: start_socketio_eventlet(None, host, port)),
+        ("SocketIO with Gevent", lambda: start_socketio_gevent(None, host, port)),
+        ("Basic Flask", lambda: start_basic_flask(None, host, port))
+    ]
+    
+    for method_name, method_func in startup_methods:
         try:
-            # Fallback to basic Flask app
-            from app import app
+            logger.info(f"🔄 Attempting to start with {method_name}...")
             
-            logger.info("✅ Basic Flask app loaded successfully")
-            logger.info("🌐 Starting basic Flask server...")
+            if method_name == "SocketIO with Eventlet":
+                if start_socketio_eventlet(None, host, port):
+                    return  # Success
+                continue
             
-            app.run(
-                host=host,
-                port=port,
-                debug=False
-            )
+            elif method_name == "SocketIO with Gevent":
+                if start_socketio_gevent(None, host, port):
+                    return  # Success
+                continue
             
-        except ImportError as e2:
-            logger.error(f"❌ Failed to import basic Flask app: {e2}")
-            logger.error("Please check that app.py exists and is properly formatted")
-            sys.exit(1)
-        except Exception as e2:
-            logger.error(f"❌ Failed to start basic Flask server: {e2}")
-            sys.exit(1)
-            
-    except Exception as e:
-        logger.error(f"❌ Failed to start production server: {e}")
-        logger.info("🔄 Attempting to start with basic Flask as fallback...")
-        
-        try:
-            # Final fallback to basic Flask app
-            from app import app
-            
-            logger.info("✅ Basic Flask app loaded successfully")
-            logger.info("🌐 Starting basic Flask server in production mode...")
-            
-            # Use production-safe settings
-            app.run(
-                host=host,
-                port=port,
-                debug=False,
-                threaded=True
-            )
-            
-        except ImportError as e3:
-            logger.error(f"❌ Failed to import basic Flask app: {e3}")
-            sys.exit(1)
-        except Exception as e3:
-            logger.error(f"❌ Failed to start basic Flask server: {e3}")
-            sys.exit(1)
+            elif method_name == "Basic Flask":
+                if start_basic_flask(None, host, port):
+                    return  # Success
+                continue
+                    
+        except Exception as e:
+            logger.warning(f"{method_name} failed: {e}")
+            continue
+    
+    # If we get here, all methods failed
+    logger.error("❌ All startup methods failed. Cannot start the application.")
+    sys.exit(1)
 
 if __name__ == "__main__":
     try:
