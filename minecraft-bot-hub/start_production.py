@@ -203,7 +203,30 @@ def main():
             
     except Exception as e:
         logger.error(f"❌ Failed to start production server: {e}")
-        sys.exit(1)
+        logger.info("🔄 Attempting to start with basic Flask as fallback...")
+        
+        try:
+            # Final fallback to basic Flask app
+            from app import app
+            
+            logger.info("✅ Basic Flask app loaded successfully")
+            logger.info("🌐 Starting basic Flask server in production mode...")
+            
+            # Use production-safe settings
+            app.run(
+                host=host,
+                port=port,
+                debug=False,
+                threaded=True,
+                allow_unsafe_werkzeug=True  # Allow production use
+            )
+            
+        except ImportError as e3:
+            logger.error(f"❌ Failed to import basic Flask app: {e3}")
+            sys.exit(1)
+        except Exception as e3:
+            logger.error(f"❌ Failed to start basic Flask server: {e3}")
+            sys.exit(1)
 
 if __name__ == "__main__":
     try:

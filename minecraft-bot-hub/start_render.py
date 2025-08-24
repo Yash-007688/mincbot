@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🚀 Minecraft Bot Hub - Simple Production Startup Script for Render
-Optimized for Render hosting with minimal dependencies
+🚀 Minecraft Bot Hub - Render-Optimized Startup Script
+Specifically designed for Render hosting with production-grade server handling
 """
 
 import os
@@ -129,6 +129,45 @@ def create_directories():
         logger.error(f"Error creating directories: {e}")
         return False
 
+def start_with_gunicorn(app, host, port):
+    """Start the app with Gunicorn for production"""
+    try:
+        import gunicorn.app.base
+        
+        class StandaloneApplication(gunicorn.app.base.BaseApplication):
+            def __init__(self, app, options=None):
+                self.options = options or {}
+                self.application = app
+                super().__init__()
+            
+            def load_config(self):
+                for key, value in self.options.items():
+                    self.cfg.set(key.lower(), value)
+            
+            def load(self):
+                return self.application
+        
+        options = {
+            'bind': f'{host}:{port}',
+            'workers': 1,
+            'worker_class': 'sync',
+            'timeout': 120,
+            'keepalive': 2,
+            'max_requests': 1000,
+            'max_requests_jitter': 100,
+            'preload_app': True,
+            'accesslog': '-',
+            'errorlog': '-',
+            'loglevel': 'info'
+        }
+        
+        logger.info("🚀 Starting with Gunicorn production server...")
+        StandaloneApplication(app, options).run()
+        
+    except Exception as e:
+        logger.warning(f"Gunicorn failed: {e}")
+        raise
+
 def main():
     """Main production startup function"""
     logger.info("🚀 Starting Minecraft Bot Hub Production Server...")
@@ -158,74 +197,76 @@ def main():
     logger.info(f"  ⚙️ Management: {os.environ.get('MANAGEMENT_SYSTEMS_ENABLED', 'true')}")
     logger.info(f"  💾 Database: {os.environ.get('DATABASE_ENABLED', 'true')}")
     
-    try:
-        # Try to import and start the production app
-        logger.info("🔄 Attempting to load production application...")
-        from app_production import app, socketio
-        
-        logger.info("✅ Production application loaded successfully")
-        logger.info("🌐 Starting production server with SocketIO...")
-        
-        # Start the production server
-        socketio.run(
-            app,
-            host=host,
-            port=port,
-            debug=False,
-            log_output=True
-        )
-        
-    except ImportError as e:
-        logger.warning(f"Production app import failed: {e}")
-        logger.info("🔄 Falling back to basic Flask app...")
-        
+    # Try multiple startup methods in order of preference
+    startup_methods = [
+        ("Gunicorn Production Server", lambda: start_with_gunicorn),
+        ("SocketIO with Eventlet", lambda: "socketio_eventlet"),
+        ("SocketIO with Gevent", lambda: "socketio_gevent"),
+        ("Basic Flask Production", lambda: "basic_flask")
+    ]
+    
+    for method_name, method_func in startup_methods:
         try:
-            # Fallback to basic Flask app
-            from app import app
+            logger.info(f"🔄 Attempting to start with {method_name}...")
             
-            logger.info("✅ Basic Flask app loaded successfully")
-            logger.info("🌐 Starting basic Flask server...")
+            if method_name == "Gunicorn Production Server":
+                try:
+                    from app import app
+                    start_with_gunicorn(app, host, port)
+                    return  # Success
+                except Exception as e:
+                    logger.warning(f"Gunicorn failed: {e}")
+                    continue
             
-            app.run(
-                host=host,
-                port=port,
-                debug=False
-            )
+            elif method_name == "SocketIO with Eventlet":
+                try:
+                    from app_production import app, socketio
+                    logger.info("✅ Production SocketIO app loaded successfully")
+                    socketio.run(app, host=host, port=port, debug=False, log_output=True)
+                    return  # Success
+                except Exception as e:
+                    logger.warning(f"SocketIO Eventlet failed: {e}")
+                    continue
             
-        except ImportError as e2:
-            logger.error(f"❌ Failed to import basic Flask app: {e2}")
-            logger.error("Please check that app.py exists and is properly formatted")
-            sys.exit(1)
-        except Exception as e2:
-            logger.error(f"❌ Failed to start basic Flask server: {e2}")
-            sys.exit(1)
+            elif method_name == "SocketIO with Gevent":
+                try:
+                    # Try to set gevent as async mode
+                    os.environ['SOCKETIO_ASYNC_MODE'] = 'gevent'
+                    from app_production import app, socketio
+                    logger.info("✅ Production SocketIO app with Gevent loaded successfully")
+                    socketio.run(app, host=host, port=port, debug=False, log_output=True)
+                    return  # Success
+                except Exception as e:
+                    logger.warning(f"SocketIO Gevent failed: {e}")
+                    continue
             
-    except Exception as e:
-        logger.error(f"❌ Failed to start production server: {e}")
-        logger.info("🔄 Attempting to start with basic Flask as fallback...")
-        
-        try:
-            # Final fallback to basic Flask app
-            from app import app
-            
-            logger.info("✅ Basic Flask app loaded successfully")
-            logger.info("🌐 Starting basic Flask server in production mode...")
-            
-            # Use production-safe settings
-            app.run(
-                host=host,
-                port=port,
-                debug=False,
-                threaded=True,
-                allow_unsafe_werkzeug=True  # Allow production use
-            )
-            
-        except ImportError as e3:
-            logger.error(f"❌ Failed to import basic Flask app: {e3}")
-            sys.exit(1)
-        except Exception as e3:
-            logger.error(f"❌ Failed to start basic Flask server: {e3}")
-            sys.exit(1)
+            elif method_name == "Basic Flask Production":
+                try:
+                    from app import app
+                    logger.info("✅ Basic Flask app loaded successfully")
+                    logger.info("🌐 Starting basic Flask server in production mode...")
+                    
+                    # Use production-safe settings
+                    app.run(
+                        host=host,
+                        port=port,
+                        debug=False,
+                        threaded=True,
+                        allow_unsafe_werkzeug=True  # Allow production use
+                    )
+                    return  # Success
+                    
+                except Exception as e:
+                    logger.error(f"Basic Flask failed: {e}")
+                    continue
+                    
+        except Exception as e:
+            logger.warning(f"{method_name} failed: {e}")
+            continue
+    
+    # If we get here, all methods failed
+    logger.error("❌ All startup methods failed. Cannot start the application.")
+    sys.exit(1)
 
 if __name__ == "__main__":
     try:
