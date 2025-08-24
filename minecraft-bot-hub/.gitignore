@@ -1,0 +1,115 @@
+# 🚀 Minecraft Bot Hub - Git Ignore File
+# Protects sensitive files and build artifacts
+
+# 🔐 Environment Variables (Sensitive)
+.env
+.env.local
+.env.production
+.env.staging
+
+# 💾 Database Files
+*.db
+*.sqlite
+*.sqlite3
+data/
+databases/
+
+# 📁 Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 🐍 Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# 🔍 IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# 📊 Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🚀 Build and Deploy
+node_modules/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# 🎮 Minecraft Specific
+*.jar
+*.zip
+*.tar.gz
+backups/
+worlds/
+plugins/
+
+# 🔧 Temporary Files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# 📱 Mobile and OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 🌐 Web Assets
+.sass-cache/
+connect.lock
+lib-cov
+coverage
+*.lcov
+.nyc_output
+
+# 🐳 Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+.docker/
+
+# ☁️ Cloud Deployment
+.render/
+.netlify/
+.vercel/
