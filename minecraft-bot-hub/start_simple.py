@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 def check_environment():
     """Check if all required environment variables are set"""
+    # FLASK_SECRET_KEY is not strictly required for startup
+    # We'll generate a default one if missing
     required_vars = ['PORT']
     
     missing_vars = []
@@ -33,6 +35,23 @@ def check_environment():
         logger.error(f"Missing required environment variables: {missing_vars}")
         logger.error("Please set these variables in your Render dashboard")
         return False
+    
+    # Check for optional but recommended variables
+    if not os.environ.get('FLASK_SECRET_KEY'):
+        logger.warning("FLASK_SECRET_KEY not set, generating a default one")
+        os.environ['FLASK_SECRET_KEY'] = 'minecraft-bot-hub-default-secret-key-2024'
+    
+    if not os.environ.get('FLASK_ENV'):
+        logger.info("FLASK_ENV not set, defaulting to production")
+        os.environ['FLASK_ENV'] = 'production'
+    
+    if not os.environ.get('DATABASE_FILE'):
+        logger.info("DATABASE_FILE not set, defaulting to minecraft_bot_hub.db")
+        os.environ['DATABASE_FILE'] = 'minecraft_bot_hub.db'
+    
+    if not os.environ.get('HOST'):
+        logger.info("HOST not set, defaulting to 0.0.0.0")
+        os.environ['HOST'] = '0.0.0.0'
     
     logger.info("Environment variables check passed")
     return True
@@ -69,6 +88,7 @@ def main():
     logger.info(f"  Host: {host}")
     logger.info(f"  Port: {port}")
     logger.info(f"  Environment: {os.environ.get('FLASK_ENV', 'production')}")
+    logger.info(f"  Secret Key: {'Set' if os.environ.get('FLASK_SECRET_KEY') else 'Generated'}")
     
     try:
         # Import and start the production app
