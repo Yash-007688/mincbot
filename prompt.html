@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat & Bot Vision - Minecraft Bot Hub</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f7f7f8;
+            color: #374151;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #202123;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #4a4b4d;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #4a4b4d;
+        }
+        
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #8B4513;
+        }
+        
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.2s ease;
+        }
+        
+        .new-chat-btn:hover {
+            background: #A0522D;
+        }
+        
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px;
+        }
+        
+        .chat-item {
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .chat-item:hover {
+            background: #2d2d30;
+        }
+        
+        .chat-item.active {
+            background: #343541;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid #4a4b4d;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #8B4513;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Chat Section */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #343541;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            background: #40414f;
+            border-bottom: 1px solid #565869;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chat-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .vision-toggle {
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .vision-toggle:hover {
+            background: #A0522D;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0 12px;
+        }
+        
+        .message.user .message-avatar {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .message.bot .message-avatar {
+            background: #10a37f;
+            color: white;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .message.user .message-content {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .message.bot .message-content {
+            background: #40414f;
+            color: white;
+        }
+        
+        .message-input-container {
+            padding: 20px;
+            background: #40414f;
+            border-top: 1px solid #565869;
+        }
+        
+        .message-input-wrapper {
+            position: relative;
+            max-width: 768px;
+            margin: 0 auto;
+        }
+        
+        .message-input {
+            width: 100%;
+            padding: 12px 50px 12px 16px;
+            border: 1px solid #565869;
+            border-radius: 12px;
+            background: #40414f;
+            color: white;
+            font-size: 16px;
+            resize: none;
+            min-height: 52px;
+            max-height: 200px;
+        }
+        
+        .message-input:focus {
+            outline: none;
+            border-color: #8B4513;
+        }
+        
+        .send-button {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .send-button:hover {
+            background: #A0522D;
+        }
+        
+        .send-button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        /* Vision Section */
+        .vision-section {
+            width: 400px;
+            background: #1a1a1a;
+            border-left: 1px solid #4a4b4d;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .vision-section.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+        
+        .vision-header {
+            padding: 20px;
+            background: #2d2d30;
+            border-bottom: 1px solid #4a4b4d;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .vision-grid {
+            flex: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            overflow-y: auto;
+        }
+        
+        .vision-feed {
+            background: #2d2d30;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #4a4b4d;
+        }
+        
+        .vision-feed-header {
+            padding: 12px 16px;
+            background: #40414f;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid #4a4b4d;
+        }
+        
+        .vision-feed-content {
+            height: 200px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .vision-placeholder {
+            text-align: center;
+        }
+        
+        .vision-placeholder .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .live-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .vision-section {
+                width: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .vision-section {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(100%);
+            }
+            
+            .vision-section.active {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Loading animation */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #10a37f;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Back to home button */
+        .back-home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1001;
+            transition: all 0.2s ease;
+        }
+        
+        .back-home-btn:hover {
+            background: #A0522D;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-home-btn" onclick="window.location.href='index.html'">← Home</button>
+    
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">MINECRAFT BOT HUB</div>
+            </div>
+            
+            <button class="new-chat-btn" onclick="startNewChat()">+ New Chat</button>
+            
+            <div class="chat-history" id="chatHistory">
+                <div class="chat-item active">General Chat</div>
+                <div class="chat-item">Bot Vision Analysis</div>
+                <div class="chat-item">Minecraft World</div>
+                <div class="chat-item">AI Assistance</div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">U</div>
+                    <span>User</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <div class="chat-header">
+                    <div class="chat-title">AI Chat Assistant</div>
+                    <button class="vision-toggle" onclick="toggleVision()" id="visionToggle">
+                        👁️ Show Vision
+                    </button>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-content">
+                            Hello! I'm your AI assistant. I can help you with various tasks and analyze information from our bot vision systems. What would you like to know or do today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message-input-container">
+                    <div class="message-input-wrapper">
+                        <textarea 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Type your message here..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-button" onclick="sendMessage()" id="sendButton">
+                            ➤
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vision Section -->
+        <div class="vision-section" id="visionSection">
+            <div class="vision-header">
+                🤖 Live Bot Vision Streams
+            </div>
+            
+            <div class="vision-grid">
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Alpha - Main Camera
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">📹</div>
+                            <div>Live Stream</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Analyzing environment...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Beta - Thermal Vision
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">🔥</div>
+                            <div>Thermal Feed</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Temperature mapping...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Gamma - Depth Sensor
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">📐</div>
+                            <div>Depth Analysis</div>
+                            <div style="font-size: 12px; margin-top: 5px;">3D mapping...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Delta - Object Detection
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">🎯</div>
+                            <div>Object Tracking</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Identifying objects...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let isVisionVisible = true;
+        let chatHistory = [];
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupMessageInput();
+            simulateBotVision();
+        });
+        
+        function setupMessageInput() {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+                
+                // Enable/disable send button based on input
+                sendButton.disabled = !this.value.trim();
+            });
+            
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+        
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate AI response
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = generateAIResponse(message);
+                addMessage(response, 'bot');
+            }, 1000 + Math.random() * 2000);
+        }
+        
+        function addMessage(content, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'user' ? 'U' : 'AI';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Store in history
+            chatHistory.push({ sender, content, timestamp: new Date() });
+        }
+        
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = 'AI';
+            
+            const typingContent = document.createElement('div');
+            typingContent.className = 'message-content';
+            typingContent.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(typingContent);
+            chatMessages.appendChild(typingDiv);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        function generateAIResponse(userMessage) {
+            const responses = [
+                "I've analyzed your request through our brain system. Based on the current bot vision data, I can see that the environment is stable and all systems are operational.",
+                "Interesting question! Let me check the live bot vision streams. I can see multiple data points that suggest we should proceed with your request.",
+                "Based on the real-time analysis from our vision systems, I recommend the following approach. The bots are currently detecting optimal conditions for this operation.",
+                "I've processed your prompt through our AI brain. The bot vision streams show that we have sufficient data to provide you with a comprehensive response.",
+                "Excellent question! Our vision systems are actively monitoring the environment. Based on the live feeds, I can give you detailed insights about your request.",
+                "I've analyzed this through our advanced brain system. The bot vision data indicates that we have multiple perspectives on this situation, allowing for a well-informed response."
+            ];
+            
+            // Add some context-aware responses
+            if (userMessage.toLowerCase().includes('vision') || userMessage.toLowerCase().includes('see')) {
+                return "I'm currently monitoring the live bot vision streams. I can see multiple camera feeds showing real-time environmental data, thermal imaging, depth analysis, and object detection. What specific aspect would you like me to focus on?";
+            }
+            
+            if (userMessage.toLowerCase().includes('bot') || userMessage.toLowerCase().includes('ai')) {
+                return "Our AI bots are actively processing information through their vision systems. I can see live streams from Bot Alpha (main camera), Bot Beta (thermal vision), Bot Gamma (depth sensor), and Bot Delta (object detection). They're all working together to provide comprehensive environmental analysis.";
+            }
+            
+            if (userMessage.toLowerCase().includes('minecraft') || userMessage.toLowerCase().includes('block')) {
+                return "Ah, you're interested in the Minecraft-style interface! Our system combines the familiar blocky aesthetic with advanced AI capabilities. The bots can analyze block patterns, detect structures, and provide insights about the virtual world they're observing.";
+            }
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        function toggleVision() {
+            const visionSection = document.getElementById('visionSection');
+            const visionToggle = document.getElementById('visionToggle');
+            
+            if (isVisionVisible) {
+                visionSection.classList.add('collapsed');
+                visionToggle.textContent = '👁️ Show Vision';
+                isVisionVisible = false;
+            } else {
+                visionSection.classList.remove('collapsed');
+                visionToggle.textContent = '👁️ Hide Vision';
+                isVisionVisible = true;
+            }
+        }
+        
+        function startNewChat() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = `
+                <div class="message bot">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                        Hello! I'm your AI assistant. I can help you with various tasks and analyze information from our bot vision systems. What would you like to know or do today?
+                    </div>
+                </div>
+            `;
+            
+            chatHistory = [];
+            
+            // Update active chat
+            document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function simulateBotVision() {
+            // Simulate live updates in vision feeds
+            setInterval(() => {
+                const visionFeeds = document.querySelectorAll('.vision-feed-content');
+                visionFeeds.forEach((feed, index) => {
+                    if (Math.random() > 0.7) {
+                        feed.style.background = `linear-gradient(45deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)})`;
+                        setTimeout(() => {
+                            feed.style.background = '#1a1a1a';
+                        }, 500);
+                    }
+                });
+            }, 3000);
+        }
+        
+        // Add some sample chat history
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
