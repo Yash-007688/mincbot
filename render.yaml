@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: minecraft-bot-hub
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_FILE
+        value: minecraft_bot_hub.db
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: AI_SYSTEM_ENABLED
+        value: true
+      - key: MANAGEMENT_SYSTEMS_ENABLED
+        value: true
+      - key: DATABASE_ENABLED
+        value: true
