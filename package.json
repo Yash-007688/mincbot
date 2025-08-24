@@ -1,0 +1,18 @@
+{
+  "description": "Minecraft bot system with multiple bots",
+  "main": "bots/all_bots.js",
+  "scripts": {
+    "start": "node bots/all_bots.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "mineflayer": "^4.8.1",
+    "mineflayer-pathfinder": "^2.4.5",
+    "minecraft-data": "^3.40.0",
+    "prismarine-world": "^3.8.0",
+    "prismarine-physics": "^1.6.0",
+    "vec3": "^0.1.8"
+  }
+}
+
+

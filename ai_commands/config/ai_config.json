@@ -1,0 +1,14 @@
+{
+    "ai_settings": {
+        "command_processing": {
+            "interval_ms": 1000,
+            "max_queue_size": 100,
+            "timeout_ms": 5000
+        },
+        "bot_behavior": {
+            "default_follow_distance": 5,
+            "max_movement_speed": 1.0,
+            "safety_health_threshold": 1
+        }
+    }
+} 

@@ -1,0 +1,22 @@
+{
+    "bot_name": "MinerBot",
+    "team_members": ["BuilderBot", "FighterBot"],
+    "settings": {
+        "health_threshold": 10,
+        "food_threshold": 15,
+        "chat_cooldown": 5000,
+        "gathering_radius": 32,
+        "follow_distance": 5
+    },
+    "priorities": {
+        "health": 1,
+        "food": 2,
+        "resources": 3,
+        "exploration": 4
+    },
+    "inventory_goals": {
+        "wood": 20,
+        "stone": 15,
+        "food": 10
+    }
+}
