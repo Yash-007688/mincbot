@@ -312,10 +312,71 @@ class InventoryManager:
         
         logger.info(f"Initialized {len(self.items)} default items")
     
+    def initialize_default_inventories(self):
+        """Initialize default inventories for new players"""
+        logger.info("Initializing default inventories...")
+        
+        # Create default inventory for demo user 'yash'
+        demo_uuid = "demo-yash-001"
+        
+        # Create empty inventory slots
+        slots = {}
+        for i in range(36):  # Standard player inventory size
+            slots[i] = InventorySlot(
+                slot_id=i,
+                item=None,
+                quantity=0,
+                durability=None,
+                custom_name=None,
+                last_updated=datetime.now()
+            )
+        
+        # Create default inventory
+        default_inventory = PlayerInventory(
+            player_uuid=demo_uuid,
+            inventory_type="player",
+            size=36,
+            slots=slots,
+            max_weight=1000.0,
+            current_weight=0.0,
+            last_updated=datetime.now(),
+            is_locked=False,
+            lock_reason=None
+        )
+        
+        self.inventories[demo_uuid] = default_inventory
+        
+        # Create default economy account
+        default_account = EconomyAccount(
+            player_uuid=demo_uuid,
+            balance=1000.0,  # Starting money
+            total_earned=0.0,
+            total_spent=0.0,
+            last_transaction=datetime.now(),
+            interest_rate=0.05,
+            inflation_multiplier=1.0,
+            is_active=True
+        )
+        
+        self.economy_accounts[demo_uuid] = default_account
+        
+        logger.info(f"Initialized default inventory and economy account for {demo_uuid}")
+    
     def initialize_default_accounts(self):
         """Initialize default economy accounts"""
-        # This will be called when players are created
-        pass
+        logger.info("Initializing default economy accounts...")
+        
+        # Server economy settings
+        self.server_economy = {
+            "total_money_supply": 100000.0,
+            "inflation_rate": 0.02,
+            "interest_rate": 0.05,
+            "tax_rate": 0.10,
+            "market_fee": 0.05,
+            "last_reset": datetime.now().isoformat()
+        }
+        
+        logger.info("Initialized default economy settings")
     
     def start_background_tasks(self):
         """Start background update tasks"""
