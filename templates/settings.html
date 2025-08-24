@@ -1,0 +1,924 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Bot Vision Commander{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1><i class="fas fa-cog me-2"></i>Settings & Configuration</h1>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="saveAllSettings()">
+                    <i class="fas fa-save me-1"></i>Save All
+                </button>
+                <button class="btn btn-outline-secondary" onclick="resetToDefaults()">
+                    <i class="fas fa-undo me-1"></i>Reset to Defaults
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- System Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-server me-2"></i>System Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Update Interval (seconds)</label>
+                    <input type="number" class="form-control" id="update-interval" value="5" min="1" max="60">
+                    <small class="form-text text-muted">How often to refresh bot data</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">View Distance</label>
+                    <input type="number" class="form-control" id="view-distance" value="16" min="8" max="32">
+                    <small class="form-text text-muted">How far bots can see (in blocks)</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Max Bot Count</label>
+                    <input type="number" class="form-control" id="max-bot-count" value="20" min="1" max="100">
+                    <small class="form-text text-muted">Maximum number of bots allowed</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Auto-save Interval (minutes)</label>
+                    <input type="number" class="form-control" id="auto-save-interval" value="10" min="1" max="60">
+                    <small class="form-text text-muted">How often to automatically save data</small>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enable-logging" checked>
+                        <label class="form-check-label" for="enable-logging">
+                            Enable System Logging
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enable-notifications" checked>
+                        <label class="form-check-label" for="enable-notifications">
+                            Enable Desktop Notifications
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bot Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-robot me-2"></i>Bot Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Default Bot Health Threshold</label>
+                    <input type="number" class="form-control" id="health-threshold" value="10" min="1" max="20">
+                    <small class="form-text text-muted">Health level that triggers warnings</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Default Bot Food Threshold</label>
+                    <input type="number" class="form-control" id="food-threshold" value="15" min="1" max="20">
+                    <small class="form-text text-muted">Food level that triggers warnings</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Chat Cooldown (ms)</label>
+                    <input type="number" class="form-control" id="chat-cooldown" value="5000" min="1000" max="30000">
+                    <small class="form-text text-muted">Minimum time between bot messages</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Gathering Radius</label>
+                    <input type="number" class="form-control" id="gathering-radius" value="32" min="8" max="128">
+                    <small class="form-text text-muted">Default radius for resource gathering</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Follow Distance</label>
+                    <input type="number" class="form-control" id="follow-distance" value="5" min="1" max="20">
+                    <small class="form-text text-muted">Distance bots maintain when following</small>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="auto-heal" checked>
+                        <label class="form-check-label" for="auto-heal">
+                            Enable Auto-healing
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="auto-eat" checked>
+                        <label class="form-check-label" for="auto-eat">
+                            Enable Auto-eating
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Display Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-desktop me-2"></i>Display Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Theme</label>
+                    <select class="form-select" id="theme-select">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto">Auto (System)</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Color Scheme</label>
+                    <select class="form-select" id="color-scheme">
+                        <option value="default">Default</option>
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="purple">Purple</option>
+                        <option value="orange">Orange</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Chart Animation Speed</label>
+                    <select class="form-select" id="chart-animation">
+                        <option value="fast">Fast</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="slow">Slow</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Map Grid Size</label>
+                    <input type="number" class="form-control" id="map-grid-size" value="10" min="5" max="50">
+                    <small class="form-text text-muted">Size of grid squares on world map</small>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="show-coordinates" checked>
+                        <label class="form-check-label" for="show-coordinates">
+                            Show Coordinates on Map
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="show-bot-names" checked>
+                        <label class="form-check-label" for="show-bot-names">
+                            Show Bot Names on Map
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bell me-2"></i>Notification Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Notification Sound</label>
+                    <select class="form-select" id="notification-sound">
+                        <option value="none">None</option>
+                        <option value="beep">Beep</option>
+                        <option value="chime">Chime</option>
+                        <option value="alert">Alert</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Notification Duration (seconds)</label>
+                    <input type="number" class="form-control" id="notification-duration" value="5" min="1" max="30">
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Notification Types</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="notify-bot-health" checked>
+                        <label class="form-check-label" for="notify-bot-health">
+                            Bot Health Warnings
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="notify-command-complete" checked>
+                        <label class="form-check-label" for="notify-command-complete">
+                            Command Completion
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="notify-errors" checked>
+                        <label class="form-check-label" for="notify-errors">
+                            Error Notifications
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="notify-resources" checked>
+                        <label class="form-check-label" for="notify-resources">
+                            Resource Discoveries
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="notify-system" checked>
+                        <label class="form-check-label" for="notify-system">
+                            System Status Changes
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Alert Levels</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alert-critical" checked>
+                        <label class="form-check-label" for="alert-critical">
+                            Critical Alerts
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alert-warning" checked>
+                        <label class="form-check-label" for="alert-warning">
+                            Warning Alerts
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alert-info">
+                        <label class="form-check-label" for="alert-info">
+                            Info Alerts
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Advanced Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs me-2"></i>Advanced Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Log Level</label>
+                    <select class="form-select" id="log-level">
+                        <option value="debug">Debug</option>
+                        <option value="info" selected>Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Max Log File Size (MB)</label>
+                    <input type="number" class="form-control" id="max-log-size" value="100" min="10" max="1000">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Log Retention (days)</label>
+                    <input type="number" class="form-control" id="log-retention" value="30" min="1" max="365">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Database Connection Pool</label>
+                    <input type="number" class="form-control" id="db-pool-size" value="10" min="1" max="50">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Cache TTL (seconds)</label>
+                    <input type="number" class="form-control" id="cache-ttl" value="300" min="60" max="3600">
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enable-debug-mode">
+                        <label class="form-check-label" for="enable-debug-mode">
+                            Enable Debug Mode
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enable-performance-monitoring">
+                        <label class="form-check-label" for="enable-performance-monitoring">
+                            Enable Performance Monitoring
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backup & Export -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-database me-2"></i>Backup & Export</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Backup Directory</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="backup-directory" value="./backups">
+                        <button class="btn btn-outline-secondary" type="button" onclick="selectBackupDirectory()">
+                            <i class="fas fa-folder-open"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Auto-backup Interval</label>
+                    <select class="form-select" id="auto-backup-interval">
+                        <option value="never">Never</option>
+                        <option value="hourly">Hourly</option>
+                        <option value="daily" selected>Daily</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="compress-backups" checked>
+                        <label class="form-check-label" for="compress-backups">
+                            Compress Backup Files
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="include-logs" checked>
+                        <label class="form-check-label" for="include-logs">
+                            Include Log Files in Backup
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="include-config" checked>
+                        <label class="form-check-label" for="include-config">
+                            Include Configuration Files
+                        </label>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="createBackup()">
+                        <i class="fas fa-download me-1"></i>Create Manual Backup
+                    </button>
+                    <button class="btn btn-outline-success" onclick="exportSettings()">
+                        <i class="fas fa-file-export me-1"></i>Export Settings
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="importSettings()">
+                        <i class="fas fa-file-import me-1"></i>Import Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Settings Modal -->
+<div class="modal fade" id="importSettingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Settings File</label>
+                    <input type="file" class="form-control" id="settings-file" accept=".json">
+                    <small class="form-text text-muted">Choose a JSON file containing settings</small>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="overwrite-existing" checked>
+                        <label class="form-check-label" for="overwrite-existing">
+                            Overwrite existing settings
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> Importing settings will replace your current configuration.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="performImport()">Import Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Input for Import -->
+<input type="file" id="hidden-file-input" style="display: none;" accept=".json">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentSettings = {};
+let defaultSettings = {};
+
+// Initialize page on load
+document.addEventListener('DOMContentLoaded', function() {
+    loadCurrentSettings();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Theme change handler
+    document.getElementById('theme-select').addEventListener('change', function() {
+        applyTheme(this.value);
+    });
+    
+    // Color scheme change handler
+    document.getElementById('color-scheme').addEventListener('change', function() {
+        applyColorScheme(this.value);
+    });
+    
+    // Chart animation change handler
+    document.getElementById('chart-animation').addEventListener('change', function() {
+        applyChartAnimation(this.value);
+    });
+}
+
+function loadCurrentSettings() {
+    // Load settings from localStorage or use defaults
+    const savedSettings = localStorage.getItem('botVisionSettings');
+    if (savedSettings) {
+        currentSettings = JSON.parse(savedSettings);
+    } else {
+        currentSettings = getDefaultSettings();
+    }
+    
+    // Apply settings to form
+    applySettingsToForm(currentSettings);
+}
+
+function getDefaultSettings() {
+    return {
+        system: {
+            updateInterval: 5,
+            viewDistance: 16,
+            maxBotCount: 20,
+            autoSaveInterval: 10,
+            enableLogging: true,
+            enableNotifications: true
+        },
+        bot: {
+            healthThreshold: 10,
+            foodThreshold: 15,
+            chatCooldown: 5000,
+            gatheringRadius: 32,
+            followDistance: 5,
+            autoHeal: true,
+            autoEat: true
+        },
+        display: {
+            theme: 'light',
+            colorScheme: 'default',
+            chartAnimation: 'normal',
+            mapGridSize: 10,
+            showCoordinates: true,
+            showBotNames: true
+        },
+        notifications: {
+            sound: 'beep',
+            duration: 5,
+            botHealth: true,
+            commandComplete: true,
+            errors: true,
+            resources: true,
+            system: true,
+            critical: true,
+            warning: true,
+            info: false
+        },
+        advanced: {
+            logLevel: 'info',
+            maxLogSize: 100,
+            logRetention: 30,
+            dbPoolSize: 10,
+            cacheTTL: 300,
+            debugMode: false,
+            performanceMonitoring: false
+        },
+        backup: {
+            directory: './backups',
+            autoInterval: 'daily',
+            compress: true,
+            includeLogs: true,
+            includeConfig: true
+        }
+    };
+}
+
+function applySettingsToForm(settings) {
+    // System settings
+    document.getElementById('update-interval').value = settings.system.updateInterval;
+    document.getElementById('view-distance').value = settings.system.viewDistance;
+    document.getElementById('max-bot-count').value = settings.system.maxBotCount;
+    document.getElementById('auto-save-interval').value = settings.system.autoSaveInterval;
+    document.getElementById('enable-logging').checked = settings.system.enableLogging;
+    document.getElementById('enable-notifications').checked = settings.system.enableNotifications;
+    
+    // Bot settings
+    document.getElementById('health-threshold').value = settings.bot.healthThreshold;
+    document.getElementById('food-threshold').value = settings.bot.foodThreshold;
+    document.getElementById('chat-cooldown').value = settings.bot.chatCooldown;
+    document.getElementById('gathering-radius').value = settings.bot.gatheringRadius;
+    document.getElementById('follow-distance').value = settings.bot.followDistance;
+    document.getElementById('auto-heal').checked = settings.bot.autoHeal;
+    document.getElementById('auto-eat').checked = settings.bot.autoEat;
+    
+    // Display settings
+    document.getElementById('theme-select').value = settings.display.theme;
+    document.getElementById('color-scheme').value = settings.display.colorScheme;
+    document.getElementById('chart-animation').value = settings.display.chartAnimation;
+    document.getElementById('map-grid-size').value = settings.display.mapGridSize;
+    document.getElementById('show-coordinates').checked = settings.display.showCoordinates;
+    document.getElementById('show-bot-names').checked = settings.display.showBotNames;
+    
+    // Notification settings
+    document.getElementById('notification-sound').value = settings.notifications.sound;
+    document.getElementById('notification-duration').value = settings.notifications.duration;
+    document.getElementById('notify-bot-health').checked = settings.notifications.botHealth;
+    document.getElementById('notify-command-complete').checked = settings.notifications.commandComplete;
+    document.getElementById('notify-errors').checked = settings.notifications.errors;
+    document.getElementById('notify-resources').checked = settings.notifications.resources;
+    document.getElementById('notify-system').checked = settings.notifications.system;
+    document.getElementById('alert-critical').checked = settings.notifications.critical;
+    document.getElementById('alert-warning').checked = settings.notifications.warning;
+    document.getElementById('alert-info').checked = settings.notifications.info;
+    
+    // Advanced settings
+    document.getElementById('log-level').value = settings.advanced.logLevel;
+    document.getElementById('max-log-size').value = settings.advanced.maxLogSize;
+    document.getElementById('log-retention').value = settings.advanced.logRetention;
+    document.getElementById('db-pool-size').value = settings.advanced.dbPoolSize;
+    document.getElementById('cache-ttl').value = settings.advanced.cacheTTL;
+    document.getElementById('enable-debug-mode').checked = settings.advanced.debugMode;
+    document.getElementById('enable-performance-monitoring').checked = settings.advanced.performanceMonitoring;
+    
+    // Backup settings
+    document.getElementById('backup-directory').value = settings.backup.directory;
+    document.getElementById('auto-backup-interval').value = settings.backup.autoInterval;
+    document.getElementById('compress-backups').checked = settings.backup.compress;
+    document.getElementById('include-logs').checked = settings.backup.includeLogs;
+    document.getElementById('include-config').checked = settings.backup.includeConfig;
+}
+
+function collectSettingsFromForm() {
+    return {
+        system: {
+            updateInterval: parseInt(document.getElementById('update-interval').value),
+            viewDistance: parseInt(document.getElementById('view-distance').value),
+            maxBotCount: parseInt(document.getElementById('max-bot-count').value),
+            autoSaveInterval: parseInt(document.getElementById('auto-save-interval').value),
+            enableLogging: document.getElementById('enable-logging').checked,
+            enableNotifications: document.getElementById('enable-notifications').checked
+        },
+        bot: {
+            healthThreshold: parseInt(document.getElementById('health-threshold').value),
+            foodThreshold: parseInt(document.getElementById('food-threshold').value),
+            chatCooldown: parseInt(document.getElementById('chat-cooldown').value),
+            gatheringRadius: parseInt(document.getElementById('gathering-radius').value),
+            followDistance: parseInt(document.getElementById('follow-distance').value),
+            autoHeal: document.getElementById('auto-heal').checked,
+            autoEat: document.getElementById('auto-eat').checked
+        },
+        display: {
+            theme: document.getElementById('theme-select').value,
+            colorScheme: document.getElementById('color-scheme').value,
+            chartAnimation: document.getElementById('chart-animation').value,
+            mapGridSize: parseInt(document.getElementById('map-grid-size').value),
+            showCoordinates: document.getElementById('show-coordinates').checked,
+            showBotNames: document.getElementById('show-bot-names').checked
+        },
+        notifications: {
+            sound: document.getElementById('notification-sound').value,
+            duration: parseInt(document.getElementById('notification-duration').value),
+            botHealth: document.getElementById('notify-bot-health').checked,
+            commandComplete: document.getElementById('notify-command-complete').checked,
+            errors: document.getElementById('notify-errors').checked,
+            resources: document.getElementById('notify-resources').checked,
+            system: document.getElementById('notify-system').checked,
+            critical: document.getElementById('alert-critical').checked,
+            warning: document.getElementById('alert-warning').checked,
+            info: document.getElementById('alert-info').checked
+        },
+        advanced: {
+            logLevel: document.getElementById('log-level').value,
+            maxLogSize: parseInt(document.getElementById('max-log-size').value),
+            logRetention: parseInt(document.getElementById('log-retention').value),
+            dbPoolSize: parseInt(document.getElementById('db-pool-size').value),
+            cacheTTL: parseInt(document.getElementById('cache-ttl').value),
+            debugMode: document.getElementById('enable-debug-mode').checked,
+            performanceMonitoring: document.getElementById('enable-performance-monitoring').checked
+        },
+        backup: {
+            directory: document.getElementById('backup-directory').value,
+            autoInterval: document.getElementById('auto-backup-interval').value,
+            compress: document.getElementById('compress-backups').checked,
+            includeLogs: document.getElementById('include-logs').checked,
+            includeConfig: document.getElementById('include-config').checked
+        }
+    };
+}
+
+function saveAllSettings() {
+    const newSettings = collectSettingsFromForm();
+    
+    // Save to localStorage
+    localStorage.setItem('botVisionSettings', JSON.stringify(newSettings));
+    
+    // Update current settings
+    currentSettings = newSettings;
+    
+    // Apply settings
+    applySettings(newSettings);
+    
+    showNotification('Settings saved successfully!', 'success');
+}
+
+function resetToDefaults() {
+    if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+        const defaultSettings = getDefaultSettings();
+        applySettingsToForm(defaultSettings);
+        currentSettings = defaultSettings;
+        
+        // Save defaults
+        localStorage.setItem('botVisionSettings', JSON.stringify(defaultSettings));
+        
+        showNotification('Settings reset to defaults!', 'success');
+    }
+}
+
+function applySettings(settings) {
+    // Apply theme
+    applyTheme(settings.display.theme);
+    
+    // Apply color scheme
+    applyColorScheme(settings.display.colorScheme);
+    
+    // Apply chart animation
+    applyChartAnimation(settings.display.chartAnimation);
+    
+    // Update system settings
+    updateSystemSettings(settings.system);
+    
+    // Update notification settings
+    updateNotificationSettings(settings.notifications);
+}
+
+function applyTheme(theme) {
+    const body = document.body;
+    
+    // Remove existing theme classes
+    body.classList.remove('theme-light', 'theme-dark');
+    
+    // Add new theme class
+    if (theme === 'auto') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        theme = prefersDark ? 'dark' : 'light';
+    }
+    
+    body.classList.add(`theme-${theme}`);
+    
+    // Update CSS variables
+    if (theme === 'dark') {
+        document.documentElement.style.setProperty('--bg-color', '#1a1a1a');
+        document.documentElement.style.setProperty('--text-color', '#ffffff');
+    } else {
+        document.documentElement.style.setProperty('--bg-color', '#ffffff');
+        document.documentElement.style.setProperty('--text-color', '#000000');
+    }
+}
+
+function applyColorScheme(scheme) {
+    const root = document.documentElement;
+    
+    const schemes = {
+        default: {
+            '--primary-color': '#007bff',
+            '--secondary-color': '#6c757d',
+            '--success-color': '#28a745',
+            '--warning-color': '#ffc107',
+            '--danger-color': '#dc3545'
+        },
+        blue: {
+            '--primary-color': '#0056b3',
+            '--secondary-color': '#495057',
+            '--success-color': '#1e7e34',
+            '--warning-color': '#e0a800',
+            '--danger-color': '#c82333'
+        },
+        green: {
+            '--primary-color': '#28a745',
+            '--secondary-color': '#6c757d',
+            '--success-color': '#1e7e34',
+            '--warning-color': '#ffc107',
+            '--danger-color': '#dc3545'
+        },
+        purple: {
+            '--primary-color': '#6f42c1',
+            '--secondary-color': '#6c757d',
+            '--success-color': '#28a745',
+            '--warning-color': '#ffc107',
+            '--danger-color': '#dc3545'
+        },
+        orange: {
+            '--primary-color': '#fd7e14',
+            '--secondary-color': '#6c757d',
+            '--success-color': '#28a745',
+            '--warning-color': '#ffc107',
+            '--danger-color': '#dc3545'
+        }
+    };
+    
+    const colors = schemes[scheme] || schemes.default;
+    Object.entries(colors).forEach(([property, value]) => {
+        root.style.setProperty(property, value);
+    });
+}
+
+function applyChartAnimation(speed) {
+    // This would apply chart animation settings to Chart.js
+    // For now, we'll just store the setting
+    console.log(`Chart animation speed set to: ${speed}`);
+}
+
+function updateSystemSettings(systemSettings) {
+    // Update system-wide settings
+    if (systemSettings.enableLogging) {
+        console.log('System logging enabled');
+    }
+    
+    if (systemSettings.enableNotifications) {
+        console.log('Desktop notifications enabled');
+    }
+    
+    // Update update interval
+    // This would typically update any running timers
+    console.log(`Update interval set to: ${systemSettings.updateInterval} seconds`);
+}
+
+function updateNotificationSettings(notificationSettings) {
+    // Update notification preferences
+    console.log('Notification settings updated:', notificationSettings);
+}
+
+function selectBackupDirectory() {
+    // In a real implementation, this would open a directory picker
+    // For now, we'll just show a prompt
+    const directory = prompt('Enter backup directory path:');
+    if (directory) {
+        document.getElementById('backup-directory').value = directory;
+    }
+}
+
+function createBackup() {
+    // Create a backup of current settings and data
+    const backup = {
+        timestamp: new Date().toISOString(),
+        settings: currentSettings,
+        version: '1.0.0'
+    };
+    
+    // Create downloadable file
+    const dataStr = JSON.stringify(backup, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `bot_vision_backup_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    link.click();
+    
+    showNotification('Backup created successfully!', 'success');
+}
+
+function exportSettings() {
+    // Export only the settings (not the full backup)
+    const dataStr = JSON.stringify(currentSettings, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `bot_vision_settings_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    link.click();
+    
+    showNotification('Settings exported successfully!', 'success');
+}
+
+function importSettings() {
+    const modal = new bootstrap.Modal(document.getElementById('importSettingsModal'));
+    modal.show();
+}
+
+function performImport() {
+    const fileInput = document.getElementById('settings-file');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showNotification('Please select a file to import', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedSettings = JSON.parse(e.target.result);
+            
+            // Validate settings structure
+            if (!importedSettings.system || !importedSettings.bot || !importedSettings.display) {
+                throw new Error('Invalid settings file format');
+            }
+            
+            // Apply imported settings
+            applySettingsToForm(importedSettings);
+            currentSettings = importedSettings;
+            
+            // Save to localStorage
+            localStorage.setItem('botVisionSettings', JSON.stringify(importedSettings));
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('importSettingsModal')).hide();
+            
+            showNotification('Settings imported successfully!', 'success');
+            
+        } catch (error) {
+            showNotification('Error importing settings: ' + error.message, 'error');
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Auto-save settings when form changes
+document.addEventListener('change', function(e) {
+    if (e.target.closest('.card-body')) {
+        // Debounce auto-save
+        clearTimeout(window.autoSaveTimeout);
+        window.autoSaveTimeout = setTimeout(() => {
+            const newSettings = collectSettingsFromForm();
+            localStorage.setItem('botVisionSettings', JSON.stringify(newSettings));
+        }, 1000);
+    }
+});
+</script>
+{% endblock %}

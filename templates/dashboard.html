@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Bot Vision Commander{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+                <button class="btn btn-outline-success" onclick="exportData()">
+                    <i class="fas fa-download me-1"></i>Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- System Overview Cards -->
+    <div class="col-md-3 mb-3">
+        <div class="card border-primary h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                <h3 class="card-title text-primary" id="total-bots">0</h3>
+                <p class="card-text">Active Bots</p>
+                <small class="text-muted">All systems operational</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-globe fa-3x text-success mb-3"></i>
+                <h3 class="card-title text-success" id="world-chunks">0</h3>
+                <p class="card-text">World Chunks</p>
+                <small class="text-muted">Areas explored</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-warning h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-terminal fa-3x text-warning mb-3"></i>
+                <h3 class="card-title text-warning" id="total-commands">0</h3>
+                <p class="card-text">Commands</p>
+                <small class="text-muted">Total executed</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                <h3 class="card-title text-info" id="system-health">Good</h3>
+                <p class="card-text">System Health</p>
+                <small class="text-muted">Overall status</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Bot Status Grid -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-robot me-2"></i>Bot Status Overview</h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="filterBots('all')">All</button>
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="filterBots('healthy')">Healthy</button>
+                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterBots('warning')">Warning</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="filterBots('critical')">Critical</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Bot</th>
+                                <th>Status</th>
+                                <th>Position</th>
+                                <th>Health</th>
+                                <th>Food</th>
+                                <th>Team</th>
+                                <th>Nearby Blocks</th>
+                                <th>Nearby Entities</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bot-status-table">
+                            <tr>
+                                <td colspan="9" class="text-center text-muted">Loading bot status...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Real-time Charts -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-area me-2"></i>Bot Health Trends</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="healthChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie me-2"></i>Bot States Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="stateChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- World Discovery -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-globe me-2"></i>World Discovery</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Block Types Found</h6>
+                        <div id="block-types-list" class="mb-3">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h6>Entity Types Found</h6>
+                        <div id="entity-types-list" class="mb-3">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Commands -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history me-2"></i>Recent Commands</h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-commands-list" style="max-height: 300px; overflow-y: auto;">
+                    <p class="text-muted">Loading recent commands...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Command Input -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-terminal me-2"></i>Live Command Center</h5>
+            </div>
+            <div class="card-body">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="dashboard-command-input" 
+                           placeholder="Type your command here (e.g., 'Bot1, mine iron ore')">
+                    <button class="btn btn-primary" type="button" onclick="sendDashboardCommand()">
+                        <i class="fas fa-paper-plane me-2"></i>Send Command
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="form-text text-muted">
+                            <strong>Examples:</strong><br>
+                            • "Bot1, mine iron ore"<br>
+                            • "All bots, collect wood"<br>
+                            • "Bot2, go to 100 64 200"<br>
+                            • "Show me the status of all bots"
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="form-text text-muted">
+                            <strong>Quick Commands:</strong><br>
+                            <button class="btn btn-outline-secondary btn-sm mb-1" onclick="quickCommand('status')">Status Report</button>
+                            <button class="btn btn-outline-secondary btn-sm mb-1" onclick="quickCommand('collect')">Collect Resources</button>
+                            <button class="btn btn-outline-secondary btn-sm mb-1" onclick="quickCommand('explore')">Explore Area</button>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let healthChart, stateChart;
+let dashboardData = {};
+
+// Initialize dashboard on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    loadDashboardData();
+    startRealTimeUpdates();
+});
+
+function initializeCharts() {
+    // Health Chart
+    const healthCtx = document.getElementById('healthChart').getContext('2d');
+    healthChart = new Chart(healthCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Average Health',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 20
+                }
+            }
+        }
+    });
+    
+    // State Chart
+    const stateCtx = document.getElementById('stateChart').getContext('2d');
+    stateChart = new Chart(stateCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: [
+                    '#28a745', '#ffc107', '#17a2b8', '#6f42c1', '#fd7e14'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function loadDashboardData() {
+    fetch('/api/status')
+        .then(response => response.json())
+        .then(data => {
+            dashboardData = data;
+            updateDashboardDisplay(data);
+        })
+        .catch(error => console.error('Error loading dashboard data:', error));
+}
+
+function updateDashboardDisplay(data) {
+    // Update overview cards
+    document.getElementById('total-bots').textContent = data.total_bots || 0;
+    document.getElementById('world-chunks').textContent = data.world_overview?.total_blocks || 0;
+    document.getElementById('total-commands').textContent = data.command_history?.length || 0;
+    document.getElementById('system-health').textContent = data.system_health || 'Unknown';
+    
+    // Update bot status table
+    updateBotStatusTable(data.bot_status || {});
+    
+    // Update world discovery
+    updateWorldDiscovery(data.world_overview || {});
+    
+    // Update charts
+    updateCharts(data.bot_status || {});
+}
+
+function updateBotStatusTable(botStatus) {
+    const tbody = document.getElementById('bot-status-table');
+    let html = '';
+    
+    Object.entries(botStatus).forEach(([botName, bot]) => {
+        const healthClass = bot.health > 15 ? 'text-success' : bot.health > 10 ? 'text-warning' : 'text-danger';
+        const foodClass = bot.food > 15 ? 'text-success' : bot.food > 10 ? 'text-warning' : 'text-danger';
+        const statusBadge = getStatusBadge(bot.state);
+        
+        html += `
+            <tr class="bot-row" data-health="${bot.health}" data-state="${bot.state}">
+                <td>
+                    <strong>${botName}</strong>
+                    <br><small class="text-muted">${bot.team}</small>
+                </td>
+                <td>${statusBadge}</td>
+                <td><code>${bot.position[0].toFixed(0)}, ${bot.position[1].toFixed(0)}, ${bot.position[2].toFixed(0)}</code></td>
+                <td><span class="${healthClass}">${bot.health.toFixed(1)}/20</span></td>
+                <td><span class="${foodClass}">${bot.food.toFixed(1)}/20</span></td>
+                <td><span class="badge bg-secondary">${bot.team}</span></td>
+                <td>${bot.nearby_blocks}</td>
+                <td>${bot.nearby_entities}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewBotDetails('${botName}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="sendBotCommand('${botName}')">
+                        <i class="fas fa-terminal"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function getStatusBadge(state) {
+    const badges = {
+        'mining': '<span class="badge bg-primary">Mining</span>',
+        'building': '<span class="badge bg-success">Building</span>',
+        'exploring': '<span class="badge bg-info">Exploring</span>',
+        'farming': '<span class="badge bg-warning">Farming</span>',
+        'crafting': '<span class="badge bg-secondary">Crafting</span>',
+        'idle': '<span class="badge bg-light text-dark">Idle</span>'
+    };
+    return badges[state] || '<span class="badge bg-secondary">Unknown</span>';
+}
+
+function updateWorldDiscovery(worldOverview) {
+    // Update block types
+    const blockTypesDiv = document.getElementById('block-types-list');
+    if (worldOverview.block_types && worldOverview.block_types.length > 0) {
+        let blockHtml = '';
+        worldOverview.block_types.forEach(block => {
+            blockHtml += `<span class="badge bg-primary me-1 mb-1">${block}</span>`;
+        });
+        blockTypesDiv.innerHTML = blockHtml;
+    } else {
+        blockTypesDiv.innerHTML = '<p class="text-muted">No blocks discovered yet</p>';
+    }
+    
+    // Update entity types
+    const entityTypesDiv = document.getElementById('entity-types-list');
+    if (worldOverview.entity_types && worldOverview.entity_types.length > 0) {
+        let entityHtml = '';
+        worldOverview.entity_types.forEach(entity => {
+            entityHtml += `<span class="badge bg-info me-1 mb-1">${entity}</span>`;
+        });
+        entityTypesDiv.innerHTML = entityHtml;
+    } else {
+        entityTypesDiv.innerHTML = '<p class="text-muted">No entities discovered yet</p>';
+    }
+}
+
+function updateCharts(botStatus) {
+    // Update health chart
+    const now = new Date().toLocaleTimeString();
+    const avgHealth = Object.values(botStatus).reduce((sum, bot) => sum + bot.health, 0) / Object.keys(botStatus).length;
+    
+    healthChart.data.labels.push(now);
+    healthChart.data.datasets[0].data.push(avgHealth);
+    
+    if (healthChart.data.labels.length > 10) {
+        healthChart.data.labels.shift();
+        healthChart.data.datasets[0].data.shift();
+    }
+    
+    healthChart.update();
+    
+    // Update state chart
+    const stateCounts = {};
+    Object.values(botStatus).forEach(bot => {
+        stateCounts[bot.state] = (stateCounts[bot.state] || 0) + 1;
+    });
+    
+    stateChart.data.labels = Object.keys(stateCounts);
+    stateChart.data.datasets[0].data = Object.values(stateCounts);
+    stateChart.update();
+}
+
+function startRealTimeUpdates() {
+    // Update every 5 seconds
+    setInterval(() => {
+        loadDashboardData();
+    }, 5000);
+    
+    // Listen for real-time updates
+    socket.on('bot_update', function(data) {
+        if (data.all_bots) {
+            // Update specific bot data
+            Object.entries(data.all_bots).forEach(([botName, vision]) => {
+                // Update bot status if it exists
+                if (dashboardData.bot_status && dashboardData.bot_status[botName]) {
+                    dashboardData.bot_status[botName].health = vision.health;
+                    dashboardData.bot_status[botName].food = vision.food;
+                    dashboardData.bot_status[botName].position = vision.position;
+                    dashboardData.bot_status[botName].state = vision.state;
+                }
+            });
+            
+            // Refresh display
+            updateDashboardDisplay(dashboardData);
+        }
+    });
+    
+    // Listen for command results
+    socket.on('command_result', function(data) {
+        showNotification(`Command executed: ${data.command}`, 'success');
+        loadDashboardData();
+    });
+}
+
+function filterBots(filter) {
+    const rows = document.querySelectorAll('.bot-row');
+    
+    rows.forEach(row => {
+        const health = parseFloat(row.dataset.health);
+        const state = row.dataset.state;
+        
+        let show = true;
+        
+        switch(filter) {
+            case 'healthy':
+                show = health > 15;
+                break;
+            case 'warning':
+                show = health <= 15 && health > 10;
+                break;
+            case 'critical':
+                show = health <= 10;
+                break;
+            case 'all':
+            default:
+                show = true;
+                break;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+function refreshDashboard() {
+    loadDashboardData();
+    showNotification('Dashboard refreshed!', 'success');
+}
+
+function exportData() {
+    fetch('/api/export')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(`Data exported to ${data.filename}`, 'success');
+            } else {
+                showNotification('Export failed', 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Export failed: ' + error.message, 'error');
+        });
+}
+
+function sendDashboardCommand() {
+    const input = document.getElementById('dashboard-command-input');
+    const command = input.value.trim();
+    
+    if (!command) return;
+    
+    fetch('/api/command', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command: command })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('✅ Command executed successfully!', 'success');
+            input.value = '';
+            loadDashboardData();
+        } else {
+            showNotification('❌ Command failed: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Command failed: ' + error.message, 'error');
+    });
+}
+
+function quickCommand(type) {
+    let command = '';
+    switch(type) {
+        case 'status':
+            command = 'Show me the status of all bots';
+            break;
+        case 'collect':
+            command = 'All bots, collect resources';
+            break;
+        case 'explore':
+            command = 'All bots, explore the area';
+            break;
+    }
+    
+    if (command) {
+        document.getElementById('dashboard-command-input').value = command;
+        sendDashboardCommand();
+    }
+}
+
+function viewBotDetails(botName) {
+    // Navigate to bot details page
+    window.location.href = `/bots?bot=${botName}`;
+}
+
+function sendBotCommand(botName) {
+    // Focus on command input and suggest bot-specific command
+    const input = document.getElementById('dashboard-command-input');
+    input.value = `${botName}, `;
+    input.focus();
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Enter key support for command input
+document.getElementById('dashboard-command-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendDashboardCommand();
+    }
+});
+</script>
+{% endblock %}

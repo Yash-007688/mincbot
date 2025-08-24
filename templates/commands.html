@@ -1,0 +1,938 @@
+{% extends "base.html" %}
+
+{% block title %}Command Center - Bot Vision Commander{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1><i class="fas fa-terminal me-2"></i>Command Center</h1>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="refreshCommands()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+                <button class="btn btn-outline-success" onclick="clearCommandHistory()">
+                    <i class="fas fa-trash me-1"></i>Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Command Input -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-paper-plane me-2"></i>Send Command</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Command Type</label>
+                    <select class="form-select" id="main-command-type">
+                        <option value="custom">Custom Command</option>
+                        <option value="mining">Mining Operations</option>
+                        <option value="building">Building Projects</option>
+                        <option value="movement">Movement & Navigation</option>
+                        <option value="collection">Resource Collection</option>
+                        <option value="exploration">Exploration</option>
+                        <option value="team">Team Operations</option>
+                        <option value="emergency">Emergency Commands</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Target Selection</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="targetType" id="targetAll" value="all" checked>
+                                <label class="form-check-label" for="targetAll">
+                                    All Bots
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="targetType" id="targetSpecific" value="specific">
+                                <label class="form-check-label" for="targetSpecific">
+                                    Specific Bots
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="targetType" id="targetTeam" value="team">
+                                <label class="form-check-label" for="targetTeam">
+                                    Team
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="target-selection">
+                                <!-- Dynamic target selection will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Command</label>
+                    <textarea class="form-control" id="main-command-input" rows="3" 
+                              placeholder="Type your command here... (e.g., 'mine iron ore', 'build a house', 'explore north')"></textarea>
+                </div>
+                
+                <div id="command-parameters-main" class="mb-3">
+                    <!-- Dynamic parameters will be loaded here -->
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" id="main-command-priority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Execution Mode</label>
+                            <select class="form-select" id="main-command-mode">
+                                <option value="immediate">Immediate</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="conditional">Conditional</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-outline-secondary me-md-2" onclick="previewCommand()">
+                        <i class="fas fa-eye me-1"></i>Preview
+                    </button>
+                    <button class="btn btn-primary" onclick="sendMainCommand()">
+                        <i class="fas fa-paper-plane me-1"></i>Send Command
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Commands -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Quick Commands</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="quickCommand('status')">
+                        <i class="fas fa-info-circle me-1"></i>Status Report
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="quickCommand('collect')">
+                        <i class="fas fa-gather me-1"></i>Collect Resources
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="quickCommand('explore')">
+                        <i class="fas fa-compass me-1"></i>Explore Area
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="quickCommand('defend')">
+                        <i class="fas fa-shield-alt me-1"></i>Defensive Formation
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="quickCommand('retreat')">
+                        <i class="fas fa-arrow-down me-1"></i>Emergency Retreat
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="quickCommand('return')">
+                        <i class="fas fa-home me-1"></i>Return to Base
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <h6>Command Templates</h6>
+                <div class="list-group list-group-flush">
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('mining')">
+                        <strong>Mining:</strong> Mine [resource] at [location]
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('building')">
+                        <strong>Building:</strong> Build [structure] at [coordinates]
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('movement')">
+                        <strong>Movement:</strong> Move to [coordinates]
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('collection')">
+                        <strong>Collection:</strong> Collect [item] in [area]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Command History -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-history me-2"></i>Command History</h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="filterCommands('all')">All</button>
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="filterCommands('completed')">Completed</button>
+                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterCommands('processing')">Processing</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="filterCommands('error')">Errors</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Command</th>
+                                <th>Status</th>
+                                <th>Result</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="command-history-table">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Loading command history...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Command Preview Modal -->
+<div class="modal fade" id="commandPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="command-preview-content">
+                    <!-- Preview content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="executePreviewedCommand()">Execute Command</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scheduled Command Modal -->
+<div class="modal fade" id="scheduledCommandModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Schedule Command</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Schedule Time</label>
+                    <input type="datetime-local" class="form-control" id="schedule-time">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Repeat</label>
+                    <select class="form-select" id="schedule-repeat">
+                        <option value="once">Once</option>
+                        <option value="daily">Daily</option>
+                        <option value="hourly">Hourly</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Conditions</label>
+                    <textarea class="form-control" id="schedule-conditions" rows="3" 
+                              placeholder="Optional conditions (e.g., 'when health > 15')"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="scheduleCommand()">Schedule Command</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let commandHistory = [];
+let previewedCommand = null;
+
+// Initialize page on load
+document.addEventListener('DOMContentLoaded', function() {
+    loadCommandHistory();
+    setupCommandTypeHandler();
+    setupTargetTypeHandler();
+    setupExecutionModeHandler();
+});
+
+function setupCommandTypeHandler() {
+    document.getElementById('main-command-type').addEventListener('change', function() {
+        const commandType = this.value;
+        const paramsDiv = document.getElementById('command-parameters-main');
+        
+        let html = '';
+        
+        switch(commandType) {
+            case 'mining':
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Resource Type</label>
+                            <select class="form-select" id="param-resource">
+                                <option value="iron_ore">Iron Ore</option>
+                                <option value="coal">Coal</option>
+                                <option value="diamond">Diamond</option>
+                                <option value="gold_ore">Gold Ore</option>
+                                <option value="stone">Stone</option>
+                                <option value="any">Any Resource</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="param-quantity" value="10" min="1" max="1000">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Search Radius</label>
+                            <input type="number" class="form-control" id="param-radius" value="100" min="10" max="500">
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'building':
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Structure Type</label>
+                            <select class="form-select" id="param-structure">
+                                <option value="house">House</option>
+                                <option value="tower">Tower</option>
+                                <option value="bridge">Bridge</option>
+                                <option value="wall">Wall</option>
+                                <option value="farm">Farm</option>
+                                <option value="castle">Castle</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Size</label>
+                            <input type="number" class="form-control" id="param-size" value="5" min="1" max="50">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Material</label>
+                            <select class="form-select" id="param-material">
+                                <option value="stone">Stone</option>
+                                <option value="wood">Wood</option>
+                                <option value="brick">Brick</option>
+                                <option value="any">Any Available</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'movement':
+                html = `
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">X Coordinate</label>
+                            <input type="number" class="form-control" id="param-x" placeholder="X">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Y Coordinate</label>
+                            <input type="number" class="form-control" id="param-y" placeholder="Y">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Z Coordinate</label>
+                            <input type="number" class="form-control" id="param-z" placeholder="Z">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Formation</label>
+                            <select class="form-select" id="param-formation">
+                                <option value="line">Line</option>
+                                <option value="circle">Circle</option>
+                                <option value="square">Square</option>
+                                <option value="random">Random</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'collection':
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Item Type</label>
+                            <select class="form-select" id="param-item">
+                                <option value="wood">Wood</option>
+                                <option value="stone">Stone</option>
+                                <option value="food">Food</option>
+                                <option value="water">Water</option>
+                                <option value="flowers">Flowers</option>
+                                <option value="ores">Ores</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Search Radius</label>
+                            <input type="number" class="form-control" id="param-search-radius" value="100" min="10" max="500">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" id="param-collection-priority">
+                                <option value="closest">Closest First</option>
+                                <option value="valuable">Most Valuable</option>
+                                <option value="abundant">Most Abundant</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'exploration':
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Direction</label>
+                            <select class="form-select" id="param-direction">
+                                <option value="north">North</option>
+                                <option value="south">South</option>
+                                <option value="east">East</option>
+                                <option value="west">West</option>
+                                <option value="random">Random</option>
+                                <option value="spiral">Spiral Pattern</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Distance</label>
+                            <input type="number" class="form-control" id="param-explore-distance" value="200" min="10" max="1000">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Focus</label>
+                            <select class="form-select" id="param-explore-focus">
+                                <option value="general">General</option>
+                                <option value="resources">Resources</option>
+                                <option value="structures">Structures</option>
+                                <option value="danger">Dangerous Areas</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'team':
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Team Action</label>
+                            <select class="form-select" id="param-team-action">
+                                <option value="formation">Formation</option>
+                                <option value="attack">Attack</option>
+                                <option value="defend">Defend</option>
+                                <option value="escort">Escort</option>
+                                <option value="patrol">Patrol</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Team Size</label>
+                            <input type="number" class="form-control" id="param-team-size" value="3" min="2" max="10">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Strategy</label>
+                            <select class="form-select" id="param-team-strategy">
+                                <option value="aggressive">Aggressive</option>
+                                <option value="defensive">Defensive</option>
+                                <option value="balanced">Balanced</option>
+                                <option value="stealth">Stealth</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'emergency':
+                html = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Emergency Type</label>
+                            <select class="form-select" id="param-emergency-type">
+                                <option value="retreat">Retreat</option>
+                                <option value="heal">Heal</option>
+                                <option value="defend">Defend</option>
+                                <option value="evacuate">Evacuate</option>
+                                <option value="regroup">Regroup</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Priority Level</label>
+                            <select class="form-select" id="param-emergency-priority">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+        }
+        
+        paramsDiv.innerHTML = html;
+    });
+}
+
+function setupTargetTypeHandler() {
+    document.querySelectorAll('input[name="targetType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            updateTargetSelection();
+        });
+    });
+}
+
+function updateTargetSelection() {
+    const targetType = document.querySelector('input[name="targetType"]:checked').value;
+    const targetDiv = document.getElementById('target-selection');
+    
+    let html = '';
+    
+    switch(targetType) {
+        case 'specific':
+            html = `
+                <label class="form-label">Select Bots</label>
+                <div id="bot-checkboxes">
+                    <!-- Bot checkboxes will be loaded here -->
+                </div>
+            `;
+            loadBotCheckboxes();
+            break;
+            
+        case 'team':
+            html = `
+                <label class="form-label">Select Team</label>
+                <select class="form-select" id="team-select">
+                    <option value="mining_team">Mining Team</option>
+                    <option value="building_team">Building Team</option>
+                    <option value="exploration_team">Exploration Team</option>
+                    <option value="farming_team">Farming Team</option>
+                    <option value="all_teams">All Teams</option>
+                </select>
+            `;
+            break;
+            
+        case 'all':
+        default:
+            html = '<small class="text-muted">All bots will receive this command</small>';
+            break;
+    }
+    
+    targetDiv.innerHTML = html;
+}
+
+function loadBotCheckboxes() {
+    fetch('/api/bots')
+        .then(response => response.json())
+        .then(bots => {
+            const checkboxesDiv = document.getElementById('bot-checkboxes');
+            let html = '';
+            
+            Object.keys(bots).forEach(botName => {
+                html += `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${botName}" id="bot-${botName}">
+                        <label class="form-check-label" for="bot-${botName}">
+                            ${botName}
+                        </label>
+                    </div>
+                `;
+            });
+            
+            checkboxesDiv.innerHTML = html;
+        })
+        .catch(error => console.error('Error loading bots:', error));
+}
+
+function setupExecutionModeHandler() {
+    document.getElementById('main-command-mode').addEventListener('change', function() {
+        const mode = this.value;
+        if (mode === 'scheduled') {
+            showScheduledCommandModal();
+        }
+    });
+}
+
+function loadCommandHistory() {
+    fetch('/api/commands')
+        .then(response => response.json())
+        .then(data => {
+            commandHistory = data.commands || [];
+            updateCommandHistoryTable(commandHistory);
+        })
+        .catch(error => console.error('Error loading command history:', error));
+}
+
+function updateCommandHistoryTable(commands) {
+    const tbody = document.getElementById('command-history-table');
+    let html = '';
+    
+    if (commands.length === 0) {
+        html = '<tr><td colspan="5" class="text-center text-muted">No commands executed yet</td></tr>';
+    } else {
+        commands.forEach(cmd => {
+            const time = new Date(cmd.timestamp).toLocaleString();
+            const statusBadge = getStatusBadge(cmd.status);
+            const result = cmd.result ? JSON.stringify(cmd.result).substring(0, 100) + '...' : 'No result';
+            
+            html += `
+                <tr class="command-row" data-status="${cmd.status}">
+                    <td><small>${time}</small></td>
+                    <td><code>${cmd.command}</code></td>
+                    <td>${statusBadge}</td>
+                    <td><small>${result}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewCommandDetails('${cmd.timestamp}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="repeatCommand('${cmd.command}')">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+    
+    tbody.innerHTML = html;
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'completed': '<span class="badge bg-success">Completed</span>',
+        'processing': '<span class="badge bg-warning">Processing</span>',
+        'error': '<span class="badge bg-danger">Error</span>',
+        'pending': '<span class="badge bg-secondary">Pending</span>'
+    };
+    return badges[status] || '<span class="badge bg-secondary">Unknown</span>';
+}
+
+function filterCommands(filter) {
+    const rows = document.querySelectorAll('.command-row');
+    
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        let show = true;
+        
+        switch(filter) {
+            case 'completed':
+                show = status === 'completed';
+                break;
+            case 'processing':
+                show = status === 'processing';
+                break;
+            case 'error':
+                show = status === 'error';
+                break;
+            case 'all':
+            default:
+                show = true;
+                break;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+function previewCommand() {
+    const command = buildCommandFromForm();
+    if (!command) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    previewedCommand = command;
+    
+    const modal = new bootstrap.Modal(document.getElementById('commandPreviewModal'));
+    const contentDiv = document.getElementById('command-preview-content');
+    
+    contentDiv.innerHTML = `
+        <div class="alert alert-info">
+            <h6>Command Preview</h6>
+            <p><strong>Command:</strong> ${command.text}</p>
+            <p><strong>Target:</strong> ${command.target}</p>
+            <p><strong>Priority:</strong> ${command.priority}</p>
+            <p><strong>Mode:</strong> ${command.mode}</p>
+        </div>
+        
+        <div class="alert alert-warning">
+            <h6>What this command will do:</h6>
+            <ul>
+                ${generateCommandDescription(command)}
+            </ul>
+        </div>
+    `;
+    
+    modal.show();
+}
+
+function buildCommandFromForm() {
+    const commandType = document.getElementById('main-command-type').value;
+    const targetType = document.querySelector('input[name="targetType"]:checked').value;
+    const customCommand = document.getElementById('main-command-input').value;
+    const priority = document.getElementById('main-command-priority').value;
+    const mode = document.getElementById('main-command-mode').value;
+    
+    if (!customCommand.trim()) {
+        return null;
+    }
+    
+    let target = 'all bots';
+    if (targetType === 'specific') {
+        const selectedBots = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
+        target = selectedBots.length > 0 ? selectedBots.join(', ') : 'no bots selected';
+    } else if (targetType === 'team') {
+        const team = document.getElementById('team-select')?.value || 'all teams';
+        target = team;
+    }
+    
+    return {
+        text: customCommand,
+        target: target,
+        type: commandType,
+        priority: priority,
+        mode: mode,
+        parameters: getCommandParameters()
+    };
+}
+
+function getCommandParameters() {
+    const commandType = document.getElementById('main-command-type').value;
+    const params = {};
+    
+    switch(commandType) {
+        case 'mining':
+            params.resource = document.getElementById('param-resource')?.value;
+            params.quantity = document.getElementById('param-quantity')?.value;
+            params.radius = document.getElementById('param-radius')?.value;
+            break;
+        case 'building':
+            params.structure = document.getElementById('param-structure')?.value;
+            params.size = document.getElementById('param-size')?.value;
+            params.material = document.getElementById('param-material')?.value;
+            break;
+        // Add other cases as needed
+    }
+    
+    return params;
+}
+
+function generateCommandDescription(command) {
+    const descriptions = {
+        'mining': `<li>Search for ${command.parameters.resource || 'resources'} within ${command.parameters.radius || '100'} blocks</li>
+                   <li>Extract up to ${command.parameters.quantity || '10'} items</li>
+                   <li>Return to base when complete</li>`,
+        'building': `<li>Gather required materials for ${command.parameters.structure || 'structure'}</li>
+                     <li>Construct ${command.parameters.size || '5'}x${command.parameters.size || '5'} ${command.parameters.structure || 'structure'}</li>
+                     <li>Use ${command.parameters.material || 'available'} materials</li>`,
+        'movement': `<li>Navigate to specified coordinates</li>
+                     <li>Maintain formation during movement</li>
+                     <li>Avoid obstacles and hazards</li>`,
+        'collection': `<li>Search for specified items in the area</li>
+                       <li>Collect items based on priority settings</li>
+                       <li>Organize inventory efficiently</li>`,
+        'exploration': `<li>Explore in specified direction</li>
+                        <li>Map discovered areas and resources</li>
+                        <li>Mark important locations</li>`,
+        'team': `<li>Coordinate team actions and formations</li>
+                 <li>Execute synchronized operations</li>
+                 <li>Maintain team cohesion</li>`,
+        'emergency': `<li>Execute immediate emergency response</li>
+                      <li>Prioritize safety and survival</li>
+                      <li>Coordinate emergency actions</li>`
+    };
+    
+    return descriptions[command.type] || '<li>Execute custom command logic</li>';
+}
+
+function executePreviewedCommand() {
+    if (!previewedCommand) return;
+    
+    sendMainCommand();
+    bootstrap.Modal.getInstance(document.getElementById('commandPreviewModal')).hide();
+}
+
+function sendMainCommand() {
+    const command = buildCommandFromForm();
+    if (!command) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    // Handle scheduled commands
+    if (command.mode === 'scheduled') {
+        showScheduledCommandModal();
+        return;
+    }
+    
+    // Send immediate command
+    fetch('/api/command', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command: command.text })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('✅ Command executed successfully!', 'success');
+            document.getElementById('main-command-input').value = '';
+            loadCommandHistory();
+        } else {
+            showNotification('❌ Command failed: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Command failed: ' + error.message, 'error');
+    });
+}
+
+function showScheduledCommandModal() {
+    const modal = new bootstrap.Modal(document.getElementById('scheduledCommandModal'));
+    modal.show();
+}
+
+function scheduleCommand() {
+    const time = document.getElementById('schedule-time').value;
+    const repeat = document.getElementById('schedule-repeat').value;
+    const conditions = document.getElementById('schedule-conditions').value;
+    
+    if (!time) {
+        showNotification('Please select a schedule time', 'error');
+        return;
+    }
+    
+    // For now, just show success message
+    // In a real implementation, this would schedule the command
+    showNotification('Command scheduled successfully!', 'success');
+    bootstrap.Modal.getInstance(document.getElementById('scheduledCommandModal')).hide();
+    
+    // Clear form
+    document.getElementById('schedule-time').value = '';
+    document.getElementById('schedule-repeat').value = 'once';
+    document.getElementById('schedule-conditions').value = '';
+}
+
+function quickCommand(type) {
+    let command = '';
+    
+    switch(type) {
+        case 'status':
+            command = 'Show me the status of all bots';
+            break;
+        case 'collect':
+            command = 'All bots, collect available resources';
+            break;
+        case 'explore':
+            command = 'All bots, explore the surrounding area';
+            break;
+        case 'defend':
+            command = 'All bots, form defensive positions';
+            break;
+        case 'retreat':
+            command = 'All bots, emergency retreat to base';
+            break;
+        case 'return':
+            command = 'All bots, return to base immediately';
+            break;
+    }
+    
+    if (command) {
+        document.getElementById('main-command-input').value = command;
+        document.getElementById('main-command-type').value = 'custom';
+        document.querySelector('input[name="targetType"][value="all"]').checked = true;
+        updateTargetSelection();
+    }
+}
+
+function loadTemplate(type) {
+    let command = '';
+    
+    switch(type) {
+        case 'mining':
+            command = 'Mine iron ore at current location';
+            break;
+        case 'building':
+            command = 'Build a house at coordinates 100 64 200';
+            break;
+        case 'movement':
+            command = 'Move to coordinates 150 64 250';
+            break;
+        case 'collection':
+            command = 'Collect wood in the forest area';
+            break;
+    }
+    
+    if (command) {
+        document.getElementById('main-command-input').value = command;
+    }
+}
+
+function viewCommandDetails(timestamp) {
+    const command = commandHistory.find(cmd => cmd.timestamp === timestamp);
+    if (command) {
+        alert(`Command Details:\n\nCommand: ${command.command}\nStatus: ${command.status}\nResult: ${JSON.stringify(command.result, null, 2)}`);
+    }
+}
+
+function repeatCommand(commandText) {
+    document.getElementById('main-command-input').value = commandText;
+    document.getElementById('main-command-type').value = 'custom';
+    document.querySelector('input[name="targetType"][value="all"]').checked = true;
+    updateTargetSelection();
+}
+
+function refreshCommands() {
+    loadCommandHistory();
+    showNotification('Command history refreshed!', 'success');
+}
+
+function clearCommandHistory() {
+    if (confirm('Are you sure you want to clear all command history? This action cannot be undone.')) {
+        // In a real implementation, this would clear the history
+        showNotification('Command history cleared!', 'success');
+        commandHistory = [];
+        updateCommandHistoryTable(commandHistory);
+    }
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Initialize target selection on page load
+updateTargetSelection();
+</script>
+{% endblock %}

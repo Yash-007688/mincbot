@@ -1,0 +1,825 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Bot Vision Commander{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1><i class="fas fa-chart-bar me-2"></i>Analytics & Reports</h1>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="refreshAnalytics()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+                    <button class="btn btn-outline-success" onclick="exportReport()">
+                    <i class="fas fa-download me-1"></i>Export Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Key Metrics -->
+    <div class="col-md-3 mb-3">
+        <div class="card border-primary h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                <h3 class="card-title text-primary" id="total-bots-analytics">0</h3>
+                <p class="card-text">Total Bots</p>
+                <small class="text-muted">Active in system</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-tasks fa-3x text-success mb-3"></i>
+                <h3 class="card-title text-success" id="total-tasks-analytics">0</h3>
+                <p class="card-text">Tasks Completed</p>
+                <small class="text-muted">This session</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-warning h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                <h3 class="card-title text-warning" id="avg-response-time">0ms</h3>
+                <p class="card-text">Avg Response</p>
+                <small class="text-muted">Command execution</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-percentage fa-3x text-info mb-3"></i>
+                <h3 class="card-title text-info" id="success-rate">0%</h3>
+                <p class="card-text">Success Rate</p>
+                <small class="text-muted">Command execution</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Bot Performance Chart -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line me-2"></i>Bot Performance Over Time</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bot Status Distribution -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie me-2"></i>Bot Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Command Success Rate -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar me-2"></i>Command Success Rate by Type</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="commandSuccessChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resource Discovery Trends -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-area me-2"></i>Resource Discovery Trends</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="resourceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Bot Efficiency Metrics -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tachometer-alt me-2"></i>Bot Efficiency Metrics</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Bot</th>
+                                <th>Tasks/Hour</th>
+                                <th>Success Rate</th>
+                                <th>Avg Time</th>
+                                <th>Efficiency</th>
+                            </tr>
+                        </thead>
+                        <tbody id="efficiency-table">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Loading efficiency data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Health Metrics -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-heartbeat me-2"></i>System Health Metrics</h5>
+            </div>
+            <div class="card-body">
+                <div id="health-metrics">
+                    <div class="mb-3">
+                        <label class="form-label">Overall System Health</label>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" id="system-health-bar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted" id="system-health-text">Loading...</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Bot Health Distribution</label>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <h6 class="text-success" id="healthy-bots">0</h6>
+                                    <small class="text-muted">Healthy</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <h6 class="text-warning" id="warning-bots">0</h6>
+                                    <small class="text-muted">Warning</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <h6 class="text-danger" id="critical-bots">0</h6>
+                                    <small class="text-muted">Critical</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Resource Utilization</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">CPU Usage</small>
+                                <div class="progress mb-1" style="height: 8px;">
+                                    <div class="progress-bar bg-info" id="cpu-usage" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Memory Usage</small>
+                                <div class="progress mb-1" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" id="memory-usage" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Time-based Analysis -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-alt me-2"></i>Time-based Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Time Range</label>
+                            <select class="form-select" id="time-range">
+                                <option value="1h">Last Hour</option>
+                                <option value="6h">Last 6 Hours</option>
+                                <option value="24h" selected>Last 24 Hours</option>
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d">Last 30 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Metric</label>
+                            <select class="form-select" id="metric-type">
+                                <option value="tasks">Tasks Completed</option>
+                                <option value="commands">Commands Executed</option>
+                                <option value="resources">Resources Discovered</option>
+                                <option value="errors">Errors</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Group By</label>
+                            <select class="form-select" id="group-by">
+                                <option value="hour">Hour</option>
+                                <option value="day">Day</option>
+                                <option value="bot">Bot</option>
+                                <option value="type">Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary w-100" onclick="updateTimeAnalysis()">
+                                <i class="fas fa-chart-line me-1"></i>Update Chart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <canvas id="timeAnalysisChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Report Modal -->
+<div class="modal fade" id="detailedReportModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detailed Analytics Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detailed-report-content">
+                    <!-- Detailed report content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printReport()">
+                    <i class="fas fa-print me-1"></i>Print Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let analyticsData = {};
+let charts = {};
+
+// Initialize page on load
+document.addEventListener('DOMContentLoaded', function() {
+    loadAnalyticsData();
+    initializeCharts();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    document.getElementById('time-range').addEventListener('change', updateTimeAnalysis);
+    document.getElementById('metric-type').addEventListener('change', updateTimeAnalysis);
+    document.getElementById('group-by').addEventListener('change', updateTimeAnalysis);
+}
+
+function loadAnalyticsData() {
+    // Load bot data
+    fetch('/api/bots')
+        .then(response => response.json())
+        .then(bots => {
+            analyticsData.bots = bots;
+            updateBotMetrics(bots);
+        })
+        .catch(error => console.error('Error loading bot data:', error));
+    
+    // Load command history
+    fetch('/api/commands')
+        .then(response => response.json())
+        .then(data => {
+            analyticsData.commands = data.commands || [];
+            updateCommandMetrics(data.commands);
+        })
+        .catch(error => console.error('Error loading command data:', error));
+    
+    // Load world data
+    fetch('/api/world')
+        .then(response => response.json())
+        .then(data => {
+            analyticsData.world = data;
+            updateWorldMetrics(data);
+        })
+        .catch(error => console.error('Error loading world data:', error));
+}
+
+function updateBotMetrics(bots) {
+    const totalBots = Object.keys(bots).length;
+    const healthyBots = Object.values(bots).filter(bot => bot.health > 15).length;
+    const warningBots = Object.values(bots).filter(bot => bot.health <= 15 && bot.health > 10).length;
+    const criticalBots = Object.values(bots).filter(bot => bot.health <= 10).length;
+    
+    document.getElementById('total-bots-analytics').textContent = totalBots;
+    document.getElementById('healthy-bots').textContent = healthyBots;
+    document.getElementById('warning-bots').textContent = warningBots;
+    document.getElementById('critical-bots').textContent = criticalBots;
+    
+    // Update system health bar
+    const systemHealth = totalBots > 0 ? (healthyBots / totalBots) * 100 : 0;
+    document.getElementById('system-health-bar').style.width = systemHealth + '%';
+    document.getElementById('system-health-text').textContent = `${systemHealth.toFixed(1)}% healthy`;
+    
+    // Update status chart
+    if (charts.statusChart) {
+        charts.statusChart.data.datasets[0].data = [healthyBots, warningBots, criticalBots];
+        charts.statusChart.update();
+    }
+}
+
+function updateCommandMetrics(commands) {
+    const totalCommands = commands.length;
+    const completedCommands = commands.filter(cmd => cmd.status === 'completed').length;
+    const errorCommands = commands.filter(cmd => cmd.status === 'error').length;
+    
+    document.getElementById('total-tasks-analytics').textContent = completedCommands;
+    
+    const successRate = totalCommands > 0 ? (completedCommands / totalCommands) * 100 : 0;
+    document.getElementById('success-rate').textContent = `${successRate.toFixed(1)}%`;
+    
+    // Calculate average response time (simulated)
+    const avgResponseTime = totalCommands > 0 ? Math.floor(Math.random() * 500) + 100 : 0;
+    document.getElementById('avg-response-time').textContent = `${avgResponseTime}ms`;
+    
+    // Update command success chart
+    if (charts.commandSuccessChart) {
+        charts.commandSuccessChart.data.datasets[0].data = [completedCommands, errorCommands];
+        charts.commandSuccessChart.update();
+    }
+}
+
+function updateWorldMetrics(world) {
+    const totalChunks = Object.keys(world.blocks || {}).length;
+    const totalBlocks = new Set([].concat(...Object.values(world.blocks || {}))).size;
+    
+    // Update resource chart with simulated data
+    if (charts.resourceChart) {
+        const timeLabels = generateTimeLabels(24);
+        const resourceData = timeLabels.map(() => Math.floor(Math.random() * 50) + 10);
+        
+        charts.resourceChart.data.labels = timeLabels;
+        charts.resourceChart.data.datasets[0].data = resourceData;
+        charts.resourceChart.update();
+    }
+}
+
+function initializeCharts() {
+    // Performance Chart
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    charts.performanceChart = new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: generateTimeLabels(12),
+            datasets: [{
+                label: 'Tasks Completed',
+                data: generateRandomData(12, 5, 25),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }, {
+                label: 'Commands Executed',
+                data: generateRandomData(12, 10, 40),
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    charts.statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Healthy', 'Warning', 'Critical'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Command Success Chart
+    const commandCtx = document.getElementById('commandSuccessChart').getContext('2d');
+    charts.commandSuccessChart = new Chart(commandCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Completed', 'Errors'],
+            datasets: [{
+                label: 'Commands',
+                data: [0, 0],
+                backgroundColor: ['#28a745', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Resource Chart
+    const resourceCtx = document.getElementById('resourceChart').getContext('2d');
+    charts.resourceChart = new Chart(resourceCtx, {
+        type: 'area',
+        data: {
+            labels: generateTimeLabels(24),
+            datasets: [{
+                label: 'Resources Discovered',
+                data: generateRandomData(24, 5, 50),
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Time Analysis Chart
+    const timeCtx = document.getElementById('timeAnalysisChart').getContext('2d');
+    charts.timeAnalysisChart = new Chart(timeCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Metric',
+                data: [],
+                borderColor: 'rgb(153, 102, 255)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function generateTimeLabels(count) {
+    const labels = [];
+    const now = new Date();
+    
+    for (let i = count - 1; i >= 0; i--) {
+        const time = new Date(now.getTime() - (i * 60 * 60 * 1000)); // Hours ago
+        labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+    }
+    
+    return labels;
+}
+
+function generateRandomData(count, min, max) {
+    const data = [];
+    for (let i = 0; i < count; i++) {
+        data.push(Math.floor(Math.random() * (max - min + 1)) + min);
+    }
+    return data;
+}
+
+function updateTimeAnalysis() {
+    const timeRange = document.getElementById('time-range').value;
+    const metricType = document.getElementById('metric-type').value;
+    const groupBy = document.getElementById('group-by').value;
+    
+    // Generate appropriate labels and data based on selection
+    let labels, data;
+    
+    switch(timeRange) {
+        case '1h':
+            labels = generateTimeLabels(60); // Minutes
+            break;
+        case '6h':
+            labels = generateTimeLabels(6); // Hours
+            break;
+        case '24h':
+            labels = generateTimeLabels(24); // Hours
+            break;
+        case '7d':
+            labels = generateDayLabels(7); // Days
+            break;
+        case '30d':
+            labels = generateDayLabels(30); // Days
+            break;
+    }
+    
+    // Generate appropriate data based on metric type
+    switch(metricType) {
+        case 'tasks':
+            data = generateRandomData(labels.length, 0, 20);
+            break;
+        case 'commands':
+            data = generateRandomData(labels.length, 5, 50);
+            break;
+        case 'resources':
+            data = generateRandomData(labels.length, 10, 100);
+            break;
+        case 'errors':
+            data = generateRandomData(labels.length, 0, 10);
+            break;
+    }
+    
+    // Update chart
+    if (charts.timeAnalysisChart) {
+        charts.timeAnalysisChart.data.labels = labels;
+        charts.timeAnalysisChart.data.datasets[0].data = data;
+        charts.timeAnalysisChart.data.datasets[0].label = `${metricType.charAt(0).toUpperCase() + metricType.slice(1)} (${timeRange})`;
+        charts.timeAnalysisChart.update();
+    }
+}
+
+function generateDayLabels(count) {
+    const labels = [];
+    const now = new Date();
+    
+    for (let i = count - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+        labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    }
+    
+    return labels;
+}
+
+function updateEfficiencyTable() {
+    if (!analyticsData.bots) return;
+    
+    const tbody = document.getElementById('efficiency-table');
+    let html = '';
+    
+    Object.entries(analyticsData.bots).forEach(([botName, bot]) => {
+        // Calculate efficiency metrics (simulated)
+        const tasksPerHour = Math.floor(Math.random() * 10) + 5;
+        const successRate = Math.floor(Math.random() * 20) + 80;
+        const avgTime = Math.floor(Math.random() * 300) + 100;
+        const efficiency = Math.floor((tasksPerHour * successRate) / 100);
+        
+        html += `
+            <tr>
+                <td><strong>${botName}</strong></td>
+                <td>${tasksPerHour}</td>
+                <td>${successRate}%</td>
+                <td>${avgTime}ms</td>
+                <td>
+                    <span class="badge ${efficiency > 7 ? 'bg-success' : efficiency > 4 ? 'bg-warning' : 'bg-danger'}">
+                        ${efficiency}/10
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function updateSystemMetrics() {
+    // Simulate system metrics
+    const cpuUsage = Math.floor(Math.random() * 40) + 20;
+    const memoryUsage = Math.floor(Math.random() * 30) + 30;
+    
+    document.getElementById('cpu-usage').style.width = cpuUsage + '%';
+    document.getElementById('memory-usage').style.width = memoryUsage + '%';
+}
+
+function refreshAnalytics() {
+    loadAnalyticsData();
+    updateEfficiencyTable();
+    updateSystemMetrics();
+    showNotification('Analytics refreshed!', 'success');
+}
+
+function exportReport() {
+    // Generate comprehensive report
+    const report = generateAnalyticsReport();
+    
+    // Create downloadable file
+    const dataStr = JSON.stringify(report, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `analytics_report_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    link.click();
+    
+    showNotification('Analytics report exported successfully!', 'success');
+}
+
+function generateAnalyticsReport() {
+    const report = {
+        timestamp: new Date().toISOString(),
+        summary: {
+            total_bots: Object.keys(analyticsData.bots || {}).length,
+            total_commands: analyticsData.commands?.length || 0,
+            total_chunks: Object.keys(analyticsData.world?.blocks || {}).length,
+            system_health: calculateSystemHealth()
+        },
+        bot_performance: generateBotPerformanceData(),
+        command_analysis: generateCommandAnalysis(),
+        resource_discovery: generateResourceDiscoveryData(),
+        recommendations: generateRecommendations()
+    };
+    
+    return report;
+}
+
+function calculateSystemHealth() {
+    if (!analyticsData.bots) return 0;
+    
+    const bots = Object.values(analyticsData.bots);
+    const healthyBots = bots.filter(bot => bot.health > 15).length;
+    return (healthyBots / bots.length) * 100;
+}
+
+function generateBotPerformanceData() {
+    if (!analyticsData.bots) return {};
+    
+    const performance = {};
+    Object.entries(analyticsData.bots).forEach(([botName, bot]) => {
+        performance[botName] = {
+            health: bot.health,
+            food: bot.food,
+            state: bot.state,
+            nearby_blocks: bot.nearby_blocks?.length || 0,
+            nearby_entities: bot.nearby_entities?.length || 0,
+            efficiency_score: Math.floor(Math.random() * 10) + 1
+        };
+    });
+    
+    return performance;
+}
+
+function generateCommandAnalysis() {
+    if (!analyticsData.commands) return {};
+    
+    const commands = analyticsData.commands;
+    const total = commands.length;
+    const completed = commands.filter(cmd => cmd.status === 'completed').length;
+    const errors = commands.filter(cmd => cmd.status === 'error').length;
+    
+    return {
+        total_commands: total,
+        completed: completed,
+        errors: errors,
+        success_rate: total > 0 ? (completed / total) * 100 : 0,
+        average_response_time: Math.floor(Math.random() * 500) + 100
+    };
+}
+
+function generateResourceDiscoveryData() {
+    if (!analyticsData.world) return {};
+    
+    const blocks = analyticsData.world.blocks || {};
+    const entities = analyticsData.world.entities || {};
+    
+    return {
+        total_chunks: Object.keys(blocks).length,
+        block_types: new Set([].concat(...Object.values(blocks))).size,
+        entity_types: new Set([].concat(...Object.values(entities))).size,
+        exploration_progress: Math.min((Object.keys(blocks).length / 100) * 100, 100)
+    };
+}
+
+function generateRecommendations() {
+    const recommendations = [];
+    
+    if (analyticsData.bots) {
+        const bots = Object.values(analyticsData.bots);
+        const lowHealthBots = bots.filter(bot => bot.health <= 10);
+        
+        if (lowHealthBots.length > 0) {
+            recommendations.push({
+                priority: 'high',
+                type: 'health',
+                message: `${lowHealthBots.length} bots have low health. Consider healing them immediately.`
+            });
+        }
+        
+        const lowFoodBots = bots.filter(bot => bot.food <= 10);
+        if (lowFoodBots.length > 0) {
+            recommendations.push({
+                priority: 'medium',
+                type: 'food',
+                message: `${lowFoodBots.length} bots have low food. Send them to gather food.`
+            });
+        }
+    }
+    
+    if (analyticsData.commands) {
+        const errorRate = analyticsData.commands.filter(cmd => cmd.status === 'error').length / analyticsData.commands.length;
+        if (errorRate > 0.1) {
+            recommendations.push({
+                priority: 'medium',
+                type: 'commands',
+                message: `High command error rate (${(errorRate * 100).toFixed(1)}%). Review recent commands for issues.`
+            });
+        }
+    }
+    
+    return recommendations;
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Update efficiency table and system metrics after loading data
+setTimeout(() => {
+    updateEfficiencyTable();
+    updateSystemMetrics();
+}, 1000);
+
+// Listen for real-time updates
+socket.on('bot_update', function(data) {
+    if (data.all_bots) {
+        analyticsData.bots = data.all_bots;
+        updateBotMetrics(data.all_bots);
+        updateEfficiencyTable();
+    }
+});
+
+socket.on('command_result', function(data) {
+    // Update command metrics when new commands are executed
+    if (analyticsData.commands) {
+        analyticsData.commands.push(data);
+        updateCommandMetrics(analyticsData.commands);
+    }
+});
+</script>
+{% endblock %}

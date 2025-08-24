@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Bot Vision Commander{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Welcome Section -->
+    <div class="col-12">
+        <div class="jumbotron bg-primary text-white p-5 rounded">
+            <h1 class="display-4">
+                <i class="fas fa-robot me-3"></i>Welcome to Bot Vision Commander
+            </h1>
+            <p class="lead">
+                Real-time monitoring and command center for your Minecraft bot army. 
+                See what your bots see, give live commands, and coordinate operations like a true bot general!
+            </p>
+            <hr class="my-4">
+            <p>
+                Monitor bot health, track resource discovery, coordinate building projects, and manage your entire bot operation from one powerful dashboard.
+            </p>
+            <a class="btn btn-light btn-lg" href="{{ url_for('dashboard')" role="button">
+                <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Quick Stats -->
+    <div class="col-md-3">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Active Bots</h5>
+                <h2 class="text-primary" id="quick-bot-count">0</h2>
+                <p class="card-text">Bots currently online</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <i class="fas fa-globe fa-3x text-success mb-3"></i>
+                <h5 class="card-title">World Coverage</h5>
+                <h2 class="text-success" id="quick-world-chunks">0</h2>
+                <p class="card-text">Chunks explored</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <i class="fas fa-terminal fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Commands</h5>
+                <h2 class="text-warning" id="quick-command-count">0</h2>
+                <p class="card-text">Commands executed</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                <h5 class="card-title">System Health</h5>
+                <h2 class="text-info" id="quick-system-health">Good</h2>
+                <p class="card-text">Overall status</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Quick Actions -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('commands') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-terminal me-2"></i>Send Command
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('bots') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-robot me-2"></i>Manage Bots
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('world') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-globe me-2"></i>View World
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('analytics') }}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-chart-bar me-2"></i>Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history me-2"></i>Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-activity">
+                    <p class="text-muted text-center">Loading recent activity...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- System Status -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-server me-2"></i>System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-circle text-success me-2"></i>
+                            <span>Connection: <strong id="status-connection">Connected</strong></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-clock me-2"></i>
+                            <span>Uptime: <strong id="status-uptime">--:--:--</strong></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-memory me-2"></i>
+                            <span>Memory: <strong id="status-memory">--</strong></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            <span>Performance: <strong id="status-performance">Good</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Command Input -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-terminal me-2"></i>Quick Command</h5>
+            </div>
+            <div class="card-body">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="quick-command-input" 
+                           placeholder="Type a quick command (e.g., 'Bot1, mine iron ore')">
+                    <button class="btn btn-primary" type="button" onclick="sendQuickCommand()">
+                        <i class="fas fa-paper-plane me-2"></i>Send
+                    </button>
+                </div>
+                <small class="form-text text-muted">
+                    Examples: "All bots, collect wood" | "Bot2, go to 100 64 200" | "Show status"
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Load quick stats on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadQuickStats();
+    loadRecentActivity();
+    startStatusUpdates();
+});
+
+function loadQuickStats() {
+    fetch('/api/status')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('quick-bot-count').textContent = data.total_bots || 0;
+            document.getElementById('quick-world-chunks').textContent = data.world_overview?.total_blocks || 0;
+            document.getElementById('quick-command-count').textContent = data.command_history?.length || 0;
+            document.getElementById('quick-system-health').textContent = data.system_health || 'Unknown';
+        })
+        .catch(error => console.error('Error loading quick stats:', error));
+}
+
+function loadRecentActivity() {
+    fetch('/api/commands')
+        .then(response => response.json())
+        .then(data => {
+            const recentDiv = document.getElementById('recent-activity');
+            const commands = data.commands || [];
+            
+            if (commands.length === 0) {
+                recentDiv.innerHTML = '<p class="text-muted text-center">No recent commands</p>';
+                return;
+            }
+            
+            const recentCommands = commands.slice(-5).reverse();
+            let html = '';
+            
+            recentCommands.forEach(cmd => {
+                const time = new Date(cmd.timestamp).toLocaleTimeString();
+                const statusClass = cmd.status === 'completed' ? 'text-success' : 
+                                  cmd.status === 'error' ? 'text-danger' : 'text-warning';
+                const statusIcon = cmd.status === 'completed' ? 'fa-check' : 
+                                 cmd.status === 'error' ? 'fa-times' : 'fa-clock';
+                
+                html += `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <i class="fas ${statusIcon} ${statusClass} me-2"></i>
+                            <span class="text-truncate">${cmd.command}</span>
+                        </div>
+                        <small class="text-muted">${time}</small>
+                    </div>
+                `;
+            });
+            
+            recentDiv.innerHTML = html;
+        })
+        .catch(error => console.error('Error loading recent activity:', error));
+}
+
+function startStatusUpdates() {
+    // Update status every 5 seconds
+    setInterval(() => {
+        const now = new Date();
+        const startTime = new Date(now.getTime() - (5 * 60 * 1000)); // 5 minutes ago for demo
+        const uptime = Math.floor((now - startTime) / 1000);
+        const hours = Math.floor(uptime / 3600);
+        const minutes = Math.floor((uptime % 3600) / 60);
+        const seconds = uptime % 60;
+        
+        document.getElementById('status-uptime').textContent = 
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        document.getElementById('status-memory').textContent = '128 MB';
+        document.getElementById('status-performance').textContent = 'Good';
+    }, 1000);
+}
+
+function sendQuickCommand() {
+    const input = document.getElementById('quick-command-input');
+    const command = input.value.trim();
+    
+    if (!command) return;
+    
+    fetch('/api/command', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command: command })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('✅ Command executed successfully!', 'success');
+            input.value = '';
+            loadQuickStats();
+            loadRecentActivity();
+        } else {
+            showNotification('❌ Command failed: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Command failed: ' + error.message, 'error');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Enter key support for quick command
+document.getElementById('quick-command-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendQuickCommand();
+    }
+});
+</script>
+{% endblock %}

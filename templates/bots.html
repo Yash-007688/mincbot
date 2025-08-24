@@ -1,0 +1,638 @@
+{% extends "base.html" %}
+
+{% block title %}Bot Management - Bot Vision Commander{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1><i class="fas fa-robot me-2"></i>Bot Management</h1>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="refreshBotData()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+                <button class="btn btn-outline-success" onclick="createNewBot()">
+                    <i class="fas fa-plus me-1"></i>Add Bot
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Bot Selection -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list me-2"></i>Bot List</h5>
+            </div>
+            <div class="card-body">
+                <div id="bot-list">
+                    <p class="text-muted text-center">Loading bots...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bot Details -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Bot Details</h5>
+            </div>
+            <div class="card-body" id="bot-details">
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-robot fa-3x mb-3"></i>
+                    <p>Select a bot from the list to view details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bot Command Modal -->
+<div class="modal fade" id="botCommandModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Command to <span id="modal-bot-name"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Command Type</label>
+                    <select class="form-select" id="command-type">
+                        <option value="custom">Custom Command</option>
+                        <option value="mining">Mining</option>
+                        <option value="building">Building</option>
+                        <option value="movement">Movement</option>
+                        <option value="collection">Collection</option>
+                        <option value="exploration">Exploration</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Command</label>
+                    <input type="text" class="form-control" id="modal-command-input" 
+                           placeholder="Type your command here...">
+                </div>
+                
+                <div id="command-parameters" class="mb-3">
+                    <!-- Dynamic parameters will be loaded here -->
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Priority</label>
+                    <select class="form-select" id="command-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="executeBotCommand()">Execute Command</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bot Creation Modal -->
+<div class="modal fade" id="createBotModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Bot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Bot Name</label>
+                    <input type="text" class="form-control" id="new-bot-name" placeholder="Bot1">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Bot Type</label>
+                    <select class="form-select" id="new-bot-type">
+                        <option value="general">General Purpose</option>
+                        <option value="mining">Mining Specialist</option>
+                        <option value="building">Building Specialist</option>
+                        <option value="exploration">Exploration Specialist</option>
+                        <option value="farming">Farming Specialist</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Team</label>
+                    <select class="form-select" id="new-bot-team">
+                        <option value="unassigned">Unassigned</option>
+                        <option value="mining_team">Mining Team</option>
+                        <option value="building_team">Building Team</option>
+                        <option value="exploration_team">Exploration Team</option>
+                        <option value="farming_team">Farming Team</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Initial Position</label>
+                    <div class="row">
+                        <div class="col-4">
+                            <input type="number" class="form-control" id="new-bot-x" placeholder="X" value="0">
+                        </div>
+                        <div class="col-4">
+                            <input type="number" class="form-control" id="new-bot-y" placeholder="Y" value="64">
+                        </div>
+                        <div class="col-4">
+                            <input type="number" class="form-control" id="new-bot-z" placeholder="Z" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createBot()">Create Bot</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedBot = null;
+let botData = {};
+
+// Initialize page on load
+document.addEventListener('DOMContentLoaded', function() {
+    loadBotData();
+    setupCommandTypeHandler();
+});
+
+function loadBotData() {
+    fetch('/api/bots')
+        .then(response => response.json())
+        .then(data => {
+            botData = data;
+            updateBotList(data);
+        })
+        .catch(error => console.error('Error loading bot data:', error));
+}
+
+function updateBotList(bots) {
+    const botListDiv = document.getElementById('bot-list');
+    let html = '';
+    
+    Object.entries(bots).forEach(([botName, bot]) => {
+        const healthClass = bot.health > 15 ? 'text-success' : bot.health > 10 ? 'text-warning' : 'text-danger';
+        const isSelected = selectedBot === botName ? 'active' : '';
+        
+        html += `
+            <div class="bot-list-item ${isSelected}" onclick="selectBot('${botName}')">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${botName}</strong>
+                        <br><small class="text-muted">${bot.team}</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="${healthClass}">${bot.health.toFixed(1)}/20</div>
+                        <small class="text-muted">${bot.state}</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    botListDiv.innerHTML = html;
+    
+    // Select first bot by default
+    if (Object.keys(bots).length > 0 && !selectedBot) {
+        selectBot(Object.keys(bots)[0]);
+    }
+}
+
+function selectBot(botName) {
+    selectedBot = botName;
+    
+    // Update bot list selection
+    document.querySelectorAll('.bot-list-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    // Load bot details
+    loadBotDetails(botName);
+}
+
+function loadBotDetails(botName) {
+    const bot = botData[botName];
+    if (!bot) return;
+    
+    const detailsDiv = document.getElementById('bot-details');
+    
+    const healthPercent = (bot.health / 20) * 100;
+    const foodPercent = (bot.food / 20) * 100;
+    
+    detailsDiv.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h4>${botName}</h4>
+                <p class="text-muted">${bot.team}</p>
+                
+                <div class="mb-3">
+                    <label class="form-label">Health</label>
+                    <div class="progress mb-2">
+                        <div class="progress-bar ${bot.health > 15 ? 'bg-success' : bot.health > 10 ? 'bg-warning' : 'bg-danger'}" 
+                             style="width: ${healthPercent}%"></div>
+                    </div>
+                    <small class="text-muted">${bot.health.toFixed(1)}/20</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Food</label>
+                    <div class="progress mb-2">
+                        <div class="progress-bar ${bot.food > 15 ? 'bg-success' : bot.food > 10 ? 'bg-warning' : 'bg-danger'}" 
+                             style="width: ${foodPercent}%"></div>
+                    </div>
+                    <small class="text-muted">${bot.food.toFixed(1)}/20</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Current State</label>
+                    <div><span class="badge bg-primary">${bot.state}</span></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Position</label>
+                    <div><code>${bot.position[0].toFixed(0)}, ${bot.position[1].toFixed(0)}, ${bot.position[2].toFixed(0)}</code></div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h5>Nearby Environment</h5>
+                <div class="mb-3">
+                    <label class="form-label">Blocks (${bot.nearby_blocks.length})</label>
+                    <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                        ${bot.nearby_blocks.map(block => 
+                            `<span class="badge bg-secondary me-1 mb-1">${block.type}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Entities (${bot.nearby_entities.length})</label>
+                    <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                        ${bot.nearby_entities.map(entity => 
+                            `<span class="badge bg-info me-1 mb-1">${entity.type}</span>`
+                        ).join('')}
+                </div>
+                
+                <h5>Inventory</h5>
+                <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                    ${Object.entries(bot.inventory).map(([item, count]) => 
+                        `<span class="badge bg-success me-1 mb-1">${item}: ${count}</span>`
+                    ).join('')}
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="row">
+            <div class="col-12">
+                <h5>Actions</h5>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary" onclick="openCommandModal('${botName}')">
+                        <i class="fas fa-terminal me-2"></i>Send Command
+                    </button>
+                    <button class="btn btn-outline-success" onclick="teleportBot('${botName}')">
+                        <i class="fas fa-map-marker-alt me-2"></i>Teleport
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="healBot('${botName}')">
+                        <i class="fas fa-heart me-2"></i>Heal
+                    </button>
+                    <button class="btn btn-outline-info" onclick="viewBotVision('${botName}')">
+                        <i class="fas fa-eye me-2"></i>View Vision
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function openCommandModal(botName) {
+    document.getElementById('modal-bot-name').textContent = botName;
+    document.getElementById('modal-command-input').value = `${botName}, `;
+    document.getElementById('modal-command-input').focus();
+    
+    const modal = new bootstrap.Modal(document.getElementById('botCommandModal'));
+    modal.show();
+}
+
+function setupCommandTypeHandler() {
+    document.getElementById('command-type').addEventListener('change', function() {
+        const commandType = this.value;
+        const paramsDiv = document.getElementById('command-parameters');
+        
+        let html = '';
+        
+        switch(commandType) {
+            case 'mining':
+                html = `
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Resource Type</label>
+                            <select class="form-select" id="mining-resource">
+                                <option value="iron_ore">Iron Ore</option>
+                                <option value="coal">Coal</option>
+                                <option value="diamond">Diamond</option>
+                                <option value="gold_ore">Gold Ore</option>
+                                <option value="stone">Stone</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="mining-quantity" value="10" min="1" max="100">
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'building':
+                html = `
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Structure Type</label>
+                            <select class="form-select" id="building-structure">
+                                <option value="house">House</option>
+                                <option value="tower">Tower</option>
+                                <option value="bridge">Bridge</option>
+                                <option value="wall">Wall</option>
+                                <option value="farm">Farm</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Size</label>
+                            <input type="number" class="form-control" id="building-size" value="5" min="1" max="20">
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'movement':
+                html = `
+                    <div class="row">
+                        <div class="col-4">
+                            <label class="form-label">X Coordinate</label>
+                            <input type="number" class="form-control" id="move-x" placeholder="X">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Y Coordinate</label>
+                            <input type="number" class="form-control" id="move-y" placeholder="Y">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Z Coordinate</label>
+                            <input type="number" class="form-control" id="move-z" placeholder="Z">
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'collection':
+                html = `
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Item Type</label>
+                            <select class="form-select" id="collect-item">
+                                <option value="wood">Wood</option>
+                                <option value="stone">Stone</option>
+                                <option value="food">Food</option>
+                                <option value="water">Water</option>
+                                <option value="flowers">Flowers</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Search Radius</label>
+                            <input type="number" class="form-control" id="collect-radius" value="50" min="10" max="200">
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'exploration':
+                html = `
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Direction</label>
+                            <select class="form-select" id="explore-direction">
+                                <option value="north">North</option>
+                                <option value="south">South</option>
+                                <option value="east">East</option>
+                                <option value="west">West</option>
+                                <option value="random">Random</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Distance</label>
+                            <input type="number" class="form-control" id="explore-distance" value="100" min="10" max="500">
+                        </div>
+                    </div>
+                `;
+                break;
+        }
+        
+        paramsDiv.innerHTML = html;
+    });
+}
+
+function executeBotCommand() {
+    const botName = document.getElementById('modal-bot-name').textContent;
+    const commandType = document.getElementById('command-type').value;
+    const customCommand = document.getElementById('modal-command-input').value;
+    const priority = document.getElementById('command-priority').value;
+    
+    let command = customCommand;
+    
+    // Generate command based on type and parameters
+    if (commandType !== 'custom') {
+        command = generateCommandFromType(botName, commandType);
+    }
+    
+    if (!command) {
+        showNotification('Please enter a valid command', 'error');
+        return;
+    }
+    
+    // Send command
+    fetch('/api/command', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command: command })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('✅ Command executed successfully!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('botCommandModal')).hide();
+            loadBotData();
+        } else {
+            showNotification('❌ Command failed: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Command failed: ' + error.message, 'error');
+    });
+}
+
+function generateCommandFromType(botName, commandType) {
+    switch(commandType) {
+        case 'mining':
+            const resource = document.getElementById('mining-resource')?.value || 'iron_ore';
+            const quantity = document.getElementById('mining-quantity')?.value || '10';
+            return `${botName}, mine ${quantity} ${resource}`;
+            
+        case 'building':
+            const structure = document.getElementById('building-structure')?.value || 'house';
+            const size = document.getElementById('building-size')?.value || '5';
+            return `${botName}, build a ${size}x${size} ${structure}`;
+            
+        case 'movement':
+            const x = document.getElementById('move-x')?.value;
+            const y = document.getElementById('move-y')?.value;
+            const z = document.getElementById('move-z')?.value;
+            if (x && y && z) {
+                return `${botName}, go to coordinates ${x} ${y} ${z}`;
+            }
+            break;
+            
+        case 'collection':
+            const item = document.getElementById('collect-item')?.value || 'wood';
+            const radius = document.getElementById('collect-radius')?.value || '50';
+            return `${botName}, collect ${item} within ${radius} blocks`;
+            
+        case 'exploration':
+            const direction = document.getElementById('explore-direction')?.value || 'north';
+            const distance = document.getElementById('explore-distance')?.value || '100';
+            return `${botName}, explore ${direction} for ${distance} blocks`;
+    }
+    
+    return null;
+}
+
+function createNewBot() {
+    const modal = new bootstrap.Modal(document.getElementById('createBotModal'));
+    modal.show();
+}
+
+function createBot() {
+    const name = document.getElementById('new-bot-name').value;
+    const type = document.getElementById('new-bot-type').value;
+    const team = document.getElementById('new-bot-team').value;
+    const x = parseInt(document.getElementById('new-bot-x').value);
+    const y = parseInt(document.getElementById('new-bot-y').value);
+    const z = parseInt(document.getElementById('new-bot-z').value);
+    
+    if (!name) {
+        showNotification('Please enter a bot name', 'error');
+        return;
+    }
+    
+    // For now, just show a success message
+    // In a real implementation, this would create the bot
+    showNotification(`Bot ${name} created successfully!`, 'success');
+    bootstrap.Modal.getInstance(document.getElementById('createBotModal')).hide();
+    
+    // Clear form
+    document.getElementById('new-bot-name').value = '';
+    document.getElementById('new-bot-type').value = 'general';
+    document.getElementById('new-bot-team').value = 'unassigned';
+    document.getElementById('new-bot-x').value = '0';
+    document.getElementById('new-bot-y').value = '64';
+    document.getElementById('new-bot-z').value = '0';
+}
+
+function teleportBot(botName) {
+    const x = prompt(`Enter X coordinate for ${botName}:`, '0');
+    const y = prompt(`Enter Y coordinate for ${botName}:`, '64');
+    const z = prompt(`Enter Z coordinate for ${botName}:`, '0');
+    
+    if (x !== null && y !== null && z !== null) {
+        const command = `${botName}, teleport to ${x} ${y} ${z}`;
+        executeCustomCommand(command);
+    }
+}
+
+function healBot(botName) {
+    const command = `${botName}, heal immediately`;
+    executeCustomCommand(command);
+}
+
+function viewBotVision(botName) {
+    // This would open a modal showing the bot's current vision
+    showNotification(`Viewing ${botName}'s vision...`, 'info');
+}
+
+function executeCustomCommand(command) {
+    fetch('/api/command', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command: command })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('✅ Command executed successfully!', 'success');
+            loadBotData();
+        } else {
+            showNotification('❌ Command failed: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Command failed: ' + error.message, 'error');
+    });
+}
+
+function refreshBotData() {
+    loadBotData();
+    showNotification('Bot data refreshed!', 'success');
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Listen for real-time updates
+socket.on('bot_update', function(data) {
+    if (data.bot_name && botData[data.bot_name]) {
+        // Update specific bot data
+        botData[data.bot_name] = data.vision;
+        
+        // Refresh display if this bot is selected
+        if (selectedBot === data.bot_name) {
+            loadBotDetails(data.bot_name);
+        }
+        
+        // Update bot list
+        updateBotList(botData);
+    }
+});
+</script>
+{% endblock %}

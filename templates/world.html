@@ -1,0 +1,637 @@
+{% extends "base.html" %}
+
+{% block title %}World Map - Bot Vision Commander{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1><i class="fas fa-globe me-2"></i>World Exploration</h1>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="refreshWorldData()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+                <button class="btn btn-outline-success" onclick="exportWorldData()">
+                    <i class="fas fa-download me-1"></i>Export Map
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- World Overview -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>World Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Total Chunks Explored</label>
+                    <h4 class="text-primary" id="total-chunks">0</h4>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Block Types Found</label>
+                    <h4 class="text-success" id="total-blocks">0</h4>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Entity Types Found</label>
+                    <h4 class="text-info" id="total-entities">0</h4>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Exploration Progress</label>
+                    <div class="progress">
+                        <div class="progress-bar" id="exploration-progress" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted" id="progress-text">0% explored</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-filter me-2"></i>Map Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Show Blocks</label>
+                    <div id="block-filters">
+                        <!-- Block type filters will be loaded here -->
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Show Entities</label>
+                    <div id="entity-filters">
+                        <!-- Entity type filters will be loaded here -->
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Show Bot Positions</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="show-bots" checked>
+                        <label class="form-check-label" for="show-bots">
+                            Bot Locations
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- World Map -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-map me-2"></i>World Map</h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="zoomIn()">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="zoomOut()">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetZoom()">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="world-map-container" style="position: relative; overflow: hidden;">
+                    <canvas id="worldMap" width="800" height="600" style="border: 1px solid #ccc;"></canvas>
+                    <div class="map-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px;">
+                        <div>Zoom: <span id="zoom-level">1.0</span>x</div>
+                        <div>Center: <span id="map-center">0, 0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Resource Discovery -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-gem me-2"></i>Resource Discovery</h5>
+            </div>
+            <div class="card-body">
+                <div id="resource-discovery">
+                    <p class="text-muted text-center">Loading resource discoveries...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exploration Log -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-compass me-2"></i>Exploration Log</h5>
+            </div>
+            <div class="card-body">
+                <div id="exploration-log" style="max-height: 300px; overflow-y: auto;">
+                    <p class="text-muted text-center">Loading exploration log...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resource Details Modal -->
+<div class="modal fade" id="resourceDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resource Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resource-details-content">
+                    <!-- Resource details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendBotsToResource()">Send Bots</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let worldData = {};
+let mapCanvas, mapCtx;
+let zoomLevel = 1.0;
+let mapCenter = { x: 0, z: 0 };
+let mapOffset = { x: 0, z: 0 };
+let isDragging = false;
+let lastMousePos = { x: 0, y: 0 };
+
+// Initialize page on load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMap();
+    loadWorldData();
+    setupMapControls();
+});
+
+function initializeMap() {
+    mapCanvas = document.getElementById('worldMap');
+    mapCtx = mapCanvas.getContext('2d');
+    
+    // Set canvas size
+    mapCanvas.width = 800;
+    mapCanvas.height = 600;
+    
+    // Enable mouse events
+    mapCanvas.addEventListener('mousedown', startDrag);
+    mapCanvas.addEventListener('mousemove', drag);
+    mapCanvas.addEventListener('mouseup', endDrag);
+    mapCanvas.addEventListener('wheel', handleZoom);
+    
+    // Initial render
+    renderMap();
+}
+
+function setupMapControls() {
+    // Block filters
+    document.getElementById('show-bots').addEventListener('change', function() {
+        renderMap();
+    });
+}
+
+function loadWorldData() {
+    fetch('/api/world')
+        .then(response => response.json())
+        .then(data => {
+            worldData = data;
+            updateWorldStats(data);
+            updateFilters(data);
+            renderMap();
+        })
+        .catch(error => console.error('Error loading world data:', error));
+    
+    // Load bot positions
+    fetch('/api/bots')
+        .then(response => response.json())
+        .then(bots => {
+            worldData.bots = bots;
+            renderMap();
+        })
+        .catch(error => console.error('Error loading bot data:', error));
+}
+
+function updateWorldStats(data) {
+    const totalChunks = Object.keys(data.blocks || {}).length;
+    const totalBlocks = new Set([].concat(...Object.values(data.blocks || {}))).size;
+    const totalEntities = new Set([].concat(...Object.values(data.entities || {}))).size;
+    
+    document.getElementById('total-chunks').textContent = totalChunks;
+    document.getElementById('total-blocks').textContent = totalBlocks;
+    document.getElementById('total-entities').textContent = totalEntities;
+    
+    // Calculate exploration progress (assuming a 100x100 world)
+    const maxChunks = 100;
+    const progress = Math.min((totalChunks / maxChunks) * 100, 100);
+    document.getElementById('exploration-progress').style.width = progress + '%';
+    document.getElementById('progress-text').textContent = `${progress.toFixed(1)}% explored`;
+}
+
+function updateFilters(data) {
+    // Block type filters
+    const blockTypes = new Set([].concat(...Object.values(data.blocks || {})));
+    const blockFiltersDiv = document.getElementById('block-filters');
+    let blockHtml = '';
+    
+    blockTypes.forEach(blockType => {
+        blockHtml += `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="filter-${blockType}" value="${blockType}" checked>
+                <label class="form-check-label" for="filter-${blockType}">
+                    ${blockType}
+                </label>
+            </div>
+        `;
+    });
+    
+    blockFiltersDiv.innerHTML = blockHtml;
+    
+    // Entity type filters
+    const entityTypes = new Set([].concat(...Object.values(data.entities || {})));
+    const entityFiltersDiv = document.getElementById('entity-filters');
+    let entityHtml = '';
+    
+    entityTypes.forEach(entityType => {
+        entityHtml += `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="filter-${entityType}" value="${entityType}" checked>
+                <label class="form-check-label" for="filter-${entityType}">
+                    ${entityType}
+                </label>
+            </div>
+        `;
+    });
+    
+    entityFiltersDiv.innerHTML = entityHtml;
+    
+    // Add event listeners to filters
+    document.querySelectorAll('#block-filters input, #entity-filters input').forEach(checkbox => {
+        checkbox.addEventListener('change', renderMap);
+    });
+}
+
+function renderMap() {
+    if (!mapCtx) return;
+    
+    // Clear canvas
+    mapCtx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+    
+    // Apply zoom and offset
+    mapCtx.save();
+    mapCtx.translate(mapOffset.x, mapOffset.z);
+    mapCtx.scale(zoomLevel, zoomLevel);
+    
+    // Draw grid
+    drawGrid();
+    
+    // Draw chunks
+    drawChunks();
+    
+    // Draw entities
+    drawEntities();
+    
+    // Draw bot positions
+    if (document.getElementById('show-bots').checked) {
+        drawBotPositions();
+    }
+    
+    mapCtx.restore();
+    
+    // Update overlay
+    updateMapOverlay();
+}
+
+function drawGrid() {
+    const gridSize = 10;
+    const gridColor = '#e0e0e0';
+    
+    mapCtx.strokeStyle = gridColor;
+    mapCtx.lineWidth = 1;
+    
+    // Draw vertical lines
+    for (let x = -50; x <= 50; x += gridSize) {
+        mapCtx.beginPath();
+        mapCtx.moveTo(x * 10, -500);
+        mapCtx.lineTo(x * 10, 500);
+        mapCtx.stroke();
+    }
+    
+    // Draw horizontal lines
+    for (let z = -50; z <= 50; z += gridSize) {
+        mapCtx.beginPath();
+        mapCtx.moveTo(-500, z * 10);
+        mapCtx.lineTo(500, z * 10);
+        mapCtx.stroke();
+    }
+}
+
+function drawChunks() {
+    if (!worldData.blocks) return;
+    
+    Object.entries(worldData.blocks).forEach(([chunkKey, blockTypes]) => {
+        const [chunkX, chunkZ] = chunkKey.split(',').map(Number);
+        const chunkWorldX = chunkX * 10;
+        const chunkWorldZ = chunkZ * 10;
+        
+        // Check if any block types are visible
+        const visibleBlocks = blockTypes.filter(blockType => {
+            const checkbox = document.getElementById(`filter-${blockType}`);
+            return checkbox && checkbox.checked;
+        });
+        
+        if (visibleBlocks.length > 0) {
+            // Draw chunk
+            mapCtx.fillStyle = getChunkColor(visibleBlocks);
+            mapCtx.fillRect(chunkWorldX, chunkWorldZ, 10, 10);
+            
+            // Draw chunk border
+            mapCtx.strokeStyle = '#333';
+            mapCtx.lineWidth = 1;
+            mapCtx.strokeRect(chunkWorldX, chunkWorldZ, 10, 10);
+            
+            // Add click handler for chunk details
+            addChunkClickHandler(chunkWorldX, chunkWorldZ, chunkKey, visibleBlocks);
+        }
+    });
+}
+
+function drawEntities() {
+    if (!worldData.entities) return;
+    
+    Object.entries(worldData.entities).forEach(([chunkKey, entityTypes]) => {
+        const [chunkX, chunkZ] = chunkKey.split(',').map(Number);
+        const chunkWorldX = chunkX * 10;
+        const chunkWorldZ = chunkZ * 10;
+        
+        entityTypes.forEach(entityType => {
+            const checkbox = document.getElementById(`filter-${entityType}`);
+            if (checkbox && checkbox.checked) {
+                // Draw entity marker
+                mapCtx.fillStyle = getEntityColor(entityType);
+                mapCtx.beginPath();
+                mapCtx.arc(chunkWorldX + 5, chunkWorldZ + 5, 2, 0, 2 * Math.PI);
+                mapCtx.fill();
+            }
+        });
+    });
+}
+
+function drawBotPositions() {
+    if (!worldData.bots) return;
+    
+    Object.entries(worldData.bots).forEach(([botName, bot]) => {
+        const [x, y, z] = bot.position;
+        
+        // Convert world coordinates to map coordinates
+        const mapX = Math.floor(x / 10) * 10;
+        const mapZ = Math.floor(z / 10) * 10;
+        
+        // Draw bot marker
+        mapCtx.fillStyle = '#ff0000';
+        mapCtx.beginPath();
+        mapCtx.arc(mapX + 5, mapZ + 5, 3, 0, 2 * Math.PI);
+        mapCtx.fill();
+        
+        // Draw bot name
+        mapCtx.fillStyle = '#000';
+        mapCtx.font = '10px Arial';
+        mapCtx.fillText(botName, mapX + 5, mapZ - 5);
+    });
+}
+
+function getChunkColor(blockTypes) {
+    // Determine color based on most common block type
+    const blockCounts = {};
+    blockTypes.forEach(block => {
+        blockCounts[block] = (blockCounts[block] || 0) + 1;
+    });
+    
+    const mostCommon = Object.entries(blockCounts)
+        .sort(([,a], [,b]) => b - a)[0]?.[0];
+    
+    const colors = {
+        'stone': '#808080',
+        'dirt': '#8B4513',
+        'grass': '#90EE90',
+        'tree': '#228B22',
+        'water': '#4169E1',
+        'sand': '#F4A460',
+        'coal': '#2F4F4F',
+        'iron_ore': '#696969',
+        'gold_ore': '#FFD700',
+        'diamond': '#00CED1'
+    };
+    
+    return colors[mostCommon] || '#CCCCCC';
+}
+
+function getEntityColor(entityType) {
+    const colors = {
+        'zombie': '#8B0000',
+        'skeleton': '#F5F5DC',
+        'creeper': '#228B22',
+        'spider': '#8B4513',
+        'cow': '#8B4513',
+        'pig': '#FFB6C1',
+        'chicken': '#FFD700',
+        'villager': '#FFA500'
+    };
+    
+    return colors[entityType] || '#FF69B4';
+}
+
+function addChunkClickHandler(x, z, chunkKey, blockTypes) {
+    // This would add click handlers to chunks
+    // For now, we'll just store the data for potential use
+}
+
+function startDrag(e) {
+    isDragging = true;
+    lastMousePos = { x: e.clientX, y: e.clientY };
+}
+
+function drag(e) {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - lastMousePos.x;
+    const deltaY = e.clientY - lastMousePos.y;
+    
+    mapOffset.x += deltaX;
+    mapOffset.z += deltaY;
+    
+    lastMousePos = { x: e.clientX, y: e.clientY };
+    
+    renderMap();
+}
+
+function endDrag() {
+    isDragging = false;
+}
+
+function handleZoom(e) {
+    e.preventDefault();
+    
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    zoomLevel = Math.max(0.1, Math.min(5.0, zoomLevel * zoomFactor));
+    
+    renderMap();
+}
+
+function zoomIn() {
+    zoomLevel = Math.min(5.0, zoomLevel * 1.2);
+    renderMap();
+}
+
+function zoomOut() {
+    zoomLevel = Math.max(0.1, zoomLevel / 1.2);
+    renderMap();
+}
+
+function resetZoom() {
+    zoomLevel = 1.0;
+    mapOffset = { x: 0, z: 0 };
+    renderMap();
+}
+
+function updateMapOverlay() {
+    document.getElementById('zoom-level').textContent = zoomLevel.toFixed(1);
+    document.getElementById('map-center').textContent = `${Math.round(-mapOffset.x / zoomLevel)}, ${Math.round(-mapOffset.z / zoomLevel)}`;
+}
+
+function refreshWorldData() {
+    loadWorldData();
+    showNotification('World data refreshed!', 'success');
+}
+
+function exportWorldData() {
+    const dataStr = JSON.stringify(worldData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `world_map_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    link.click();
+    
+    showNotification('World map exported successfully!', 'success');
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Listen for real-time updates
+socket.on('bot_update', function(data) {
+    if (data.all_bots) {
+        worldData.bots = data.all_bots;
+        renderMap();
+    }
+});
+
+// Update resource discovery and exploration log
+function updateResourceDiscovery() {
+    if (!worldData.blocks) return;
+    
+    const discoveryDiv = document.getElementById('resource-discovery');
+    let html = '';
+    
+    // Group discoveries by type
+    const discoveries = {};
+    Object.entries(worldData.blocks).forEach(([chunkKey, blockTypes]) => {
+        blockTypes.forEach(blockType => {
+            if (!discoveries[blockType]) {
+                discoveries[blockType] = [];
+            }
+            discoveries[blockType].push(chunkKey);
+        });
+    });
+    
+    // Display discoveries
+    Object.entries(discoveries).forEach(([blockType, chunks]) => {
+        html += `
+            <div class="mb-3">
+                <h6>${blockType}</h6>
+                <p class="text-muted">Found in ${chunks.length} chunks</p>
+                <div class="d-flex flex-wrap">
+                    ${chunks.slice(0, 5).map(chunk => 
+                        `<span class="badge bg-primary me-1 mb-1">${chunk}</span>`
+                    ).join('')}
+                    ${chunks.length > 5 ? `<span class="badge bg-secondary">+${chunks.length - 5} more</span>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    discoveryDiv.innerHTML = html || '<p class="text-muted text-center">No resources discovered yet</p>';
+}
+
+function updateExplorationLog() {
+    const logDiv = document.getElementById('exploration-log');
+    
+    // Generate exploration log entries
+    const logEntries = [];
+    
+    if (worldData.bots) {
+        Object.entries(worldData.bots).forEach(([botName, bot]) => {
+            logEntries.push({
+                time: new Date().toLocaleTimeString(),
+                bot: botName,
+                action: `Explored area around ${bot.position[0].toFixed(0)}, ${bot.position[2].toFixed(0)}`,
+                discoveries: bot.nearby_blocks.length + ' blocks, ' + bot.nearby_entities.length + ' entities'
+            });
+        });
+    }
+    
+    // Display log entries
+    let html = '';
+    logEntries.slice(-10).reverse().forEach(entry => {
+        html += `
+            <div class="border-bottom pb-2 mb-2">
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">${entry.time}</small>
+                    <span class="badge bg-info">${entry.bot}</span>
+                </div>
+                <div>${entry.action}</div>
+                <small class="text-muted">Discovered: ${entry.discoveries}</small>
+            </div>
+        `;
+    });
+    
+    logDiv.innerHTML = html || '<p class="text-muted text-center">No exploration activity yet</p>';
+}
+
+// Update displays when world data changes
+function updateDisplays() {
+    updateResourceDiscovery();
+    updateExplorationLog();
+}
+
+// Call updateDisplays after loading world data
+setTimeout(updateDisplays, 1000);
+</script>
+{% endblock %}
