@@ -24,6 +24,16 @@ except ImportError:
     AI_SYSTEM_AVAILABLE = False
     print("Warning: AI commands system not available")
 
+# Import our new management systems
+try:
+    from server_manager import ServerManager
+    from inventory_manager import InventoryManager
+    from command_handler import CommandHandler
+    MANAGEMENT_SYSTEMS_AVAILABLE = True
+except ImportError:
+    MANAGEMENT_SYSTEMS_AVAILABLE = False
+    print("Warning: Management systems not available")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,6 +57,26 @@ class BotManager:
     def __init__(self):
         self.bots = {}
         self.bot_ips = {}
+        
+        # Initialize management systems
+        self.server_manager = None
+        self.inventory_manager = None
+        self.command_handler = None
+        
+        if MANAGEMENT_SYSTEMS_AVAILABLE:
+            try:
+                self.server_manager = ServerManager()
+                self.inventory_manager = InventoryManager()
+                self.command_handler = CommandHandler()
+                
+                # Link the systems together
+                self.command_handler.set_server_manager(self.server_manager)
+                self.command_handler.set_inventory_manager(self.inventory_manager)
+                
+                logger.info("Management systems initialized successfully")
+            except Exception as e:
+                logger.error(f"Error initializing management systems: {e}")
+        
         self.initialize_bots()
     
     def initialize_bots(self):
@@ -163,6 +193,42 @@ class BotManager:
             new_port = 8000 + hash(bot_id) % 1000
             self.bot_ips[bot_id] = {'ip': new_ip, 'port': new_port}
             return {"success": True, "message": f"Mock IP rotated for {bot_id}"}
+    
+    def cleanup(self):
+        """Cleanup resources"""
+        logger.info("Cleaning up Bot Manager...")
+        
+        # Cleanup management systems
+        if self.server_manager:
+            try:
+                self.server_manager.cleanup()
+                logger.info("Server Manager cleaned up")
+            except Exception as e:
+                logger.error(f"Error cleaning up Server Manager: {e}")
+        
+        if self.inventory_manager:
+            try:
+                self.inventory_manager.cleanup()
+                logger.info("Inventory Manager cleaned up")
+            except Exception as e:
+                logger.error(f"Error cleaning up Inventory Manager: {e}")
+        
+        if self.command_handler:
+            try:
+                self.command_handler.cleanup()
+                logger.info("Command Handler cleaned up")
+            except Exception as e:
+                logger.error(f"Error cleaning up Command Handler: {e}")
+        
+        # Cleanup AI systems if available
+        if AI_SYSTEM_AVAILABLE and hasattr(self, 'ip_manager'):
+            try:
+                self.ip_manager.cleanup()
+                logger.info("IP Manager cleaned up")
+            except Exception as e:
+                logger.error(f"Error cleaning up IP Manager: {e}")
+        
+        logger.info("Bot Manager cleanup completed")
 
 # Initialize bot manager
 bot_manager = BotManager()
@@ -272,13 +338,43 @@ def restart_bot(bot_id):
 @app.route('/api/system/info')
 def get_system_info():
     """API endpoint to get system information"""
-    return jsonify({
+    system_info = {
         "current_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "uptime": "2h 15m",  # Mock uptime
         "active_connections": len(bot_manager.bots) if bot_manager else 0,
         "system_status": "operational",
-        "ai_system_available": AI_SYSTEM_AVAILABLE
-    })
+        "ai_system_available": AI_SYSTEM_AVAILABLE,
+        "management_systems_available": MANAGEMENT_SYSTEMS_AVAILABLE
+    }
+    
+    # Add server manager info if available
+    if bot_manager and bot_manager.server_manager:
+        server_status = bot_manager.server_manager.get_server_status()
+        system_info.update({
+            "server_status": server_status,
+            "total_players": server_status.get("total_players", 0),
+            "online_players": server_status.get("online_players", 0),
+            "regions": server_status.get("regions", 0)
+        })
+    
+    # Add inventory manager info if available
+    if bot_manager and bot_manager.inventory_manager:
+        market_info = bot_manager.inventory_manager.get_market_info()
+        system_info.update({
+            "total_items": market_info.get("total_items", 0),
+            "total_transactions": market_info.get("total_transactions", 0),
+            "currency": market_info.get("currency", "Unknown")
+        })
+    
+    # Add command handler info if available
+    if bot_manager and bot_manager.command_handler:
+        commands = bot_manager.command_handler.get_all_commands()
+        system_info.update({
+            "total_commands": len(commands),
+            "command_categories": list(bot_manager.command_handler.categories.keys())
+        })
+    
+    return jsonify(system_info)
 
 @app.route('/api/chat/message', methods=['POST'])
 def process_chat_message():
@@ -313,6 +409,254 @@ def process_chat_message():
         "timestamp": datetime.now().isoformat(),
         "user": user
     })
+
+# New Management System API Endpoints
+
+@app.route('/api/players/list')
+def get_players_list():
+    """API endpoint to get list of all players"""
+    if bot_manager and bot_manager.server_manager:
+        online_players = bot_manager.server_manager.get_online_players()
+        all_players = bot_manager.server_manager.get_player_statistics()
+        return jsonify({
+            "online_players": online_players,
+            "statistics": all_players
+        })
+    return jsonify({"error": "Server manager not available"}), 500
+
+@app.route('/api/players/<player_id>/info')
+def get_player_info(player_id):
+    """API endpoint to get player information"""
+    if bot_manager and bot_manager.server_manager:
+        player = bot_manager.server_manager.get_player(player_id)
+        if player:
+            return jsonify({
+                "player": {
+                    "uuid": player.uuid,
+                    "username": player.username,
+                    "display_name": player.display_name,
+                    "is_bot": player.is_bot,
+                    "coordinates": player.coordinates,
+                    "dimension": player.dimension,
+                    "health": player.health,
+                    "food": player.food,
+                    "level": player.level,
+                    "team": player.team
+                }
+            })
+        return jsonify({"error": "Player not found"}), 404
+    return jsonify({"error": "Server manager not available"}), 500
+
+@app.route('/api/players/<player_id>/coordinates', methods=['POST'])
+def update_player_coordinates(player_id):
+    """API endpoint to update player coordinates"""
+    if bot_manager and bot_manager.server_manager:
+        data = request.get_json()
+        x = data.get('x')
+        y = data.get('y')
+        z = data.get('z')
+        dimension = data.get('dimension', 'overworld')
+        
+        if x is not None and y is not None and z is not None:
+            bot_manager.server_manager.update_player_coordinates(player_id, (x, y, z), dimension)
+            return jsonify({
+                "success": True,
+                "message": f"Updated coordinates for {player_id} to ({x}, {y}, {z})"
+            })
+        else:
+            return jsonify({"error": "Missing coordinates"}), 400
+    return jsonify({"error": "Server manager not available"}), 500
+
+@app.route('/api/inventory/<player_id>')
+def get_player_inventory(player_id):
+    """API endpoint to get player inventory"""
+    if bot_manager and bot_manager.inventory_manager:
+        inventory = bot_manager.inventory_manager.get_inventory_contents(player_id)
+        balance = bot_manager.inventory_manager.get_balance(player_id)
+        return jsonify({
+            "inventory": inventory,
+            "balance": balance
+        })
+    return jsonify({"error": "Inventory manager not available"}), 500
+
+@app.route('/api/inventory/<player_id>/add', methods=['POST'])
+def add_item_to_inventory(player_id):
+    """API endpoint to add item to player inventory"""
+    if bot_manager and bot_manager.inventory_manager:
+        data = request.get_json()
+        item_id = data.get('item_id')
+        quantity = data.get('quantity', 1)
+        slot_id = data.get('slot_id')
+        durability = data.get('durability')
+        
+        if item_id:
+            success = bot_manager.inventory_manager.add_item_to_inventory(
+                player_id, item_id, quantity, slot_id, durability
+            )
+            if success:
+                return jsonify({
+                    "success": True,
+                    "message": f"Added {quantity}x {item_id} to {player_id}'s inventory"
+                })
+            else:
+                return jsonify({"error": "Failed to add item"}), 500
+        else:
+            return jsonify({"error": "Missing item_id"}), 400
+    return jsonify({"error": "Inventory manager not available"}), 500
+
+@app.route('/api/inventory/<player_id>/remove', methods=['POST'])
+def remove_item_from_inventory(player_id):
+    """API endpoint to remove item from player inventory"""
+    if bot_manager and bot_manager.inventory_manager:
+        data = request.get_json()
+        item_id = data.get('item_id')
+        quantity = data.get('quantity', 1)
+        slot_id = data.get('slot_id')
+        
+        if item_id:
+            success = bot_manager.inventory_manager.remove_item_from_inventory(
+                player_id, item_id, quantity, slot_id
+            )
+            if success:
+                return jsonify({
+                    "success": True,
+                    "message": f"Removed {quantity}x {item_id} from {player_id}'s inventory"
+                })
+            else:
+                return jsonify({"error": "Failed to remove item"}), 500
+        else:
+            return jsonify({"error": "Missing item_id"}), 400
+    return jsonify({"error": "Inventory manager not available"}), 500
+
+@app.route('/api/economy/<player_id>/balance')
+def get_player_balance(player_id):
+    """API endpoint to get player balance"""
+    if bot_manager and bot_manager.inventory_manager:
+        balance = bot_manager.inventory_manager.get_balance(player_id)
+        stats = bot_manager.inventory_manager.get_player_statistics(player_id)
+        return jsonify({
+            "balance": balance,
+            "statistics": stats
+        })
+    return jsonify({"error": "Inventory manager not available"}), 500
+
+@app.route('/api/economy/<player_id>/add', methods=['POST'])
+def add_money_to_player(player_id):
+    """API endpoint to add money to player"""
+    if bot_manager and bot_manager.inventory_manager:
+        data = request.get_json()
+        amount = data.get('amount')
+        reason = data.get('reason', 'deposit')
+        
+        if amount is not None:
+            success = bot_manager.inventory_manager.add_money(player_id, amount, reason)
+            if success:
+                return jsonify({
+                    "success": True,
+                    "message": f"Added {amount} coins to {player_id}"
+                })
+            else:
+                return jsonify({"error": "Failed to add money"}), 500
+        else:
+            return jsonify({"error": "Missing amount"}), 400
+    return jsonify({"error": "Inventory manager not available"}), 500
+
+@app.route('/api/economy/transfer', methods=['POST'])
+def transfer_money():
+    """API endpoint to transfer money between players"""
+    if bot_manager and bot_manager.inventory_manager:
+        data = request.get_json()
+        sender = data.get('sender')
+        receiver = data.get('receiver')
+        amount = data.get('amount')
+        reason = data.get('reason', 'transfer')
+        
+        if sender and receiver and amount is not None:
+            success = bot_manager.inventory_manager.transfer_money(sender, receiver, amount, reason)
+            if success:
+                return jsonify({
+                    "success": True,
+                    "message": f"Transferred {amount} coins from {sender} to {receiver}"
+                })
+            else:
+                return jsonify({"error": "Transfer failed"}), 500
+        else:
+            return jsonify({"error": "Missing sender, receiver, or amount"}), 400
+    return jsonify({"error": "Inventory manager not available"}), 500
+
+@app.route('/api/commands/list')
+def get_commands_list():
+    """API endpoint to get list of all commands"""
+    if bot_manager and bot_manager.command_handler:
+        commands = bot_manager.command_handler.get_all_commands()
+        categories = bot_manager.command_handler.categories
+        return jsonify({
+            "commands": commands,
+            "categories": categories
+        })
+    return jsonify({"error": "Command handler not available"}), 500
+
+@app.route('/api/commands/<command_name>/info')
+def get_command_info(command_name):
+    """API endpoint to get command information"""
+    if bot_manager and bot_manager.command_handler:
+        command_info = bot_manager.command_handler.get_command_info(command_name)
+        if command_info:
+            return jsonify({"command": command_info})
+        return jsonify({"error": "Command not found"}), 404
+    return jsonify({"error": "Command handler not available"}), 500
+
+@app.route('/api/commands/execute', methods=['POST'])
+def execute_command():
+    """API endpoint to execute a command"""
+    if bot_manager and bot_manager.command_handler:
+        data = request.get_json()
+        player_uuid = data.get('player_uuid')
+        player_name = data.get('player_name', 'Unknown')
+        coordinates = data.get('coordinates', (0, 64, 0))
+        dimension = data.get('dimension', 'overworld')
+        gamemode = data.get('gamemode', 'survival')
+        permissions = data.get('permissions', [])
+        command_input = data.get('command')
+        
+        if player_uuid and command_input:
+            result = bot_manager.command_handler.execute_command(
+                player_uuid, player_name, coordinates, dimension, gamemode, permissions, command_input
+            )
+            return jsonify({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+                "error": result.error,
+                "execution_time": result.execution_time
+            })
+        else:
+            return jsonify({"error": "Missing player_uuid or command"}), 400
+    return jsonify({"error": "Command handler not available"}), 500
+
+@app.route('/api/warps/list')
+def get_warps_list():
+    """API endpoint to get list of all warps"""
+    if bot_manager and bot_manager.command_handler:
+        warps = bot_manager.command_handler.get_warps()
+        return jsonify({"warps": warps})
+    return jsonify({"error": "Command handler not available"}), 500
+
+@app.route('/api/homes/<player_id>')
+def get_player_homes(player_id):
+    """API endpoint to get player homes"""
+    if bot_manager and bot_manager.command_handler:
+        homes = bot_manager.command_handler.get_player_homes(player_id)
+        return jsonify({"homes": homes})
+    return jsonify({"error": "Command handler not available"}), 500
+
+@app.route('/api/market/info')
+def get_market_info():
+    """API endpoint to get market information"""
+    if bot_manager and bot_manager.inventory_manager:
+        market_info = bot_manager.inventory_manager.get_market_info()
+        return jsonify(market_info)
+    return jsonify({"error": "Inventory manager not available"}), 500
 
 # SocketIO events for real-time updates
 @socketio.on('connect')
@@ -375,12 +719,36 @@ update_thread = threading.Thread(target=broadcast_bot_updates, daemon=True)
 update_thread.start()
 
 if __name__ == '__main__':
+    import signal
+    
+    def signal_handler(signum, frame):
+        """Handle shutdown signals"""
+        logger.info(f"Received signal {signum}, shutting down...")
+        if 'bot_manager' in globals():
+            bot_manager.cleanup()
+        sys.exit(0)
+    
+    # Register signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     logger.info("Starting Minecraft Bot Hub Flask Application...")
     logger.info(f"AI System Available: {AI_SYSTEM_AVAILABLE}")
+    logger.info(f"Management Systems Available: {MANAGEMENT_SYSTEMS_AVAILABLE}")
     
     # Create templates directory if it doesn't exist
     templates_dir = Path('templates')
     templates_dir.mkdir(exist_ok=True)
     
-    # Run the application
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    try:
+        # Run the application
+        socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    except KeyboardInterrupt:
+        logger.info("Received keyboard interrupt, shutting down...")
+        if 'bot_manager' in globals():
+            bot_manager.cleanup()
+    except Exception as e:
+        logger.error(f"Application error: {e}")
+        if 'bot_manager' in globals():
+            bot_manager.cleanup()
+        sys.exit(1)
