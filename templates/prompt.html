@@ -1523,22 +1523,73 @@
             deployBtn.disabled = true;
             deployBtn.classList.add('deploying');
             
-            // Simulate deployment process
-            setTimeout(() => {
-                deployBtn.textContent = '✅ Deployed!';
-                deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+            // Create deployment data
+            const deploymentData = {
+                deployment_name: deploymentName,
+                bot_count: parseInt(botCount),
+                server_ip: serverIP,
+                server_name: serverName,
+                server_port: parseInt(serverPort),
+                bot_names: botNames.map(bot => bot.name),
+                configuration: {
+                    auto_restart: true,
+                    max_bots: 20,
+                    deployment_zone: 'main',
+                    priority: 'high'
+                }
+            };
+            
+            // Send deployment to backend
+            createDeployment(deploymentData, deployBtn, originalText, botNames);
+        }
+        
+        // Create deployment in backend
+        async function createDeployment(deploymentData, deployBtn, originalText, botNames) {
+            try {
+                const response = await fetch('/api/deployments/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(deploymentData)
+                });
                 
-                setTimeout(() => {
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Success - update button
+                    deployBtn.textContent = '✅ Deployed!';
+                    deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    
+                    // Add to chat with bot names
+                    const botNameList = botNames.map(bot => bot.name).join(', ');
+                    addMessage(`Successfully deployed ${deploymentData.bot_count} bots (${botNameList}) to ${deploymentData.server_name} (${deploymentData.server_ip}:${deploymentData.server_port})`, 'bot');
+                    
+                    // Reset button after delay
+                    setTimeout(() => {
+                        deployBtn.textContent = originalText;
+                        deployBtn.disabled = false;
+                        deployBtn.classList.remove('deploying');
+                        deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    }, 2000);
+                    
+                } else {
+                    // Error - show message and reset button
+                    alert('Deployment failed: ' + data.error);
                     deployBtn.textContent = originalText;
                     deployBtn.disabled = false;
                     deployBtn.classList.remove('deploying');
                     deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-                }, 2000);
+                }
                 
-                // Add to chat with bot names
-                const botNameList = botNames.map(bot => bot.name).join(', ');
-                addMessage(`Successfully deployed ${botCount} bots (${botNameList}) to ${serverName} (${serverIP}:${serverPort})`, 'bot');
-            }, 3000);
+            } catch (error) {
+                console.error('Deployment error:', error);
+                alert('Deployment failed. Please try again.');
+                deployBtn.textContent = originalText;
+                deployBtn.disabled = false;
+                deployBtn.classList.remove('deploying');
+                deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+            }
         }
         
         // Go Live functionality
@@ -1611,7 +1662,65 @@
             
             // Initialize bot names
             updateBotNames(4);
+            
+            // Load existing deployments
+            loadExistingDeployments();
         });
+        
+        // Load existing deployments from backend
+        async function loadExistingDeployments() {
+            try {
+                const response = await fetch('/api/deployments/list');
+                const data = await response.json();
+                
+                if (data.deployments && data.deployments.length > 0) {
+                    // Load the most recent deployment
+                    const latestDeployment = data.deployments[0];
+                    loadDeploymentToForm(latestDeployment);
+                }
+            } catch (error) {
+                console.log('No existing deployments or error loading:', error);
+            }
+        }
+        
+        // Load deployment data into form
+        function loadDeploymentToForm(deployment) {
+            if (deployment.deployment_name) {
+                document.getElementById('deploymentName').value = deployment.deployment_name;
+            }
+            if (deployment.bot_count) {
+                document.getElementById('botCount').value = deployment.bot_count;
+                document.getElementById('sliderValue').textContent = deployment.bot_count + ' bots';
+                updateBotNames(deployment.bot_count);
+            }
+            if (deployment.server_ip) {
+                document.getElementById('deploymentServerIP').value = deployment.server_ip;
+            }
+            if (deployment.server_name) {
+                document.getElementById('deploymentServerName').value = deployment.server_name;
+            }
+            if (deployment.server_port) {
+                document.getElementById('deploymentServerPort').value = deployment.server_port;
+            }
+            
+            // Load bot names if available
+            if (deployment.configuration && deployment.configuration.bot_names) {
+                loadBotNamesToForm(deployment.configuration.bot_names);
+            }
+        }
+        
+        // Load bot names into form inputs
+        function loadBotNamesToForm(botNames) {
+            const container = document.querySelector('.bot-names-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            botNames.forEach((botName, index) => {
+                const botItem = createBotNameItem(index + 1, botName);
+                container.appendChild(botItem);
+            });
+        }
         
         // Bot names management
         function updateBotNames(botCount) {

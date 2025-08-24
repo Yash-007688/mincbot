@@ -435,6 +435,11 @@ class DatabaseManager:
                 with sqlite3.connect(self.db_file) as conn:
                     cursor = conn.cursor()
                     
+                    # Prepare configuration with bot names
+                    config = deployment_data.get("configuration", {})
+                    if "bot_names" in deployment_data:
+                        config["bot_names"] = deployment_data["bot_names"]
+                    
                     cursor.execute('''
                         INSERT INTO bot_deployments (user_id, deployment_name, bot_count, server_ip, server_name, server_port, configuration)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -445,7 +450,7 @@ class DatabaseManager:
                         deployment_data["server_ip"],
                         deployment_data["server_name"],
                         deployment_data["server_port"],
-                        json.dumps(deployment_data.get("configuration", {}))
+                        json.dumps(config)
                     ))
                     
                     deployment_id = cursor.lastrowid

@@ -59,6 +59,22 @@ bot_manager = None
 action_handler = None
 ai_bots = {}
 
+def generate_default_bot_names(bot_count):
+    """Generate default bot names for deployment"""
+    gamer_names = [
+        'IronMiner', 'WoodCutter', 'StoneBreaker', 'DiamondHunter',
+        'NetherExplorer', 'EndVoyager', 'RedstoneMaster', 'Enchanter',
+        'PotionBrewer', 'Archer', 'Swordsman', 'Miner',
+        'Farmer', 'Builder', 'Explorer', 'Trader',
+        'Guardian', 'Scout', 'Navigator', 'Artisan'
+    ]
+    
+    # Return the first N names, or generate generic names if more than 20
+    if bot_count <= len(gamer_names):
+        return gamer_names[:bot_count]
+    else:
+        return [f'Bot{i}' for i in range(1, bot_count + 1)]
+
 class BotManager:
     """Manages bot instances and operations"""
     
@@ -814,6 +830,14 @@ def create_deployment():
         return jsonify({"error": "Invalid session"}), 401
     
     data = request.get_json()
+    
+    # Extract bot names from the request
+    bot_names = data.get('bot_names', [])
+    
+    # Generate default bot names if none provided
+    if not bot_names:
+        bot_names = generate_default_bot_names(data.get('bot_count', 1))
+    
     deployment_data = {
         "user_id": session.user_id,
         "deployment_name": data.get('deployment_name', 'New Deployment'),
@@ -821,6 +845,7 @@ def create_deployment():
         "server_ip": data.get('server_ip', 'localhost'),
         "server_name": data.get('server_name', 'minecraft'),
         "server_port": data.get('server_port', 25565),
+        "bot_names": bot_names,
         "configuration": data.get('configuration', {})
     }
     
@@ -880,6 +905,43 @@ def deploy_bots(deployment_id):
     except Exception as e:
         db_manager.update_deployment_status(deployment.id, "error")
         return jsonify({"error": f"Deployment failed: {str(e)}"}), 500
+
+@app.route('/api/deployments/<deployment_id>/bot-names')
+def get_deployment_bot_names(deployment_id):
+    """API endpoint to get bot names for a specific deployment"""
+    if not db_manager:
+        return jsonify({"error": "Database system not available"}), 500
+    
+    # Get user from session
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    session = db_manager.get_session(session_id)
+    if not session:
+        return jsonify({"error": "Invalid session"}), 401
+    
+    # Get deployment
+    deployment = db_manager.get_deployment_by_id(int(deployment_id))
+    if not deployment:
+        return jsonify({"error": "Deployment not found"}), 404
+    
+    # Check if user owns this deployment
+    if deployment.user_id != session.user_id:
+        return jsonify({"error": "Access denied"}), 403
+    
+    # Return bot names from deployment configuration
+    bot_names = deployment.configuration.get('bot_names', [])
+    if not bot_names:
+        # Generate default names if none stored
+        bot_names = generate_default_bot_names(deployment.bot_count)
+    
+    return jsonify({
+        "success": True,
+        "deployment_id": deployment_id,
+        "bot_names": bot_names,
+        "bot_count": deployment.bot_count
+    })
 
 @app.route('/api/deployments/<deployment_id>/stop', methods=['POST'])
 def stop_deployment(deployment_id):
