@@ -125,7 +125,7 @@ def create_directories():
 def start_socketio_eventlet(app, host, port):
     """Start with SocketIO and Eventlet"""
     try:
-        from app_production import app, socketio
+        from app_simple import app, socketio
         logger.info("✅ SocketIO app loaded successfully")
         socketio.run(app, host=host, port=port, debug=False, log_output=True)
         return True
@@ -137,7 +137,7 @@ def start_socketio_gevent(app, host, port):
     """Start with SocketIO and Gevent"""
     try:
         os.environ['SOCKETIO_ASYNC_MODE'] = 'gevent'
-        from app_production import app, socketio
+        from app_simple import app, socketio
         logger.info("✅ SocketIO app with Gevent loaded successfully")
         socketio.run(app, host=host, port=port, debug=False, log_output=True)
         return True
@@ -148,6 +148,8 @@ def start_socketio_gevent(app, host, port):
 def start_basic_flask(app, host, port):
     """Start with basic Flask (most compatible)"""
     try:
+        from app_simple import app
+        logger.info("✅ Basic Flask app loaded successfully")
         logger.info("🌐 Starting basic Flask server...")
         
         # Most basic and compatible settings - no version-specific parameters
