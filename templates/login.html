@@ -281,6 +281,13 @@
             <button type="submit" class="login-btn">LOGIN</button>
         </form>
         
+        <!-- Default credentials info -->
+        <div class="credentials-info" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0; border: 2px solid #e1e5e9;">
+            <p style="margin: 0 0 10px 0; color: #333; font-weight: 600;">🔑 Default Login Credentials:</p>
+            <p style="margin: 5px 0; color: #666;"><strong>Username:</strong> <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">yash</code></p>
+            <p style="margin: 5px 0; color: #666;"><strong>Password:</strong> <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">yash</code></p>
+        </div>
+        
         <a href="#" class="forgot-password">Forgot your password?</a>
         
         <div class="divider">
@@ -302,7 +309,7 @@
     </div>
     
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
@@ -310,15 +317,45 @@
             
             // Simple validation
             if (username && password) {
-                // Simulate login process
                 const loginBtn = document.querySelector('.login-btn');
                 loginBtn.textContent = 'LOGGING IN...';
                 loginBtn.disabled = true;
                 
-                setTimeout(() => {
-                    // Redirect to prompt page after successful login
-                    window.location.href = 'prompt.html';
-                }, 1500);
+                try {
+                    // Send login request to backend
+                    const response = await fetch('/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Show success message
+                        loginBtn.textContent = 'SUCCESS!';
+                        loginBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                        
+                        // Redirect to chat page after successful login
+                        setTimeout(() => {
+                            window.location.href = '/chat';
+                        }, 1000);
+                    } else {
+                        // Show error message
+                        alert('Login failed: ' + data.error);
+                        loginBtn.textContent = 'LOGIN';
+                        loginBtn.disabled = false;
+                        loginBtn.style.background = 'linear-gradient(135deg, #8B4513, #A0522D)';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('Login failed. Please try again.');
+                    loginBtn.textContent = 'LOGIN';
+                    loginBtn.disabled = false;
+                    loginBtn.style.background = 'linear-gradient(135deg, #8B4513, #A0522D)';
+                }
             }
         });
         

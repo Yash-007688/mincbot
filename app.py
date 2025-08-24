@@ -34,6 +34,14 @@ except ImportError:
     MANAGEMENT_SYSTEMS_AVAILABLE = False
     print("Warning: Management systems not available")
 
+# Import database system
+try:
+    from database import DatabaseManager
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
+    print("Warning: Database system not available")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -229,9 +237,27 @@ class BotManager:
                 logger.error(f"Error cleaning up IP Manager: {e}")
         
         logger.info("Bot Manager cleanup completed")
+    
+    def cleanup_database(self):
+        """Cleanup database resources"""
+        if db_manager:
+            try:
+                db_manager.cleanup()
+                logger.info("Database Manager cleaned up")
+            except Exception as e:
+                logger.error(f"Error cleaning up Database Manager: {e}")
 
-# Initialize bot manager
+# Initialize managers
 bot_manager = BotManager()
+db_manager = None
+
+if DATABASE_AVAILABLE:
+    try:
+        db_manager = DatabaseManager()
+        logger.info("Database Manager initialized successfully")
+    except Exception as e:
+        logger.error(f"Error initializing Database Manager: {e}")
+        db_manager = None
 
 # Routes
 @app.route('/')
@@ -247,7 +273,91 @@ def login():
 @app.route('/chat')
 def chat():
     """Chat/prompt page"""
-    return render_template('prompt.html')
+    # Check if user is authenticated
+    session_id = request.cookies.get('session_id')
+    if not session_id or not db_manager:
+        return redirect(url_for('login'))
+    
+    session = db_manager.get_session(session_id)
+    if not session:
+        return redirect(url_for('login'))
+    
+    return render_template('prompt.html', username=session.username)
+
+# Authentication routes
+@app.route('/auth/login', methods=['POST'])
+def auth_login():
+    """Handle user login"""
+    if not db_manager:
+        return jsonify({"error": "Database system not available"}), 500
+    
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    
+    if not username or not password:
+        return jsonify({"error": "Username and password required"}), 400
+    
+    # Authenticate user
+    user = db_manager.authenticate_user(username, password)
+    if not user:
+        return jsonify({"error": "Invalid credentials"}), 401
+    
+    # Create session
+    session_id = db_manager.create_session(
+        user.id, 
+        user.username, 
+        request.remote_addr,
+        request.headers.get('User-Agent', '')
+    )
+    
+    if not session_id:
+        return jsonify({"error": "Failed to create session"}), 500
+    
+    response = jsonify({
+        "success": True,
+        "message": "Login successful",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "role": user.role,
+            "permissions": user.permissions
+        }
+    })
+    
+    # Set session cookie
+    response.set_cookie('session_id', session_id, max_age=86400, httponly=True, secure=False)
+    return response
+
+@app.route('/auth/logout', methods=['POST'])
+def auth_logout():
+    """Handle user logout"""
+    session_id = request.cookies.get('session_id')
+    if session_id and db_manager:
+        db_manager.delete_session(session_id)
+    
+    response = jsonify({"success": True, "message": "Logout successful"})
+    response.delete_cookie('session_id')
+    return response
+
+@app.route('/auth/check')
+def auth_check():
+    """Check if user is authenticated"""
+    session_id = request.cookies.get('session_id')
+    if not session_id or not db_manager:
+        return jsonify({"authenticated": False})
+    
+    session = db_manager.get_session(session_id)
+    if not session:
+        return jsonify({"authenticated": False})
+    
+    return jsonify({
+        "authenticated": True,
+        "user": {
+            "username": session.username,
+            "session_id": session.session_id
+        }
+    })
 
 @app.route('/api/bots/status')
 def get_bot_statuses():
@@ -344,7 +454,8 @@ def get_system_info():
         "active_connections": len(bot_manager.bots) if bot_manager else 0,
         "system_status": "operational",
         "ai_system_available": AI_SYSTEM_AVAILABLE,
-        "management_systems_available": MANAGEMENT_SYSTEMS_AVAILABLE
+        "management_systems_available": MANAGEMENT_SYSTEMS_AVAILABLE,
+        "database_available": DATABASE_AVAILABLE
     }
     
     # Add server manager info if available
@@ -372,6 +483,16 @@ def get_system_info():
         system_info.update({
             "total_commands": len(commands),
             "command_categories": list(bot_manager.command_handler.categories.keys())
+        })
+    
+    # Add database info if available
+    if db_manager:
+        db_stats = db_manager.get_database_stats()
+        system_info.update({
+            "database_stats": db_stats,
+            "total_users": db_stats.get("total_users", 0),
+            "total_deployments": db_stats.get("total_deployments", 0),
+            "active_deployments": db_stats.get("active_deployments", 0)
         })
     
     return jsonify(system_info)
@@ -658,6 +779,141 @@ def get_market_info():
         return jsonify(market_info)
     return jsonify({"error": "Inventory manager not available"}), 500
 
+# Bot Deployment API Endpoints
+@app.route('/api/deployments/list')
+def get_deployments_list():
+    """API endpoint to get list of bot deployments"""
+    if not db_manager:
+        return jsonify({"error": "Database system not available"}), 500
+    
+    # Get user from session
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    session = db_manager.get_session(session_id)
+    if not session:
+        return jsonify({"error": "Invalid session"}), 401
+    
+    deployments = db_manager.get_user_deployments(session.user_id)
+    return jsonify({"deployments": [asdict(deployment) for deployment in deployments]})
+
+@app.route('/api/deployments/create', methods=['POST'])
+def create_deployment():
+    """API endpoint to create a new bot deployment"""
+    if not db_manager:
+        return jsonify({"error": "Database system not available"}), 500
+    
+    # Get user from session
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    session = db_manager.get_session(session_id)
+    if not session:
+        return jsonify({"error": "Invalid session"}), 401
+    
+    data = request.get_json()
+    deployment_data = {
+        "user_id": session.user_id,
+        "deployment_name": data.get('deployment_name', 'New Deployment'),
+        "bot_count": data.get('bot_count', 1),
+        "server_ip": data.get('server_ip', 'localhost'),
+        "server_name": data.get('server_name', 'minecraft'),
+        "server_port": data.get('server_port', 25565),
+        "configuration": data.get('configuration', {})
+    }
+    
+    deployment_id = db_manager.create_bot_deployment(deployment_data)
+    if deployment_id:
+        return jsonify({
+            "success": True,
+            "message": "Deployment created successfully",
+            "deployment_id": deployment_id
+        })
+    else:
+        return jsonify({"error": "Failed to create deployment"}), 500
+
+@app.route('/api/deployments/<deployment_id>/deploy', methods=['POST'])
+def deploy_bots(deployment_id):
+    """API endpoint to deploy bots"""
+    if not db_manager:
+        return jsonify({"error": "Database system not available"}), 500
+    
+    # Get user from session
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    session = db_manager.get_session(session_id)
+    if not session:
+        return jsonify({"error": "Invalid session"}), 401
+    
+    # Get deployment
+    deployment = db_manager.get_deployment_by_id(int(deployment_id))
+    if not deployment:
+        return jsonify({"error": "Deployment not found"}), 404
+    
+    # Check if user owns this deployment
+    if deployment.user_id != session.user_id:
+        return jsonify({"error": "Access denied"}), 403
+    
+    # Update deployment status to deploying
+    db_manager.update_deployment_status(deployment.id, "deploying")
+    
+    # Here you would integrate with your bot deployment system
+    # For now, we'll simulate deployment
+    try:
+        # Simulate bot deployment
+        bot_count = deployment.bot_count
+        server_info = f"{deployment.server_ip}:{deployment.server_port}"
+        
+        # Update status to active after successful deployment
+        db_manager.update_deployment_status(deployment.id, "active", started_at=True)
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully deployed {bot_count} bots to {server_info}",
+            "deployment": asdict(deployment)
+        })
+        
+    except Exception as e:
+        db_manager.update_deployment_status(deployment.id, "error")
+        return jsonify({"error": f"Deployment failed: {str(e)}"}), 500
+
+@app.route('/api/deployments/<deployment_id>/stop', methods=['POST'])
+def stop_deployment(deployment_id):
+    """API endpoint to stop bot deployment"""
+    if not db_manager:
+        return jsonify({"error": "Database system not available"}), 500
+    
+    # Get user from session
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    session = db_manager.get_session(session_id)
+    if not session:
+        return jsonify({"error": "Invalid session"}), 401
+    
+    # Get deployment
+    deployment = db_manager.get_deployment_by_id(int(deployment_id))
+    if not deployment:
+        return jsonify({"error": "Deployment not found"}), 404
+    
+    # Check if user owns this deployment
+    if deployment.user_id != session.user_id:
+        return jsonify({"error": "Access denied"}), 403
+    
+    # Update deployment status to stopped
+    db_manager.update_deployment_status(deployment.id, "stopped", stopped_at=True)
+    
+    return jsonify({
+        "success": True,
+        "message": "Deployment stopped successfully",
+        "deployment": asdict(deployment)
+    })
+
 # SocketIO events for real-time updates
 @socketio.on('connect')
 def handle_connect():
@@ -726,6 +982,7 @@ if __name__ == '__main__':
         logger.info(f"Received signal {signum}, shutting down...")
         if 'bot_manager' in globals():
             bot_manager.cleanup()
+            bot_manager.cleanup_database()
         sys.exit(0)
     
     # Register signal handlers
