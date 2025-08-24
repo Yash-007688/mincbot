@@ -3,9 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Bot Hub - Home</title>
+    <title>Minecraft Bot Hub - Professional Bot Management Platform</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #4a90e2;
+            --accent-color: #f39c12;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c5d6;
+            --border-color: #2d3748;
+            --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
         
         * {
             margin: 0;
@@ -14,155 +31,316 @@
         }
         
         body {
-            font-family: 'Press Start 2P', cursive;
-            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
-            color: #2F4F2F;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--text-primary);
             overflow-x: hidden;
+            line-height: 1.6;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 20px;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            padding: 80px 0 60px;
             position: relative;
+            background: linear-gradient(135deg, rgba(44, 90, 160, 0.1) 0%, rgba(74, 144, 226, 0.1) 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%232d3748" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.1;
         }
         
         .title {
-            font-size: 3rem;
-            color: #8B4513;
-            text-shadow: 4px 4px 0px #654321;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 20px;
-            animation: bounce 2s infinite;
+            position: relative;
+            z-index: 1;
         }
         
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-20px); }
-            60% { transform: translateY(-10px); }
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+            border-radius: 2px;
         }
         
         .subtitle {
-            font-size: 1.2rem;
-            color: #556B2F;
-            margin-bottom: 30px;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
         }
         
-        .minecraft-button {
-            background: #8B4513;
-            border: 4px solid #654321;
-            color: #F5DEB3;
-            padding: 15px 30px;
-            font-family: 'Press Start 2P', cursive;
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn {
+            padding: 16px 32px;
+            font-family: 'Inter', sans-serif;
             font-size: 1rem;
-            cursor: pointer;
+            font-weight: 600;
             text-decoration: none;
-            display: inline-block;
-            margin: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 4px 4px 0px #654321;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .minecraft-button:hover {
-            background: #A0522D;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 6px 6px 0px #654321;
+            box-shadow: var(--shadow-heavy);
         }
         
-        .minecraft-button:active {
-            transform: translateY(0);
-            box-shadow: 2px 2px 0px #654321;
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent-color), #e67e22);
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .features-section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 60px;
+            color: var(--text-primary);
         }
         
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
             margin-top: 40px;
         }
         
-        .grid-item {
-            background: rgba(139, 69, 19, 0.9);
-            border: 4px solid #654321;
-            padding: 30px;
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 30px;
             text-align: center;
-            border-radius: 0;
-            box-shadow: 8px 8px 0px #654321;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
         
-        .grid-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 12px 12px 0px #654321;
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
         
-        .grid-item h3 {
-            color: #F5DEB3;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-heavy);
+            border-color: var(--secondary-color);
         }
         
-        .grid-item p {
-            color: #DEB887;
-            font-size: 0.8rem;
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .feature-description {
+            color: var(--text-secondary);
             line-height: 1.6;
             margin-bottom: 20px;
         }
         
-        .floating-blocks {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+        .stats-section {
+            padding: 80px 0;
+            background: rgba(44, 90, 160, 0.05);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
         }
         
-        .block {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(45deg, #8B4513, #A0522D);
-            border: 2px solid #654321;
-            animation: float 6s ease-in-out infinite;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
         }
         
-        .block:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
-        .block:nth-child(2) { top: 20%; right: 15%; animation-delay: 1s; }
-        .block:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 2s; }
-        .block:nth-child(4) { bottom: 20%; right: 25%; animation-delay: 3s; }
-        .block:nth-child(5) { top: 50%; left: 5%; animation-delay: 4s; }
-        .block:nth-child(6) { top: 60%; right: 10%; animation-delay: 5s; }
+        .stat-item {
+            padding: 20px;
+        }
         
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        
+        .cta-description {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .footer {
+            background: var(--dark-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
             text-align: center;
-            margin-top: 60px;
-            padding: 20px;
-            color: #556B2F;
-            font-size: 0.7rem;
+        }
+        
+        .footer-content {
+            color: var(--text-secondary);
         }
         
         @media (max-width: 768px) {
-            .title {
-                font-size: 2rem;
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
             }
             
             .grid-container {
                 grid-template-columns: 1fr;
             }
             
-            .minecraft-button {
-                padding: 12px 24px;
-                font-size: 0.8rem;
+            .feature-card {
+                padding: 30px 20px;
             }
+        }
+        
+        /* Minecraft-style pixel art accents */
+        .pixel-border {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
         }
     </style>
 </head>
@@ -178,54 +356,102 @@
     
     <div class="container">
         <header class="header">
-            <h1 class="title">MINECRAFT BOT HUB</h1>
-            <p class="subtitle">Where AI Meets the Blocky World</p>
-            <div class="button-group">
-                <a href="login.html" class="minecraft-button">LOGIN</a>
-                <a href="prompt.html" class="minecraft-button">CHAT WITH BOTS</a>
+            <h1 class="title">Minecraft Bot Hub</h1>
+            <p class="subtitle">Professional Bot Management Platform for Minecraft Servers</p>
+            <div class="hero-buttons">
+                <a href="/login" class="btn btn-primary">
+                    <span>🚀 Get Started</span>
+                </a>
+                <a href="/chat" class="btn btn-secondary">
+                    <span>💬 Live Chat</span>
+                </a>
+                <a href="#features" class="btn btn-accent">
+                    <span>⚡ Features</span>
+                </a>
             </div>
         </header>
-        
-        <div class="grid-container">
-            <div class="grid-item">
-                <h3>🤖 AI BOTS</h3>
-                <p>Interact with intelligent bots that can see, think, and respond just like in the real world.</p>
-                <a href="prompt.html" class="minecraft-button">START CHAT</a>
+
+        <section class="features-section" id="features">
+            <h2 class="section-title">Advanced Bot Management</h2>
+            <div class="grid-container">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">Intelligent Bot Control</h3>
+                    <p class="feature-description">Advanced AI-powered bots with real-time vision, decision making, and autonomous operations for your Minecraft server.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3 class="feature-title">Real-Time Monitoring</h3>
+                    <p class="feature-description">Live bot vision streaming, status monitoring, and performance analytics with instant notifications and alerts.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3 class="feature-title">Server Management</h3>
+                    <p class="feature-description">Comprehensive server administration tools including player tracking, region management, and automated maintenance.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3 class="feature-title">Economy System</h3>
+                    <p class="feature-description">Advanced in-game economy with trading, banking, inflation control, and automated market management.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Security & Permissions</h3>
+                    <p class="feature-description">Role-based access control, secure authentication, and comprehensive audit logging for enterprise-grade security.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Analytics & Insights</h3>
+                    <p class="feature-description">Detailed performance metrics, player behavior analysis, and predictive analytics for server optimization.</p>
+                </div>
             </div>
-            
-            <div class="grid-item">
-                <h3>👁️ LIVE VISION</h3>
-                <p>Watch real-time streams of what our bots are seeing through their advanced vision systems.</p>
-                <a href="prompt.html" class="minecraft-button">WATCH STREAMS</a>
+        </section>
+
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Bot Types</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Monitoring</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Servers</div>
+                </div>
             </div>
-            
-            <div class="grid-item">
-                <h3>🧠 SMART BRAIN</h3>
-                <p>Our bots analyze your prompts using advanced AI to give you intelligent, contextual responses.</p>
-                <a href="prompt.html" class="minecraft-button">TRY IT OUT</a>
+        </section>
+
+        <section class="cta-section">
+            <h2 class="cta-title">Ready to Transform Your Server?</h2>
+            <p class="cta-description">Join thousands of server administrators who trust Minecraft Bot Hub for professional bot management and server automation.</p>
+            <div class="hero-buttons">
+                <a href="/login" class="btn btn-primary">
+                    <span>🚀 Start Free Trial</span>
+                </a>
+                <a href="/chat" class="btn btn-secondary">
+                    <span>📋 View Demo</span>
+                </a>
             </div>
-        </div>
-        
-        <div class="grid-container">
-            <div class="grid-item">
-                <h3>🎮 MINECRAFT STYLE</h3>
-                <p>Experience the familiar blocky aesthetic of Minecraft with modern AI capabilities.</p>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Minecraft Bot Hub. Professional Bot Management Platform.</p>
+                <p>Built with advanced AI and modern web technologies.</p>
             </div>
-            
-            <div class="grid-item">
-                <h3>⚡ REAL-TIME</h3>
-                <p>Get instant responses and live updates as our bots process your requests.</p>
-            </div>
-            
-            <div class="grid-item">
-                <h3>🔒 SECURE</h3>
-                <p>Your conversations and data are protected with enterprise-grade security.</p>
-            </div>
-        </div>
+        </footer>
     </div>
-    
-    <footer class="footer">
-        <p>© 2024 Minecraft Bot Hub - Built with ❤️ and lots of blocks</p>
-    </footer>
 </body>
 </html>

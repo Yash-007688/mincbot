@@ -5,7 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Minecraft Bot Hub</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #4a90e2;
+            --accent-color: #f39c12;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c5d6;
+            --border-color: #2d3748;
+            --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
         
         * {
             margin: 0;
@@ -14,8 +31,9 @@
         }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,68 +42,105 @@
         }
         
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 50px;
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            box-shadow: var(--shadow-heavy);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .login-header {
             text-align: center;
+            margin-bottom: 40px;
         }
         
         .logo {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1.5rem;
-            color: #8B4513;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 0px #654321;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
         }
         
-        .welcome-text {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 400;
         }
         
         .form-group {
-            margin-bottom: 20px;
-            text-align: left;
+            margin-bottom: 25px;
         }
         
-        .form-group label {
+        .form-label {
             display: block;
             margin-bottom: 8px;
-            color: #555;
+            color: var(--text-primary);
             font-weight: 500;
+            font-size: 0.95rem;
         }
         
-        .form-group input {
+        .form-input {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
             transition: all 0.3s ease;
-            background: #f8f9fa;
+            backdrop-filter: blur(10px);
         }
         
-        .form-group input:focus {
+        .form-input:focus {
             outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
         }
         
         .login-btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #8B4513, #A0522D);
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-bottom: 20px;
@@ -93,146 +148,71 @@
         
         .login-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(139, 69, 19, 0.3);
+            box-shadow: var(--shadow-medium);
         }
         
         .login-btn:active {
             transform: translateY(0);
         }
         
-        .divider {
-            margin: 20px 0;
-            position: relative;
+        .demo-credentials {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
             text-align: center;
         }
         
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e1e5e9;
+        .demo-title {
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
         }
         
-        .divider span {
-            background: white;
-            padding: 0 15px;
-            color: #666;
-            font-size: 14px;
+        .demo-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
         }
         
-        .social-login {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .social-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        
-        .social-btn:hover {
-            border-color: #667eea;
-            background: #f8f9fa;
-        }
-        
-        .forgot-password {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: block;
-        }
-        
-        .forgot-password:hover {
-            text-decoration: underline;
-        }
-        
-        .signup-link {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .signup-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .back-home {
+        .back-link {
+            text-align: center;
             margin-top: 20px;
         }
         
-        .back-home a {
-            color: #8B4513;
+        .back-link a {
+            color: var(--secondary-color);
             text-decoration: none;
             font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+            transition: color 0.3s ease;
         }
         
-        .back-home a:hover {
-            text-decoration: underline;
+        .back-link a:hover {
+            color: var(--primary-color);
         }
         
-        .floating-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            display: none;
         }
         
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(139, 69, 19, 0.3);
-            border-radius: 50%;
-            animation: float-up 8s linear infinite;
-        }
-        
-        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .particle:nth-child(2) { left: 20%; animation-delay: 2s; }
-        .particle:nth-child(3) { left: 30%; animation-delay: 4s; }
-        .particle:nth-child(4) { left: 40%; animation-delay: 6s; }
-        .particle:nth-child(5) { left: 50%; animation-delay: 1s; }
-        .particle:nth-child(6) { left: 60%; animation-delay: 3s; }
-        .particle:nth-child(7) { left: 70%; animation-delay: 5s; }
-        .particle:nth-child(8) { left: 80%; animation-delay: 7s; }
-        .particle:nth-child(9) { left: 90%; animation-delay: 0s; }
-        
-        @keyframes float-up {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                opacity: 0;
-            }
+        .success-message {
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: var(--success-color);
+            font-size: 0.9rem;
+            display: none;
         }
         
         @media (max-width: 480px) {
@@ -240,133 +220,130 @@
                 padding: 30px 20px;
             }
             
-            .logo {
-                font-size: 1.2rem;
+            .login-title {
+                font-size: 1.75rem;
             }
-            
-            .social-login {
-                flex-direction: column;
-            }
+        }
+        
+        /* Loading animation */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .loading .login-btn {
+            position: relative;
+        }
+        
+        .loading .login-btn::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="floating-particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
-    
     <div class="login-container">
-        <div class="logo">MINECRAFT BOT HUB</div>
-        <p class="welcome-text">Welcome back! Please login to continue</p>
+        <div class="login-header">
+            <div class="logo">🤖</div>
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to your Minecraft Bot Hub account</p>
+        </div>
+        
+        <div class="demo-credentials">
+            <div class="demo-title">Demo Account</div>
+            <div class="demo-text">Username: yash | Password: yash</div>
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
         
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required>
             </div>
             
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
             </div>
             
-            <button type="submit" class="login-btn">LOGIN</button>
+            <button type="submit" class="login-btn" id="loginBtn">
+                Sign In
+            </button>
         </form>
         
-        <!-- Default credentials info -->
-        <div class="credentials-info" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0; border: 2px solid #e1e5e9;">
-            <p style="margin: 0 0 10px 0; color: #333; font-weight: 600;">🔑 Default Login Credentials:</p>
-            <p style="margin: 5px 0; color: #666;"><strong>Username:</strong> <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">yash</code></p>
-            <p style="margin: 5px 0; color: #666;"><strong>Password:</strong> <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">yash</code></p>
-        </div>
-        
-        <a href="#" class="forgot-password">Forgot your password?</a>
-        
-        <div class="divider">
-            <span>or continue with</span>
-        </div>
-        
-        <div class="social-login">
-            <button class="social-btn">Google</button>
-            <button class="social-btn">Discord</button>
-        </div>
-        
-        <p class="signup-link">
-            Don't have an account? <a href="#">Sign up</a>
-        </p>
-        
-        <div class="back-home">
-            <a href="index.html">← Back to Home</a>
+        <div class="back-link">
+            <a href="/">← Back to Home</a>
         </div>
     </div>
-    
+
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
             
-            // Simple validation
-            if (username && password) {
-                const loginBtn = document.querySelector('.login-btn');
-                loginBtn.textContent = 'LOGGING IN...';
-                loginBtn.disabled = true;
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Show loading state
+            loginBtn.textContent = 'Signing In...';
+            loginBtn.disabled = true;
+            document.getElementById('loginForm').classList.add('loading');
+            
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
                 
-                try {
-                    // Send login request to backend
-                    const response = await fetch('/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ username, password })
-                    });
+                const data = await response.json();
+                
+                if (data.success) {
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
                     
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Show success message
-                        loginBtn.textContent = 'SUCCESS!';
-                        loginBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-                        
-                        // Redirect to chat page after successful login
-                        setTimeout(() => {
-                            window.location.href = '/chat';
-                        }, 1000);
-                    } else {
-                        // Show error message
-                        alert('Login failed: ' + data.error);
-                        loginBtn.textContent = 'LOGIN';
-                        loginBtn.disabled = false;
-                        loginBtn.style.background = 'linear-gradient(135deg, #8B4513, #A0522D)';
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    alert('Login failed. Please try again.');
-                    loginBtn.textContent = 'LOGIN';
-                    loginBtn.disabled = false;
-                    loginBtn.style.background = 'linear-gradient(135deg, #8B4513, #A0522D)';
+                    // Redirect to chat page after short delay
+                    setTimeout(() => {
+                        window.location.href = '/chat';
+                    }, 1000);
+                } else {
+                    errorMessage.textContent = data.error || 'Login failed. Please try again.';
+                    errorMessage.style.display = 'block';
                 }
+            } catch (error) {
+                errorMessage.textContent = 'Network error. Please check your connection.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Reset loading state
+                loginBtn.textContent = 'Sign In';
+                loginBtn.disabled = false;
+                document.getElementById('loginForm').classList.remove('loading');
             }
-        });
-        
-        // Add some interactivity to social buttons
-        document.querySelectorAll('.social-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 150);
-            });
         });
     </script>
 </body>
