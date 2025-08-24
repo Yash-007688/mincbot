@@ -77,16 +77,46 @@ def check_environment():
 
 def check_dependencies():
     """Check if all required dependencies are available"""
+    missing_deps = []
+    
+    # Check core Flask
     try:
         import flask
+        logger.info("✅ Flask available")
+    except ImportError:
+        missing_deps.append("Flask")
+    
+    # Check SocketIO (optional)
+    try:
         import flask_socketio
-        import gunicorn
+        logger.info("✅ Flask-SocketIO available")
+    except ImportError:
+        logger.warning("⚠️ Flask-SocketIO not available, will use basic Flask")
+    
+    # Check async libraries (optional)
+    try:
         import eventlet
-        logger.info("✅ Core dependencies check passed")
-        return True
-    except ImportError as e:
-        logger.error(f"❌ Missing dependency: {e}")
+        logger.info("✅ Eventlet available")
+    except ImportError:
+        try:
+            import gevent
+            logger.info("✅ Gevent available")
+        except ImportError:
+            logger.warning("⚠️ No async library available, will use basic Flask")
+    
+    # Check production server (optional)
+    try:
+        import gunicorn
+        logger.info("✅ Gunicorn available")
+    except ImportError:
+        logger.warning("⚠️ Gunicorn not available, will use basic Flask")
+    
+    if missing_deps:
+        logger.error(f"❌ Missing critical dependencies: {missing_deps}")
         return False
+    
+    logger.info("✅ Dependencies check completed")
+    return True
 
 def create_directories():
     """Create necessary directories for production"""
@@ -110,7 +140,7 @@ def main():
     
     # Check dependencies
     if not check_dependencies():
-        sys.exit(1)
+        logger.warning("⚠️ Some dependencies missing, will attempt to start with basic Flask")
     
     # Create directories
     if not create_directories():
