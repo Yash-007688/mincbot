@@ -157,6 +157,26 @@
             background: #A0522D;
         }
         
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .settings-toggle {
+            background: #40414f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .settings-toggle:hover {
+            background: #8B4513;
+        }
+        
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -429,6 +449,233 @@
         .back-home-btn:hover {
             background: #A0522D;
         }
+        
+        /* Settings Section */
+        .settings-section {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: #1a1a1a;
+            border-left: 1px solid #4a4b4d;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .settings-section.active {
+            transform: translateX(0);
+        }
+        
+        .settings-header {
+            padding: 20px;
+            background: #2d2d30;
+            border-bottom: 1px solid #4a4b4d;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .settings-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .settings-close:hover {
+            background: #40414f;
+        }
+        
+        .settings-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .settings-group {
+            margin-bottom: 30px;
+        }
+        
+        .settings-group h3 {
+            color: #F5DEB3;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 8px;
+        }
+        
+        .form-field {
+            margin-bottom: 20px;
+        }
+        
+        .form-field label {
+            display: block;
+            color: #DEB887;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-field input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4a4b4d;
+            border-radius: 8px;
+            background: #2d2d30;
+            color: white;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .form-field input:focus {
+            outline: none;
+            border-color: #8B4513;
+            box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
+        }
+        
+        .form-field input::placeholder {
+            color: #6b7280;
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 12px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+        
+        .save-btn:hover {
+            background: #A0522D;
+        }
+        
+        .save-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .bot-list {
+            background: #2d2d30;
+            border-radius: 8px;
+            border: 1px solid #4a4b4d;
+            overflow: hidden;
+        }
+        
+        .bot-item {
+            padding: 15px;
+            border-bottom: 1px solid #4a4b4d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .bot-item:last-child {
+            border-bottom: none;
+        }
+        
+        .bot-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .bot-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10a37f;
+            animation: pulse 2s infinite;
+        }
+        
+        .bot-status.offline {
+            background: #ef4444;
+            animation: none;
+        }
+        
+        .bot-details h4 {
+            color: #F5DEB3;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .bot-details p {
+            color: #DEB887;
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        .bot-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .bot-action-btn {
+            background: #40414f;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .bot-action-btn:hover {
+            background: #8B4513;
+        }
+        
+        .connection-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .connection-status.connected {
+            background: rgba(16, 163, 127, 0.2);
+            color: #10a37f;
+            border: 1px solid #10a37f;
+        }
+        
+        .connection-status.disconnected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .refresh-btn {
+            background: #40414f;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+        }
+        
+        .refresh-btn:hover {
+            background: #8B4513;
+        }
     </style>
 </head>
 <body>
@@ -464,9 +711,14 @@
             <div class="chat-section">
                 <div class="chat-header">
                     <div class="chat-title">AI Chat Assistant</div>
-                    <button class="vision-toggle" onclick="toggleVision()" id="visionToggle">
-                        👁️ Show Vision
-                    </button>
+                    <div class="header-actions">
+                        <button class="vision-toggle" onclick="toggleVision()" id="visionToggle">
+                            👁️ Show Vision
+                        </button>
+                        <button class="settings-toggle" onclick="toggleSettings()" id="settingsToggle">
+                            ⚙️ Settings
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="chat-messages" id="chatMessages">
@@ -555,6 +807,129 @@
                             <div style="font-size: 12px; margin-top: 5px;">Identifying objects...</div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Section -->
+    <div class="settings-section" id="settingsSection">
+        <div class="settings-header">
+            <span>⚙️ Settings & Configuration</span>
+            <button class="settings-close" onclick="toggleSettings()">×</button>
+        </div>
+        
+        <div class="settings-content">
+            <!-- Connection Status -->
+            <div class="connection-status connected" id="connectionStatus">
+                🟢 Connected to Server
+                <button class="refresh-btn" onclick="refreshConnection()">🔄</button>
+            </div>
+            
+            <!-- Server Configuration -->
+            <div class="settings-group">
+                <h3>🌐 Server Configuration</h3>
+                <div class="form-field">
+                    <label for="serverName">Server Name</label>
+                    <input type="text" id="serverName" placeholder="Enter server name" value="Minecraft Bot Hub">
+                </div>
+                <div class="form-field">
+                    <label for="serverPort">Server Port</label>
+                    <input type="number" id="serverPort" placeholder="Enter port number" value="25565">
+                </div>
+                <div class="form-field">
+                    <label for="serverIP">Server IP Address</label>
+                    <input type="text" id="serverIP" placeholder="Enter server IP" value="192.168.1.100">
+                </div>
+                <button class="save-btn" onclick="saveServerConfig()">💾 Save Configuration</button>
+            </div>
+            
+            <!-- Bot Management -->
+            <div class="settings-group">
+                <h3>🤖 Bot Management</h3>
+                <div class="bot-list" id="botList">
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status"></div>
+                            <div class="bot-details">
+                                <h4>Bot Alpha</h4>
+                                <p>IP: 192.168.1.101 | Port: 8080</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('alpha')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('alpha')">Restart</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status"></div>
+                            <div class="bot-details">
+                                <h4>Bot Beta</h4>
+                                <p>IP: 192.168.1.102 | Port: 8081</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('beta')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('beta')">Restart</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status"></div>
+                            <div class="bot-details">
+                                <h4>Bot Gamma</h4>
+                                <p>IP: 192.168.1.103 | Port: 8082</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('gamma')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('gamma')">Restart</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status offline"></div>
+                            <div class="bot-details">
+                                <h4>Bot Delta</h4>
+                                <p>IP: 192.168.1.104 | Port: 8083</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('delta')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('delta')">Restart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Network Tools -->
+            <div class="settings-group">
+                <h3>🔧 Network Tools</h3>
+                <div class="form-field">
+                    <label for="pingTarget">Ping Target</label>
+                    <input type="text" id="pingTarget" placeholder="Enter IP or hostname" value="8.8.8.8">
+                </div>
+                <button class="save-btn" onclick="pingTarget()">📡 Test Connection</button>
+            </div>
+            
+            <!-- System Info -->
+            <div class="settings-group">
+                <h3>💻 System Information</h3>
+                <div class="form-field">
+                    <label>Current Time</label>
+                    <input type="text" id="currentTime" readonly value="Loading...">
+                </div>
+                <div class="form-field">
+                    <label>Uptime</label>
+                    <input type="text" id="uptime" readonly value="Loading...">
+                </div>
+                <div class="form-field">
+                    <label>Active Connections</label>
+                    <input type="text" id="activeConnections" readonly value="Loading...">
                 </div>
             </div>
         </div>
@@ -753,6 +1128,161 @@
                 this.classList.add('active');
             });
         });
+        
+        // Settings functionality
+        let isSettingsVisible = false;
+        
+        function toggleSettings() {
+            const settingsSection = document.getElementById('settingsSection');
+            const settingsToggle = document.getElementById('settingsToggle');
+            
+            if (isSettingsVisible) {
+                settingsSection.classList.remove('active');
+                settingsToggle.textContent = '⚙️ Settings';
+                isSettingsVisible = false;
+            } else {
+                settingsSection.classList.add('active');
+                settingsToggle.textContent = '⚙️ Close';
+                isSettingsVisible = true;
+                updateSystemInfo();
+            }
+        }
+        
+        function saveServerConfig() {
+            const serverName = document.getElementById('serverName').value;
+            const serverPort = document.getElementById('serverPort').value;
+            const serverIP = document.getElementById('serverIP').value;
+            
+            if (!serverName || !serverPort || !serverIP) {
+                alert('Please fill in all server configuration fields');
+                return;
+            }
+            
+            // Simulate saving configuration
+            const saveBtn = document.querySelector('.save-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '💾 Saving...';
+            saveBtn.disabled = true;
+            
+            setTimeout(() => {
+                saveBtn.textContent = '✅ Saved!';
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }, 2000);
+                
+                // Add to chat
+                addMessage(`Server configuration updated: ${serverName} (${serverIP}:${serverPort})`, 'bot');
+            }, 1500);
+        }
+        
+        function pingBot(botName) {
+            const botItem = document.querySelector(`[onclick="pingBot('${botName}')"]`).closest('.bot-item');
+            const status = botItem.querySelector('.bot-status');
+            const pingBtn = botItem.querySelector('.bot-action-btn');
+            
+            // Simulate ping
+            pingBtn.textContent = 'Pinging...';
+            pingBtn.disabled = true;
+            
+            setTimeout(() => {
+                const isOnline = Math.random() > 0.2; // 80% chance of being online
+                
+                if (isOnline) {
+                    status.classList.remove('offline');
+                    status.style.background = '#10a37f';
+                    pingBtn.textContent = 'Online';
+                } else {
+                    status.style.background = '#ef4444';
+                    pingBtn.textContent = 'Offline';
+                }
+                
+                setTimeout(() => {
+                    pingBtn.textContent = 'Ping';
+                    pingBtn.disabled = false;
+                }, 2000);
+            }, 1000 + Math.random() * 2000);
+        }
+        
+        function restartBot(botName) {
+            const botItem = document.querySelector(`[onclick="restartBot('${botName}')`).closest('.bot-item');
+            const restartBtn = botItem.querySelector('.bot-action-btn:last-child');
+            const status = botItem.querySelector('.bot-status');
+            
+            // Simulate restart
+            restartBtn.textContent = 'Restarting...';
+            restartBtn.disabled = true;
+            status.style.background = '#f59e0b';
+            
+            setTimeout(() => {
+                status.style.background = '#10a37f';
+                restartBtn.textContent = 'Restart';
+                restartBtn.disabled = false;
+                
+                // Add to chat
+                addMessage(`Bot ${botName} has been restarted successfully.`, 'bot');
+            }, 3000);
+        }
+        
+        function pingTarget() {
+            const target = document.getElementById('pingTarget').value;
+            if (!target) {
+                alert('Please enter a target IP or hostname');
+                return;
+            }
+            
+            const pingBtn = document.querySelector('[onclick="pingTarget()"]');
+            const originalText = pingBtn.textContent;
+            pingBtn.textContent = '📡 Pinging...';
+            pingBtn.disabled = true;
+            
+            setTimeout(() => {
+                const pingTime = Math.floor(Math.random() * 100) + 10; // 10-110ms
+                pingBtn.textContent = `📡 ${pingTime}ms`;
+                
+                setTimeout(() => {
+                    pingBtn.textContent = originalText;
+                    pingBtn.disabled = false;
+                }, 3000);
+                
+                // Add to chat
+                addMessage(`Ping to ${target}: ${pingTime}ms`, 'bot');
+            }, 1000 + Math.random() * 2000);
+        }
+        
+        function refreshConnection() {
+            const statusDiv = document.getElementById('connectionStatus');
+            const refreshBtn = statusDiv.querySelector('.refresh-btn');
+            
+            refreshBtn.style.transform = 'rotate(360deg)';
+            refreshBtn.style.transform = 'rotate(360deg)';
+            refreshBtn.style.transition = 'transform 1s ease';
+            
+            setTimeout(() => {
+                refreshBtn.style.transform = 'rotate(0deg)';
+                statusDiv.classList.remove('connected', 'disconnected');
+                statusDiv.classList.add('connected');
+                statusDiv.innerHTML = '🟢 Connected to Server <button class="refresh-btn" onclick="refreshConnection()">🔄</button>';
+            }, 1000);
+        }
+        
+        function updateSystemInfo() {
+            // Update current time
+            const now = new Date();
+            document.getElementById('currentTime').value = now.toLocaleString();
+            
+            // Update uptime (simulated)
+            const uptimeHours = Math.floor(Math.random() * 24) + 1;
+            const uptimeMinutes = Math.floor(Math.random() * 60);
+            document.getElementById('uptime').value = `${uptimeHours}h ${uptimeMinutes}m`;
+            
+            // Update active connections
+            const connections = Math.floor(Math.random() * 50) + 10;
+            document.getElementById('activeConnections').value = `${connections} connections`;
+        }
+        
+        // Update system info every minute
+        setInterval(updateSystemInfo, 60000);
     </script>
 </body>
 </html>
