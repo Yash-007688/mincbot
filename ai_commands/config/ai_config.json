@@ -9,6 +9,53 @@
             "default_follow_distance": 5,
             "max_movement_speed": 1.0,
             "safety_health_threshold": 1
+        },
+        "vision_system": {
+            "camera_update_interval": 500,
+            "max_vision_range": 64,
+            "thermal_vision_enabled": true,
+            "depth_sensing_enabled": true,
+            "object_detection_enabled": true
+        },
+        "server_config": {
+            "default_port": 25565,
+            "default_ip": "192.168.1.100",
+            "server_name": "Minecraft Bot Hub",
+            "max_connections": 50
+        },
+        "bot_management": {
+            "auto_health_check": true,
+            "auto_restart_on_failure": true,
+            "ping_interval": 30000,
+            "status_update_interval": 5000
+        }
+    },
+    "bot_vision_config": {
+        "cameras": {
+            "alpha": {
+                "type": "main_camera",
+                "ip": "192.168.1.101",
+                "port": 8080,
+                "features": ["environment_analysis", "block_detection"]
+            },
+            "beta": {
+                "type": "thermal_vision",
+                "ip": "192.168.1.102",
+                "port": 8081,
+                "features": ["temperature_mapping", "heat_detection"]
+            },
+            "gamma": {
+                "type": "depth_sensor",
+                "ip": "192.168.1.103",
+                "port": 8082,
+                "features": ["3d_mapping", "distance_measurement"]
+            },
+            "delta": {
+                "type": "object_detection",
+                "ip": "192.168.1.104",
+                "port": 8083,
+                "features": ["entity_tracking", "item_recognition"]
+            }
         }
     }
 } 

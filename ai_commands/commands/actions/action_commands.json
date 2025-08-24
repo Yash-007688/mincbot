@@ -102,128 +102,105 @@
                 "quantity": "number"
             }
         },
-        "repair": {
-            "description": "Repair items",
-            "format": "repair <bot_name> <item_type>",
-            "example": "repair Bot1 diamond_sword",
-            "python_handler": "handle_repair_command",
+        "vision": {
+            "description": "Manage bot vision system",
+            "format": "vision <bot_name> <action> [parameters]",
+            "example": "vision Bot1 analyze",
+            "python_handler": "handle_vision_command",
             "parameters": {
-                "item_type": ["sword", "pickaxe", "axe", "armor", "bow"]
+                "action": ["analyze", "toggle", "status", "calibrate", "focus"]
             }
         },
-        "teleport": {
-            "description": "Teleport bot to specific coordinates",
-            "format": "teleport <bot_name> <x> <y> <z>",
-            "example": "teleport Bot1 100 64 -200",
-            "python_handler": "handle_teleport_command",
+        "camera": {
+            "description": "Control bot camera settings",
+            "format": "camera <bot_name> <setting> <value>",
+            "example": "camera Bot1 zoom 2x",
+            "python_handler": "handle_camera_command",
             "parameters": {
-                "x": "number",
-                "y": "number",
-                "z": "number"
-            },
-            "output_format": {
-                "type": "action",
-                "target": "all_bots.js",
-                "action": "teleport"
+                "setting": ["zoom", "focus", "exposure", "filter", "mode"],
+                "value": ["auto", "manual", "night", "thermal", "depth"]
             }
         },
-        "goto": {
-            "description": "Make bot walk to specific coordinates",
-            "format": "goto <bot_name> <x> <y> <z>",
-            "example": "goto Bot1 100 64 -200",
-            "python_handler": "handle_goto_command",
+        "settings": {
+            "description": "Manage bot settings and configuration",
+            "format": "settings <bot_name> <category> <setting> <value>",
+            "example": "settings Bot1 network ip 192.168.1.105",
+            "python_handler": "handle_settings_command",
             "parameters": {
-                "x": "number",
-                "y": "number",
-                "z": "number"
-            },
-            "output_format": {
-                "type": "action",
-                "target": "all_bots.js",
-                "action": "goto"
+                "category": ["network", "vision", "behavior", "safety", "performance"],
+                "setting": ["ip", "port", "enabled", "threshold", "limit"]
             }
         },
-        "follow_coords": {
-            "description": "Make bot follow a path of coordinates",
-            "format": "follow_coords <bot_name> <coordinates>",
-            "example": "follow_coords Bot1 [[100,64,-200], [150,64,-250], [200,64,-300]]",
-            "python_handler": "handle_follow_coords_command",
+        "monitor": {
+            "description": "Monitor bot performance and status",
+            "format": "monitor <bot_name> <metric>",
+            "example": "monitor Bot1 health",
+            "python_handler": "handle_monitor_command",
             "parameters": {
-                "coordinates": "array"
-            },
-            "output_format": {
-                "type": "action",
-                "target": "all_bots.js",
-                "action": "follow_coords"
+                "metric": ["health", "performance", "vision", "network", "inventory", "all"]
             }
         },
-        "save_location": {
-            "description": "Save current location with a name",
-            "format": "save_location <bot_name> <location_name>",
-            "example": "save_location Bot1 base",
-            "python_handler": "handle_save_location_command",
+        "optimize": {
+            "description": "Optimize bot performance",
+            "format": "optimize <bot_name> <aspect>",
+            "example": "optimize Bot1 vision",
+            "python_handler": "handle_optimize_command",
             "parameters": {
-                "location_name": "string"
-            },
-            "output_format": {
-                "type": "action",
-                "target": "all_bots.js",
-                "action": "save_location"
+                "aspect": ["vision", "movement", "inventory", "pathfinding", "all"]
             }
         },
-        "goto_location": {
-            "description": "Go to a saved location",
-            "format": "goto_location <bot_name> <location_name>",
-            "example": "goto_location Bot1 base",
-            "python_handler": "handle_goto_location_command",
+        "backup": {
+            "description": "Backup bot data and configuration",
+            "format": "backup <bot_name> <type>",
+            "example": "backup Bot1 full",
+            "python_handler": "handle_backup_command",
             "parameters": {
-                "location_name": "string"
-            },
-            "output_format": {
-                "type": "action",
-                "target": "all_bots.js",
-                "action": "goto_location"
+                "type": ["full", "config", "inventory", "vision", "memory"]
             }
         },
-        "admin": {
-            "description": "Admin commands for server management",
-            "format": "admin <command> <parameters>",
-            "example": "admin list",
-            "python_handler": "handle_admin_command",
+        "restore": {
+            "description": "Restore bot from backup",
+            "format": "restore <bot_name> <backup_id>",
+            "example": "restore Bot1 backup_20241201",
+            "python_handler": "handle_restore_command",
             "parameters": {
-                "command": ["list", "add", "remove", "permissions", "status"],
-                "admin_name": "string"
-            },
-            "output_format": {
-                "type": "admin",
-                "target": "all_bots.js",
-                "action": "admin_management"
-            },
-            "admin_only": true
-        },
-        "admin_list": {
-            "description": "List all admin users",
-            "format": "admin_list",
-            "example": "admin_list",
-            "python_handler": "handle_admin_list_command",
-            "output_format": {
-                "type": "admin",
-                "target": "all_bots.js",
-                "action": "list_admins"
+                "backup_id": "string"
             }
         },
-        "admin_status": {
-            "description": "Check admin status",
-            "format": "admin_status <username>",
-            "example": "admin_status CodeDevPro",
-            "python_handler": "handle_admin_status_command",
+        "update": {
+            "description": "Update bot firmware or configuration",
+            "format": "update <bot_name> <component>",
+            "example": "update Bot1 vision_system",
+            "python_handler": "handle_update_command",
             "parameters": {
-                "username": "string"
-            },
-            "output_format": {
-                "type": "admin",
-                "target": "all_bots.js",
-                "action": "check_admin_status"
+                "component": ["firmware", "vision_system", "ai_model", "config", "all"]
+            }
+        },
+        "diagnose": {
+            "description": "Run diagnostic tests on bot",
+            "format": "diagnose <bot_name> <test_type>",
+            "example": "diagnose Bot1 vision",
+            "python_handler": "handle_diagnose_command",
+            "parameters": {
+                "test_type": ["vision", "movement", "network", "ai", "full", "quick"]
+            }
+        },
+        "calibrate": {
+            "description": "Calibrate bot systems",
+            "format": "calibrate <bot_name> <system>",
+            "example": "calibrate Bot1 camera",
+            "python_handler": "handle_calibrate_command",
+            "parameters": {
+                "system": ["camera", "sensors", "movement", "vision", "all"]
+            }
+        },
+        "sync": {
+            "description": "Synchronize bot with other bots or server",
+            "format": "sync <bot_name> <target>",
+            "example": "sync Bot1 server",
+            "python_handler": "handle_sync_command",
+            "parameters": {
+                "target": ["server", "team", "vision", "inventory", "all"]
             }
         }
     },
