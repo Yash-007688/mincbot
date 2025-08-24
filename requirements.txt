@@ -1,15 +1,47 @@
-# Bot Brain System Dependencies
-# Core Python packages for the intelligent bot management system
+# Flask Application Dependencies
+# Minecraft Bot Hub Web Server
 
-# No external dependencies required - uses only Python standard library
-# The system is designed to work with Python 3.7+ out of the box
+# Core Flask
+Flask>=2.3.0
+Flask-SocketIO>=5.3.0
+Flask-Session>=0.5.0
 
-# Optional: For enhanced functionality, you can install these packages:
-# asyncio-mqtt==0.13.0  # For MQTT communication with Node.js bots
-# websockets==11.0.3    # For WebSocket communication
-# pydantic==2.5.0       # For enhanced data validation
-# fastapi==0.104.1      # For REST API endpoints
-# uvicorn==0.24.0       # For running the FastAPI server
+# WebSocket and Real-time
+python-socketio>=5.8.0
+python-engineio>=4.6.0
 
-# For now, the system works with standard library only
-# Run: python bot_brain.py to test the system
+# HTTP and API
+requests>=2.31.0
+aiohttp>=3.8.0
+
+# Data handling
+PyYAML>=6.0
+configparser>=5.3.0
+
+# Logging and monitoring
+loguru>=0.7.0
+
+# Development and testing
+python-dotenv>=1.0.0
+pytest>=7.4.0
+pytest-flask>=1.2.0
+
+# Production server
+gunicorn>=21.2.0
+eventlet>=0.33.0
+
+# Security
+cryptography>=41.0.0
+bcrypt>=4.0.0
+
+# Database (optional)
+SQLAlchemy>=2.0.0
+Flask-SQLAlchemy>=3.0.0
+
+# Caching (optional)
+Flask-Caching>=2.0.0
+redis>=4.5.0
+
+# Background tasks (optional)
+celery>=5.3.0
+redis>=4.5.0
