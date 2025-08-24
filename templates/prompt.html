@@ -714,6 +714,81 @@
             text-align: center;
         }
         
+        /* Bot Names Styling */
+        .bot-names-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .bot-name-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .bot-name-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #565869;
+            border-radius: 6px;
+            background: #40414f;
+            color: white;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .bot-name-input:focus {
+            outline: none;
+            border-color: #8B4513;
+            box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
+        }
+        
+        .bot-name-input::placeholder {
+            color: #8a8b8c;
+        }
+        
+        .status-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 80px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .status-tag.online {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+        
+        .status-tag.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .status-tag.connecting {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid #fbbf24;
+        }
+        
+        .bot-names-info {
+            margin-top: 8px;
+            color: #8a8b8c;
+            font-style: italic;
+        }
+        
         .deploy-btn {
             width: 100%;
             padding: 12px 16px;
@@ -1024,6 +1099,15 @@
                     <div class="slider-container">
                         <input type="range" id="botCount" min="1" max="20" value="4" class="bot-count-slider">
                         <span class="slider-value" id="sliderValue">4 bots</span>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label for="botNames">Bot Names (Real Gamer Names)</label>
+                    <div class="bot-names-container">
+                        <!-- Bot names will be generated dynamically based on slider value -->
+                    </div>
+                    <div class="bot-names-info">
+                        <small>💡 Bot names will appear as real players on the server. Use creative gamer names!</small>
                     </div>
                 </div>
                 <div class="form-field">
@@ -1426,6 +1510,7 @@
             const serverIP = document.getElementById('deploymentServerIP').value;
             const serverName = document.getElementById('deploymentServerName').value;
             const serverPort = document.getElementById('deploymentServerPort').value;
+            const botNames = getAllBotNames();
             
             if (!deploymentName || !botCount || !serverIP || !serverName || !serverPort) {
                 alert('Please fill in all deployment fields');
@@ -1450,8 +1535,9 @@
                     deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
                 }, 2000);
                 
-                // Add to chat
-                addMessage(`Successfully deployed ${botCount} bots to ${serverName} (${serverIP}:${serverPort})`, 'bot');
+                // Add to chat with bot names
+                const botNameList = botNames.map(bot => bot.name).join(', ');
+                addMessage(`Successfully deployed ${botCount} bots (${botNameList}) to ${serverName} (${serverIP}:${serverPort})`, 'bot');
             }, 3000);
         }
         
@@ -1466,8 +1552,14 @@
                 goLiveBtn.classList.remove('live');
                 goLiveBtn.style.background = 'linear-gradient(135deg, #6c757d, #495057)';
                 
+                // Update all bot statuses to offline
+                const botCount = document.getElementById('botCount').value;
+                for (let i = 1; i <= botCount; i++) {
+                    updateBotStatus(i, 'offline');
+                }
+                
                 // Add to chat
-                addMessage('Live mode stopped. Bots are now offline.', 'bot');
+                addMessage('Live mode stopped. All bots are now offline.', 'bot');
             } else {
                 // Start live mode
                 goLiveBtn.textContent = '🟢 LIVE';
@@ -1476,26 +1568,31 @@
                 // Add to chat
                 addMessage('🚀 GOING LIVE! Bots are now deploying and connecting to the server...', 'bot');
                 
-                // Simulate bot deployment process
-                setTimeout(() => {
-                    addMessage('✅ Bot Alpha deployed successfully!', 'bot');
-                }, 2000);
+                // Get bot names and simulate deployment process
+                const botNames = getAllBotNames();
                 
-                setTimeout(() => {
-                    addMessage('✅ Bot Beta deployed successfully!', 'bot');
-                }, 4000);
+                botNames.forEach((bot, index) => {
+                    const delay = (index + 1) * 2000; // 2 seconds apart
+                    
+                    setTimeout(() => {
+                        // Update bot status to connecting
+                        updateBotStatus(bot.id, 'connecting');
+                        addMessage(`🟡 ${bot.name} is connecting...`, 'bot');
+                        
+                        // After 1 second, set to online
+                        setTimeout(() => {
+                            updateBotStatus(bot.id, 'online');
+                            addMessage(`✅ ${bot.name} deployed successfully!`, 'bot');
+                        }, 1000);
+                    }, delay);
+                });
                 
+                // Final success message
+                const totalDelay = (botNames.length + 1) * 2000;
                 setTimeout(() => {
-                    addMessage('✅ Bot Gamma deployed successfully!', 'bot');
-                }, 6000);
-                
-                setTimeout(() => {
-                    addMessage('✅ Bot Delta deployed successfully!', 'bot');
-                }, 8000);
-                
-                setTimeout(() => {
-                    addMessage('🎉 All bots are now LIVE and connected to play.mcfleet.net:25565!', 'bot');
-                }, 10000);
+                    const botNameList = botNames.map(bot => bot.name).join(', ');
+                    addMessage(`🎉 All bots (${botNameList}) are now LIVE and connected to play.mcfleet.net:25565!`, 'bot');
+                }, totalDelay);
             }
         }
         
@@ -1506,10 +1603,105 @@
             
             if (botCountSlider && sliderValue) {
                 botCountSlider.addEventListener('input', function() {
-                    sliderValue.textContent = this.value + ' bots';
+                    const botCount = this.value;
+                    sliderValue.textContent = botCount + ' bots';
+                    updateBotNames(botCount);
                 });
             }
+            
+            // Initialize bot names
+            updateBotNames(4);
         });
+        
+        // Bot names management
+        function updateBotNames(botCount) {
+            const container = document.querySelector('.bot-names-container');
+            if (!container) return;
+            
+            // Clear existing bot names
+            container.innerHTML = '';
+            
+            // Generate bot names based on count
+            for (let i = 1; i <= botCount; i++) {
+                const botName = generateBotName(i);
+                const botItem = createBotNameItem(i, botName);
+                container.appendChild(botItem);
+            }
+        }
+        
+        function generateBotName(botNumber) {
+            const gamerNames = [
+                'IronMiner', 'WoodCutter', 'StoneBreaker', 'DiamondHunter',
+                'NetherExplorer', 'EndVoyager', 'RedstoneMaster', 'Enchanter',
+                'PotionBrewer', 'Archer', 'Swordsman', 'Miner',
+                'Farmer', 'Builder', 'Explorer', 'Trader',
+                'Guardian', 'Scout', 'Navigator', 'Artisan'
+            ];
+            
+            return gamerNames[botNumber - 1] || `Bot${botNumber}`;
+        }
+        
+        function createBotNameItem(botId, defaultName) {
+            const div = document.createElement('div');
+            div.className = 'bot-name-item';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'bot-name-input';
+            input.placeholder = `Bot ${botId} name`;
+            input.value = defaultName;
+            input.dataset.botId = botId;
+            
+            const statusTag = document.createElement('span');
+            statusTag.className = 'status-tag offline';
+            statusTag.textContent = '🔴 Offline';
+            
+            div.appendChild(input);
+            div.appendChild(statusTag);
+            
+            return div;
+        }
+        
+        function updateBotStatus(botId, status) {
+            const botItem = document.querySelector(`[data-bot-id="${botId}"]`);
+            if (!botItem) return;
+            
+            const statusTag = botItem.parentElement.querySelector('.status-tag');
+            if (!statusTag) return;
+            
+            // Remove existing status classes
+            statusTag.classList.remove('online', 'offline', 'connecting');
+            
+            // Add new status
+            switch (status) {
+                case 'online':
+                    statusTag.classList.add('online');
+                    statusTag.textContent = '🟢 Online';
+                    break;
+                case 'offline':
+                    statusTag.classList.add('offline');
+                    statusTag.textContent = '🔴 Offline';
+                    break;
+                case 'connecting':
+                    statusTag.classList.add('connecting');
+                    statusTag.textContent = '🟡 Connecting';
+                    break;
+            }
+        }
+        
+        function getAllBotNames() {
+            const botInputs = document.querySelectorAll('.bot-name-input');
+            const botNames = [];
+            
+            botInputs.forEach(input => {
+                botNames.push({
+                    id: input.dataset.botId,
+                    name: input.value.trim() || input.placeholder
+                });
+            });
+            
+            return botNames;
+        }
     </script>
 </body>
 </html>
