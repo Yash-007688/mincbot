@@ -380,11 +380,106 @@
             height: 200px;
             background: #1a1a1a;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
             color: #6b7280;
-            font-size: 14px;
+            font-size: 12px;
             position: relative;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .vision-feed-content.active {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .vision-feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .bot-name {
+            font-weight: 600;
+            color: #4CAF50;
+        }
+        
+        .timestamp {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        .vision-feed-data {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .data-item .label {
+            color: #ccc;
+            font-size: 11px;
+        }
+        
+        .data-item .value {
+            color: #fff;
+            font-weight: 500;
+            font-size: 11px;
+        }
+        
+        .status-active {
+            color: #4CAF50 !important;
+        }
+        
+        .status-inactive {
+            color: #f44336 !important;
+        }
+        
+        .status-connecting {
+            color: #ff9800 !important;
+        }
+        
+        .quick-actions {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        .quick-actions-title {
+            font-weight: 600;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .quick-action-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 4px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-action-btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
         }
         
         .vision-placeholder {
@@ -909,6 +1004,15 @@
                             Hello! I'm your AI assistant. I can help you with various tasks and analyze information from our bot vision systems. What would you like to know or do today?
                         </div>
                     </div>
+                    
+                    <!-- Quick Action Buttons -->
+                    <div class="quick-actions">
+                        <div class="quick-actions-title">Quick Actions:</div>
+                        <button onclick="askAboutSpawn()" class="quick-action-btn">📍 Spawn Locations</button>
+                        <button onclick="askAboutWorld()" class="quick-action-btn">🌍 World Info</button>
+                        <button onclick="askAboutVision()" class="quick-action-btn">👁️ Bot Vision</button>
+                        <button onclick="askAboutNavigation()" class="quick-action-btn">🧭 Navigation Help</button>
+                    </div>
                 </div>
                 
                 <div class="message-input-container">
@@ -942,8 +1046,8 @@
                     <div class="vision-feed-content">
                         <div class="vision-placeholder">
                             <div class="icon">📹</div>
-                            <div>Live Stream</div>
-                            <div style="font-size: 12px; margin-top: 5px;">Analyzing environment...</div>
+                            <div>Main Camera</div>
+                            <div style="font-size: 10px; margin-top: 5px; color: #888;">Click "Show Vision" to activate live feed</div>
                         </div>
                     </div>
                 </div>
@@ -956,8 +1060,8 @@
                     <div class="vision-feed-content">
                         <div class="vision-placeholder">
                             <div class="icon">🔥</div>
-                            <div>Thermal Feed</div>
-                            <div style="font-size: 12px; margin-top: 5px;">Temperature mapping...</div>
+                            <div>Thermal Vision</div>
+                            <div style="font-size: 10px; margin-top: 5px; color: #888;">Click "Show Vision" to activate live feed</div>
                         </div>
                     </div>
                 </div>
@@ -970,8 +1074,8 @@
                     <div class="vision-feed-content">
                         <div class="vision-placeholder">
                             <div class="icon">📐</div>
-                            <div>Depth Analysis</div>
-                            <div style="font-size: 12px; margin-top: 5px;">3D mapping...</div>
+                            <div>Depth Sensor</div>
+                            <div style="font-size: 10px; margin-top: 5px; color: #888;">Click "Show Vision" to activate live feed</div>
                         </div>
                     </div>
                 </div>
@@ -984,8 +1088,8 @@
                     <div class="vision-feed-content">
                         <div class="vision-placeholder">
                             <div class="icon">🎯</div>
-                            <div>Object Tracking</div>
-                            <div style="font-size: 12px; margin-top: 5px;">Identifying objects...</div>
+                            <div>Object Detection</div>
+                            <div style="font-size: 10px; margin-top: 55px; color: #888;">Click "Show Vision" to activate live feed</div>
                         </div>
                     </div>
                 </div>
@@ -1200,12 +1304,31 @@
             // Show typing indicator
             showTypingIndicator();
             
-            // Simulate AI response
-            setTimeout(() => {
+            // Send message to backend for AI processing
+            fetch('/api/chat/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    user: 'User'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
                 hideTypingIndicator();
-                const response = generateAIResponse(message);
-                addMessage(response, 'bot');
-            }, 1000 + Math.random() * 2000);
+                if (data.success) {
+                    addMessage(data.response, 'bot');
+                } else {
+                    addMessage('Sorry, I encountered an error processing your message. Please try again.', 'bot');
+                }
+            })
+            .catch(error => {
+                hideTypingIndicator();
+                console.error('Error:', error);
+                addMessage('Sorry, I encountered an error processing your message. Please try again.', 'bot');
+            });
         }
         
         function addMessage(content, sender) {
@@ -1267,6 +1390,8 @@
         }
         
         function generateAIResponse(userMessage) {
+            // This function is now replaced by the backend API
+            // Keeping it for fallback purposes
             const responses = [
                 "I've analyzed your request through our brain system. Based on the current bot vision data, I can see that the environment is stable and all systems are operational.",
                 "Interesting question! Let me check the live bot vision streams. I can see multiple data points that suggest we should proceed with your request.",
@@ -1276,7 +1401,7 @@
                 "I've analyzed this through our advanced brain system. The bot vision data indicates that we have multiple perspectives on this situation, allowing for a well-informed response."
             ];
             
-            // Add some context-aware responses
+            // Add some context-aware responses for fallback
             if (userMessage.toLowerCase().includes('vision') || userMessage.toLowerCase().includes('see')) {
                 return "I'm currently monitoring the live bot vision streams. I can see multiple camera feeds showing real-time environmental data, thermal imaging, depth analysis, and object detection. What specific aspect would you like me to focus on?";
             }
@@ -1300,11 +1425,100 @@
                 visionSection.classList.add('collapsed');
                 visionToggle.textContent = '👁️ Show Vision';
                 isVisionVisible = false;
+                // Stop live updates when hiding
+                if (window.visionUpdateInterval) {
+                    clearInterval(window.visionUpdateInterval);
+                    window.visionUpdateInterval = null;
+                }
             } else {
                 visionSection.classList.remove('collapsed');
                 visionToggle.textContent = '👁️ Hide Vision';
                 isVisionVisible = true;
+                // Start live updates when showing
+                startLiveVisionUpdates();
             }
+        }
+        
+        function startLiveVisionUpdates() {
+            // Clear any existing interval
+            if (window.visionUpdateInterval) {
+                clearInterval(window.visionUpdateInterval);
+            }
+            
+            // Start live updates every 2 seconds
+            window.visionUpdateInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/bots/vision/live');
+                    const data = await response.json();
+                    
+                    if (data.success && data.vision_data) {
+                        updateVisionFeeds(data.vision_data);
+                    }
+                } catch (error) {
+                    console.log('Vision update error:', error);
+                }
+            }, 2000);
+            
+            // Initial update
+            fetch('/api/bots/vision/live')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.vision_data) {
+                        updateVisionFeeds(data.vision_data);
+                    }
+                })
+                .catch(error => console.log('Initial vision update error:', error));
+        }
+        
+        function updateVisionFeeds(visionData) {
+            // Update each vision feed with real data
+            Object.keys(visionData).forEach((botId, index) => {
+                const feed = document.querySelector(`.vision-feed:nth-child(${index + 1}) .vision-feed-content`);
+                if (feed) {
+                    const botData = visionData[botId];
+                    const timestamp = new Date(botData.timestamp).toLocaleTimeString();
+                    
+                    // Update feed content with real data
+                    feed.innerHTML = `
+                        <div class="vision-feed-header">
+                            <span class="bot-name">Bot ${botId.toUpperCase()}</span>
+                            <span class="timestamp">${timestamp}</span>
+                        </div>
+                        <div class="vision-feed-data">
+                            <div class="data-item">
+                                <span class="label">Camera:</span>
+                                <span class="value">${botData.camera_type || 'Main'}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="label">Status:</span>
+                                <span class="value status-${botData.status || 'active'}">${botData.status || 'Active'}</span>
+                            </div>
+                            <div class nowrap="data-item">
+                                <span class="label">Resolution:</span>
+                                <span class="value">${botData.resolution || '1920x1080'}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="label">FPS:</span>
+                                <span class="value">${botData.fps || 30}</span>
+                            </div>
+                            ${botData.environment_data ? `
+                                <div class="data-item">
+                                    <span class="label">Light:</span>
+                                    <span class="value">${botData.environment_data.light_level || 0}/15</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="label">Objects:</span>
+                                    <span class="value">${botData.environment_data.objects_detected || 0}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    // Add visual feedback for active feeds
+                    feed.classList.add('active');
+                    setTimeout(() => feed.classList.remove('active'), 1000);
+                }
+            });
         }
         
         function startNewChat() {
@@ -1315,6 +1529,15 @@
                     <div class="message-content">
                         Hello! I'm your AI assistant. I can help you with various tasks and analyze information from our bot vision systems. What would you like to know or do today?
                     </div>
+                </div>
+                
+                <!-- Quick Action Buttons -->
+                <div class="quick-actions">
+                    <div class="quick-actions-title">Quick Actions:</div>
+                    <button onclick="askAboutSpawn()" class="quick-action-btn">📍 Spawn Locations</button>
+                    <button onclick="askAboutWorld()" class="quick-action-btn">🌍 World Info</button>
+                    <button onclick="askAboutVision()" class="quick-action-btn">👁️ Bot Vision</button>
+                    <button onclick="askAboutNavigation()" class="quick-action-btn">🧭 Navigation Help</button>
                 </div>
             `;
             
@@ -1347,6 +1570,45 @@
                 this.classList.add('active');
             });
         });
+        
+        // Add quick action buttons for common queries
+        function addQuickActionButtons() {
+            const chatMessages = document.getElementById('chatMessages');
+            const quickActionsDiv = document.createElement('div');
+            quickActionsDiv.className = 'quick-actions';
+            quickActionsDiv.innerHTML = `
+                <div class="quick-actions-title">Quick Actions:</div>
+                <button onclick="askAboutSpawn()" class="quick-action-btn">📍 Spawn Locations</button>
+                <button onclick="askAboutWorld()" class="quick-action-btn">🌍 World Info</button>
+                <button onclick="askAboutVision()" class="quick-action-btn">👁️ Bot Vision</button>
+                <button onclick="askAboutNavigation()" class="quick-action-btn">🧭 Navigation Help</button>
+            `;
+            chatMessages.appendChild(quickActionsDiv);
+        }
+        
+        function askAboutSpawn() {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = 'Where do I respawn? What are the spawn coordinates?';
+            sendMessage();
+        }
+        
+        function askAboutWorld() {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = 'What type of world is this? Is it a big world?';
+            sendMessage();
+        }
+        
+        function askAboutVision() {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = 'Show me the bot vision streams. What can the bots see?';
+            sendMessage();
+        }
+        
+        function askAboutNavigation() {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = 'Help me navigate this world. Where can I go?';
+            sendMessage();
+        }
         
         // Settings functionality
         let isSettingsVisible = false;
@@ -1599,51 +1861,53 @@
             
             if (goLiveBtn.classList.contains('live')) {
                 // Stop live mode
-                goLiveBtn.textContent = '⏹️ Stop Live';
+                goLiveBtn.textContent = '🚀 Go Live';
                 goLiveBtn.classList.remove('live');
-                goLiveBtn.style.background = 'linear-gradient(135deg, #6c757d, #495057)';
+                goLiveBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
                 
-                // Update all bot statuses to offline
-                const botCount = document.getElementById('botCount').value;
-                for (let i = 1; i <= botCount; i++) {
-                    updateBotStatus(i, 'offline');
+                // Stop vision updates
+                if (window.visionUpdateInterval) {
+                    clearInterval(window.visionUpdateInterval);
+                    window.visionUpdateInterval = null;
                 }
                 
                 // Add to chat
-                addMessage('Live mode stopped. All bots are now offline.', 'bot');
+                addMessage('⏹️ Live mode stopped. Bot vision streams are now offline.', 'bot');
             } else {
                 // Start live mode
                 goLiveBtn.textContent = '🟢 LIVE';
                 goLiveBtn.classList.add('live');
+                goLiveBtn.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
                 
                 // Add to chat
                 addMessage('🚀 GOING LIVE! Bots are now deploying and connecting to the server...', 'bot');
                 
-                // Get bot names and simulate deployment process
-                const botNames = getAllBotNames();
+                // Start vision updates immediately
+                if (isVisionVisible) {
+                    startLiveVisionUpdates();
+                }
                 
-                botNames.forEach((bot, index) => {
-                    const delay = (index + 1) * 2000; // 2 seconds apart
-                    
-                    setTimeout(() => {
-                        // Update bot status to connecting
-                        updateBotStatus(bot.id, 'connecting');
-                        addMessage(`🟡 ${bot.name} is connecting...`, 'bot');
-                        
-                        // After 1 second, set to online
-                        setTimeout(() => {
-                            updateBotStatus(bot.id, 'online');
-                            addMessage(`✅ ${bot.name} deployed successfully!`, 'bot');
-                        }, 1000);
-                    }, delay);
-                });
-                
-                // Final success message
-                const totalDelay = (botNames.length + 1) * 2000;
+                // Simulate bot deployment process
                 setTimeout(() => {
-                    const botNameList = botNames.map(bot => bot.name).join(', ');
-                    addMessage(`🎉 All bots (${botNameList}) are now LIVE and connected to play.mcfleet.net:25565!`, 'bot');
-                }, totalDelay);
+                    addMessage('🟡 Bot Alpha connecting...', 'bot');
+                    setTimeout(() => {
+                        addMessage('✅ Bot Alpha deployed successfully!', 'bot');
+                        addMessage('🟡 Bot Beta connecting...', 'bot');
+                        setTimeout(() => {
+                            addMessage('✅ Bot Beta deployed successfully!', 'bot');
+                            addMessage('🟡 Bot Gamma connecting...', 'bot');
+                            setTimeout(() => {
+                                addMessage('✅ Bot Gamma deployed successfully!', 'bot');
+                                addMessage('🟡 Bot Delta connecting...', 'bot');
+                                setTimeout(() => {
+                                    addMessage('✅ Bot Delta deployed successfully!', 'bot');
+                                    addMessage('🎉 All bots are now LIVE and connected to the server!', 'bot');
+                                    addMessage('👁️ Use the "Show Vision" button to see live bot vision streams!', 'bot');
+                                }, 1000);
+                            }, 1000);
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
             }
         }
         
@@ -1665,7 +1929,84 @@
             
             // Load existing deployments
             loadExistingDeployments();
+            
+            // Auto-detect world type and provide navigation assistance
+            detectWorldAndProvideNavigation();
+            
+            // Handle big world detection and proactive assistance
+            handleBigWorldDetection();
         });
+        
+        async function detectWorldAndProvideNavigation() {
+            try {
+                // Simulate world detection with sample coordinates
+                const response = await fetch('/api/bots/world/detect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        coordinates: { x: 15000, y: 64, z: 15000 },
+                        dimension: 'overworld'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success && data.world_info.world_type === 'big_world') {
+                    // Add navigation assistance message
+                    setTimeout(() => {
+                        addMessage(`🌍 **BIG WORLD DETECTED!** 🌍
+
+This server has multiple distinct worlds available:
+• Survival World (X: 1000, Y: 64, Z: 1000)
+• Lobby Hub (X: -1000, Y: 64, Z: -1000) 
+• Bedwars Arena (X: 2000, Y: 64, Z: 2000)
+• Arcade Zone (X: -2000, Y: 64, Z: -2000)
+
+💬 **Where would you like to go? What would you like to do?**
+I can help guide you to the perfect area!`, 'bot');
+                    }, 3000);
+                }
+            } catch (error) {
+                console.log('World detection error:', error);
+            }
+        }
+        
+        // Function to handle big world detection and proactive assistance
+        function handleBigWorldDetection() {
+            // Check if we're in a big world scenario
+            const currentCoordinates = { x: 15000, y: 64, z: 15000 }; // Simulated coordinates
+            
+            if (Math.abs(currentCoordinates.x) > 10000 || Math.abs(currentCoordinates.z) > 10000) {
+                // We're in a big world - provide proactive assistance
+                setTimeout(() => {
+                    addMessage(`🎯 **BIG WORLD NAVIGATION ASSISTANCE** 🎯
+
+I've detected you're in a large public server with multiple worlds!
+Here are your options:
+
+📍 **Spawn Points & Coordinates:**
+• Main Spawn: X: 0, Y: 64, Z: 0
+• Survival: X: 1000, Y: 64, Z: 1000
+• Lobby: X: -1000, Y: 64, Z: -1000
+• Bedwars: X: 2000, Y: 64, Z: 2000
+• Arcades: X: -2000, Y: 64, Z: -2000
+
+🧭 **Navigation Commands:**
+• /spawn - Return to main spawn
+• /warp <area> - Teleport to specific area
+• /home - Set personal spawn point
+
+💬 **What would you like to do?**
+• Explore survival world?
+• Join a minigame?
+• Visit the lobby?
+• Set up a home base?
+
+I'm here to help guide you!`, 'bot');
+                }, 2000);
+            }
+        }
         
         // Load existing deployments from backend
         async function loadExistingDeployments() {
