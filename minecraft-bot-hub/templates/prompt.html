@@ -1158,34 +1158,56 @@
         let isVisionVisible = true;
         let chatHistory = [];
         
-        // Initialize the app
+        // Initialize the app - CONSOLIDATED INTO ONE DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function() {
             setupMessageInput();
             simulateBotVision();
+            
+            // Initialize slider functionality
+            const botCountSlider = document.getElementById('botCount');
+            const sliderValue = document.getElementById('sliderValue');
+            
+            if (botCountSlider && sliderValue) {
+                botCountSlider.addEventListener('input', function() {
+                    const botCount = this.value;
+                    sliderValue.textContent = botCount + ' bots';
+                    updateBotNames(botCount);
+                });
+            }
+            
+            // Initialize bot names
+            updateBotNames(4);
+            
+            // Load existing deployments
+            loadExistingDeployments();
         });
         
         function setupMessageInput() {
             const messageInput = document.getElementById('messageInput');
             const sendButton = document.getElementById('sendButton');
             
-            messageInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+            if (messageInput && sendButton) {
+                messageInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+                    
+                    // Enable/disable send button based on input
+                    sendButton.disabled = !this.value.trim();
+                });
                 
-                // Enable/disable send button based on input
-                sendButton.disabled = !this.value.trim();
-            });
-            
-            messageInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
+                messageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
         }
         
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
+            if (!messageInput) return;
+            
             const message = messageInput.value.trim();
             
             if (!message) return;
@@ -1210,6 +1232,8 @@
         
         function addMessage(content, sender) {
             const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
             
@@ -1234,6 +1258,8 @@
         
         function showTypingIndicator() {
             const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message bot';
             typingDiv.id = 'typingIndicator';
@@ -1256,6 +1282,7 @@
             typingDiv.appendChild(typingContent);
             chatMessages.appendChild(typingDiv);
             
+            // Scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
@@ -1268,288 +1295,244 @@
         
         function generateAIResponse(userMessage) {
             const responses = [
-                "I've analyzed your request through our brain system. Based on the current bot vision data, I can see that the environment is stable and all systems are operational.",
-                "Interesting question! Let me check the live bot vision streams. I can see multiple data points that suggest we should proceed with your request.",
-                "Based on the real-time analysis from our vision systems, I recommend the following approach. The bots are currently detecting optimal conditions for this operation.",
-                "I've processed your prompt through our AI brain. The bot vision streams show that we have sufficient data to provide you with a comprehensive response.",
-                "Excellent question! Our vision systems are actively monitoring the environment. Based on the live feeds, I can give you detailed insights about your request.",
-                "I've analyzed this through our advanced brain system. The bot vision data indicates that we have multiple perspectives on this situation, allowing for a well-informed response."
+                "I understand you want to " + userMessage.toLowerCase() + ". Let me analyze the best approach for your Minecraft server.",
+                "Based on your request: " + userMessage + ", I'll coordinate with the bots to execute this action.",
+                "Analyzing your prompt: " + userMessage + ". The bots are processing this request now.",
+                "I've received your command: " + userMessage + ". Deploying appropriate bot strategies.",
+                "Processing your request: " + userMessage + ". The AI system is coordinating with all active bots.",
+                "Your prompt has been analyzed: " + userMessage + ". Executing optimal bot deployment strategy.",
+                "I understand: " + userMessage + ". The bots are now implementing this plan.",
+                "Command received: " + userMessage + ". Coordinating with all available bot resources."
             ];
-            
-            // Add some context-aware responses
-            if (userMessage.toLowerCase().includes('vision') || userMessage.toLowerCase().includes('see')) {
-                return "I'm currently monitoring the live bot vision streams. I can see multiple camera feeds showing real-time environmental data, thermal imaging, depth analysis, and object detection. What specific aspect would you like me to focus on?";
-            }
-            
-            if (userMessage.toLowerCase().includes('bot') || userMessage.toLowerCase().includes('ai')) {
-                return "Our AI bots are actively processing information through their vision systems. I can see live streams from Bot Alpha (main camera), Bot Beta (thermal vision), Bot Gamma (depth sensor), and Bot Delta (object detection). They're all working together to provide comprehensive environmental analysis.";
-            }
-            
-            if (userMessage.toLowerCase().includes('minecraft') || userMessage.toLowerCase().includes('block')) {
-                return "Ah, you're interested in the Minecraft-style interface! Our system combines the familiar blocky aesthetic with advanced AI capabilities. The bots can analyze block patterns, detect structures, and provide insights about the virtual world they're observing.";
-            }
             
             return responses[Math.floor(Math.random() * responses.length)];
         }
         
         function toggleVision() {
-            const visionSection = document.getElementById('visionSection');
-            const visionToggle = document.getElementById('visionToggle');
-            
-            if (isVisionVisible) {
-                visionSection.classList.add('collapsed');
-                visionToggle.textContent = '👁️ Show Vision';
-                isVisionVisible = false;
-            } else {
-                visionSection.classList.remove('collapsed');
-                visionToggle.textContent = '👁️ Hide Vision';
-                isVisionVisible = true;
+            const visionPanel = document.getElementById('visionPanel');
+            if (visionPanel) {
+                isVisionVisible = !isVisionVisible;
+                visionPanel.style.display = isVisionVisible ? 'block' : 'none';
+                
+                const toggleBtn = document.getElementById('toggleVisionBtn');
+                if (toggleBtn) {
+                    toggleBtn.textContent = isVisionVisible ? 'Hide Vision' : 'Show Vision';
+                }
             }
         }
         
         function startNewChat() {
             const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = `
-                <div class="message bot">
-                    <div class="message-avatar">AI</div>
-                    <div class="message-content">
-                        Hello! I'm your AI assistant. I can help you with various tasks and analyze information from our bot vision systems. What would you like to know or do today?
-                    </div>
-                </div>
-            `;
-            
-            chatHistory = [];
-            
-            // Update active chat
-            document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-            event.target.classList.add('active');
+            if (chatMessages) {
+                chatMessages.innerHTML = '';
+                chatHistory = [];
+                
+                // Add welcome message
+                addMessage("Hello! I'm your AI assistant for Minecraft Bot Hub. How can I help you today?", 'bot');
+            }
         }
         
         function simulateBotVision() {
-            // Simulate live updates in vision feeds
-            setInterval(() => {
-                const visionFeeds = document.querySelectorAll('.vision-feed-content');
-                visionFeeds.forEach((feed, index) => {
-                    if (Math.random() > 0.7) {
-                        feed.style.background = `linear-gradient(45deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)})`;
-                        setTimeout(() => {
-                            feed.style.background = '#1a1a1a';
-                        }, 500);
-                    }
+            const visionFeed = document.getElementById('visionFeed');
+            if (!visionFeed) return;
+            
+            const visionItems = [
+                { name: 'Bot-001', status: 'Online', location: 'X: 100, Y: 64, Z: -200', activity: 'Mining diamonds' },
+                { name: 'Bot-002', status: 'Online', location: 'X: 150, Y: 70, Z: -180', activity: 'Building house' },
+                { name: 'Bot-003', status: 'Online', location: 'X: 80, Y: 65, Z: -220', activity: 'Farming wheat' },
+                { name: 'Bot-004', status: 'Online', location: 'X: 120, Y: 68, Z: -190', activity: 'Exploring caves' }
+            ];
+            
+            visionFeed.innerHTML = '';
+            
+            visionItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'vision-item';
+                itemDiv.innerHTML = `
+                    <div class="vision-header">
+                        <span class="bot-name">${item.name}</span>
+                        <span class="bot-status ${item.status.toLowerCase()}">${item.status}</span>
+                    </div>
+                    <div class="vision-details">
+                        <div class="vision-location">📍 ${item.location}</div>
+                        <div class="vision-activity">🔧 ${item.activity}</div>
+                    </div>
+                `;
+                
+                itemDiv.addEventListener('click', function() {
+                    // Highlight selected bot
+                    document.querySelectorAll('.vision-item').forEach(i => i.classList.remove('selected'));
+                    this.classList.add('selected');
                 });
-            }, 3000);
+                
+                visionFeed.appendChild(itemDiv);
+            });
         }
         
-        // Add some sample chat history
-        document.querySelectorAll('.chat-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-        
-        // Settings functionality
-        let isSettingsVisible = false;
-        
         function toggleSettings() {
-            const settingsSection = document.getElementById('settingsSection');
-            const settingsToggle = document.getElementById('settingsToggle');
-            
-            if (isSettingsVisible) {
-                settingsSection.classList.remove('active');
-                settingsToggle.textContent = '⚙️ Settings';
-                isSettingsVisible = false;
-            } else {
-                settingsSection.classList.add('active');
-                settingsToggle.textContent = '⚙️ Close';
-                isSettingsVisible = true;
-                updateSystemInfo();
+            const settingsPanel = document.getElementById('settingsPanel');
+            if (settingsPanel) {
+                const isVisible = settingsPanel.style.display !== 'none';
+                settingsPanel.style.display = isVisible ? 'none' : 'block';
+                
+                const toggleBtn = document.getElementById('toggleSettingsBtn');
+                if (toggleBtn) {
+                    toggleBtn.textContent = isVisible ? 'Show Settings' : 'Hide Settings';
+                }
             }
         }
         
         function saveServerConfig() {
             const serverName = document.getElementById('serverName').value;
-            const serverPort = document.getElementById('serverPort').value;
             const serverIP = document.getElementById('serverIP').value;
+            const serverPort = document.getElementById('serverPort').value;
             
-            if (!serverName || !serverPort || !serverIP) {
+            if (!serverName || !serverIP || !serverPort) {
                 alert('Please fill in all server configuration fields');
                 return;
             }
             
-            // Simulate saving configuration
-            const saveBtn = document.querySelector('.save-btn');
-            const originalText = saveBtn.textContent;
-            saveBtn.textContent = '💾 Saving...';
-            saveBtn.disabled = true;
+            // Save configuration (in real app, this would go to backend)
+            localStorage.setItem('serverConfig', JSON.stringify({
+                name: serverName,
+                ip: serverIP,
+                port: serverPort
+            }));
             
-            setTimeout(() => {
-                saveBtn.textContent = '✅ Saved!';
-                setTimeout(() => {
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                }, 2000);
-                
-                // Add to chat
-                addMessage(`Server configuration updated: ${serverName} (${serverIP}:${serverPort})`, 'bot');
-            }, 1500);
+            alert('Server configuration saved successfully!');
         }
         
         function pingBot(botName) {
-            const botItem = document.querySelector(`[onclick="pingBot('${botName}')"]`).closest('.bot-item');
-            const status = botItem.querySelector('.bot-status');
-            const pingBtn = botItem.querySelector('.bot-action-btn');
-            
-            // Simulate ping
-            pingBtn.textContent = 'Pinging...';
-            pingBtn.disabled = true;
-            
-            setTimeout(() => {
-                const isOnline = Math.random() > 0.2; // 80% chance of being online
+            const statusElement = document.getElementById(`botStatus_${botName}`);
+            if (statusElement) {
+                statusElement.textContent = 'Pinging...';
+                statusElement.className = 'bot-status pinging';
                 
-                if (isOnline) {
-                    status.classList.remove('offline');
-                    status.style.background = '#10a37f';
-                    pingBtn.textContent = 'Online';
-                } else {
-                    status.style.background = '#ef4444';
-                    pingBtn.textContent = 'Offline';
-                }
-                
+                // Simulate ping response
                 setTimeout(() => {
-                    pingBtn.textContent = 'Ping';
-                    pingBtn.disabled = false;
-                }, 2000);
-            }, 1000 + Math.random() * 2000);
+                    statusElement.textContent = 'Online';
+                    statusElement.className = 'bot-status online';
+                }, 1000 + Math.random() * 2000);
+            }
         }
         
         function restartBot(botName) {
-            const botItem = document.querySelector(`[onclick="restartBot('${botName}')`).closest('.bot-item');
-            const restartBtn = botItem.querySelector('.bot-action-btn:last-child');
-            const status = botItem.querySelector('.bot-status');
-            
-            // Simulate restart
-            restartBtn.textContent = 'Restarting...';
-            restartBtn.disabled = true;
-            status.style.background = '#f59e0b';
-            
-            setTimeout(() => {
-                status.style.background = '#10a37f';
-                restartBtn.textContent = 'Restart';
-                restartBtn.disabled = false;
+            const statusElement = document.getElementById(`botStatus_${botName}`);
+            if (statusElement) {
+                statusElement.textContent = 'Restarting...';
+                statusElement.className = 'bot-status restarting';
                 
-                // Add to chat
-                addMessage(`Bot ${botName} has been restarted successfully.`, 'bot');
-            }, 3000);
+                // Simulate restart
+                setTimeout(() => {
+                    statusElement.textContent = 'Online';
+                    statusElement.className = 'bot-status online';
+                }, 3000 + Math.random() * 2000);
+            }
         }
         
         function pingTarget() {
-            const target = document.getElementById('pingTarget').value;
-            if (!target) {
-                alert('Please enter a target IP or hostname');
+            const targetIP = document.getElementById('pingTarget').value;
+            if (!targetIP) {
+                alert('Please enter a target IP address');
                 return;
             }
             
-            const pingBtn = document.querySelector('[onclick="pingTarget()"]');
-            const originalText = pingBtn.textContent;
-            pingBtn.textContent = '📡 Pinging...';
-            pingBtn.disabled = true;
-            
-            setTimeout(() => {
-                const pingTime = Math.floor(Math.random() * 100) + 10; // 10-110ms
-                pingBtn.textContent = `📡 ${pingTime}ms`;
+            const pingResult = document.getElementById('pingResult');
+            if (pingResult) {
+                pingResult.textContent = 'Pinging...';
                 
+                // Simulate ping
                 setTimeout(() => {
-                    pingBtn.textContent = originalText;
-                    pingBtn.disabled = false;
-                }, 3000);
-                
-                // Add to chat
-                addMessage(`Ping to ${target}: ${pingTime}ms`, 'bot');
-            }, 1000 + Math.random() * 2000);
+                    const latency = Math.floor(Math.random() * 100) + 20;
+                    pingResult.textContent = `Ping: ${latency}ms`;
+                }, 1000);
+            }
         }
         
         function refreshConnection() {
-            const statusDiv = document.getElementById('connectionStatus');
-            const refreshBtn = statusDiv.querySelector('.refresh-btn');
-            
-            refreshBtn.style.transform = 'rotate(360deg)';
-            refreshBtn.style.transform = 'rotate(360deg)';
-            refreshBtn.style.transition = 'transform 1s ease';
-            
-            setTimeout(() => {
-                refreshBtn.style.transform = 'rotate(0deg)';
-                statusDiv.classList.remove('connected', 'disconnected');
-                statusDiv.classList.add('connected');
-                statusDiv.innerHTML = '🟢 Connected to Server <button class="refresh-btn" onclick="refreshConnection()">🔄</button>';
-            }, 1000);
+            const connectionStatus = document.getElementById('connectionStatus');
+            if (connectionStatus) {
+                connectionStatus.textContent = 'Refreshing...';
+                
+                // Simulate refresh
+                setTimeout(() => {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.className = 'connection-status connected';
+                }, 1500);
+            }
         }
         
         function updateSystemInfo() {
-            // Update current time
-            const now = new Date();
-            document.getElementById('currentTime').value = now.toLocaleString();
-            
-            // Update uptime (simulated)
-            const uptimeHours = Math.floor(Math.random() * 24) + 1;
-            const uptimeMinutes = Math.floor(Math.random() * 60);
-            document.getElementById('uptime').value = `${uptimeHours}h ${uptimeMinutes}m`;
-            
-            // Update active connections
-            const connections = Math.floor(Math.random() * 50) + 10;
-            document.getElementById('activeConnections').value = `${connections} connections`;
+            const systemInfo = document.getElementById('systemInfo');
+            if (systemInfo) {
+                const info = {
+                    uptime: Math.floor(Math.random() * 24) + 'h ' + Math.floor(Math.random() * 60) + 'm',
+                    memory: Math.floor(Math.random() * 20) + 80 + '%',
+                    cpu: Math.floor(Math.random() * 30) + 40 + '%',
+                    connections: Math.floor(Math.random() * 50) + 10
+                };
+                
+                systemInfo.innerHTML = `
+                    <div class="info-item">
+                        <label>Uptime</label>
+                        <span>${info.uptime}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Memory Usage</label>
+                        <span>${info.memory}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>CPU Usage</label>
+                        <span>${info.cpu}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Active Connections</label>
+                        <span>${info.connections}</span>
+                    </div>
+                `;
+            }
         }
         
-        // Update system info every minute
-        setInterval(updateSystemInfo, 60000);
-        
-        // Bot deployment functionality
         function deployBots() {
-            const deploymentName = document.getElementById('deploymentName').value;
             const botCount = document.getElementById('botCount').value;
-            const serverIP = document.getElementById('deploymentServerIP').value;
             const serverName = document.getElementById('deploymentServerName').value;
+            const serverIP = document.getElementById('deploymentServerIP').value;
             const serverPort = document.getElementById('deploymentServerPort').value;
-            const botNames = getAllBotNames();
             
-            if (!deploymentName || !botCount || !serverIP || !serverName || !serverPort) {
+            if (!botCount || !serverName || !serverIP || !serverPort) {
                 alert('Please fill in all deployment fields');
                 return;
             }
             
-            const deployBtn = document.querySelector('.deploy-btn');
+            const deployBtn = document.getElementById('deployBtn');
             const originalText = deployBtn.textContent;
-            deployBtn.textContent = '🚀 Deploying...';
+            
+            deployBtn.textContent = 'Deploying...';
             deployBtn.disabled = true;
-            deployBtn.classList.add('deploying');
+            
+            // Get bot names
+            const botNames = getAllBotNames();
             
             // Create deployment data
             const deploymentData = {
-                deployment_name: deploymentName,
+                name: `Deployment-${Date.now()}`,
                 bot_count: parseInt(botCount),
-                server_ip: serverIP,
                 server_name: serverName,
+                server_ip: serverIP,
                 server_port: parseInt(serverPort),
-                bot_names: botNames.map(bot => bot.name),
-                configuration: {
-                    auto_restart: true,
-                    max_bots: 20,
-                    deployment_zone: 'main',
-                    priority: 'high'
-                }
+                bot_names: botNames
             };
             
-            // Send deployment to backend
+            // Create deployment
             createDeployment(deploymentData, deployBtn, originalText, botNames);
         }
         
-        // Create deployment in backend
         async function createDeployment(deploymentData, deployBtn, originalText, botNames) {
             try {
                 const response = await fetch('/api/deployments/create', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(deploymentData)
                 });
@@ -1557,115 +1540,82 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Success - update button
-                    deployBtn.textContent = '✅ Deployed!';
-                    deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    // Simulate deployment process
+                    deployBtn.textContent = 'Deploying...';
                     
-                    // Add to chat with bot names
-                    const botNameList = botNames.map(bot => bot.name).join(', ');
-                    addMessage(`Successfully deployed ${deploymentData.bot_count} bots (${botNameList}) to ${deploymentData.server_name} (${deploymentData.server_ip}:${deploymentData.server_port})`, 'bot');
+                    const totalDelay = 2000 + (deploymentData.bot_count * 500);
+                    const botNameList = botNames.join(', ');
                     
-                    // Reset button after delay
                     setTimeout(() => {
-                        deployBtn.textContent = originalText;
-                        deployBtn.disabled = false;
-                        deployBtn.classList.remove('deploying');
-                        deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-                    }, 2000);
-                    
+                        deployBtn.textContent = 'Deployed!';
+                        deployBtn.className = 'deploy-btn deployed';
+                        
+                        // Add success message to chat
+                        addMessage(`🎉 Deployment created successfully! Deploying ${deploymentData.bot_count} bots to ${deploymentData.server_name}`, 'bot');
+                        
+                        setTimeout(() => {
+                            deployBtn.textContent = originalText;
+                            deployBtn.disabled = false;
+                            deployBtn.className = 'deploy-btn';
+                        }, 2000);
+                        
+                        // Simulate bot deployment
+                        addMessage(`🚀 Deploying bots: ${botNameList}`, 'bot');
+                        
+                        setTimeout(() => {
+                            addMessage(`🎉 All bots (${botNameList}) are now LIVE and connected to ${deploymentData.server_ip}:${deploymentData.server_port}!`, 'bot');
+                        }, totalDelay);
+                    }, totalDelay);
                 } else {
-                    // Error - show message and reset button
-                    alert('Deployment failed: ' + data.error);
-                    deployBtn.textContent = originalText;
-                    deployBtn.disabled = false;
-                    deployBtn.classList.remove('deploying');
-                    deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    throw new Error(data.error || 'Deployment failed');
                 }
-                
             } catch (error) {
                 console.error('Deployment error:', error);
-                alert('Deployment failed. Please try again.');
-                deployBtn.textContent = originalText;
-                deployBtn.disabled = false;
-                deployBtn.classList.remove('deploying');
-                deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                deployBtn.textContent = 'Deployment Failed';
+                deployBtn.className = 'deploy-btn failed';
+                
+                addMessage(`❌ Deployment failed: ${error.message}`, 'bot');
+                
+                setTimeout(() => {
+                    deployBtn.textContent = originalText;
+                    deployBtn.disabled = false;
+                    deployBtn.className = 'deploy-btn';
+                }, 3000);
             }
         }
         
-        // Go Live functionality
         function goLive() {
+            const botCount = document.getElementById('botCount').value;
+            const serverName = document.getElementById('deploymentServerName').value;
+            const serverIP = document.getElementById('deploymentServerIP').value;
+            const serverPort = document.getElementById('deploymentServerPort').value;
+            
+            if (!botCount || !serverName || !serverIP || !serverPort) {
+                alert('Please fill in all deployment fields');
+                return;
+            }
+            
             const goLiveBtn = document.getElementById('goLiveBtn');
             const originalText = goLiveBtn.textContent;
             
-            if (goLiveBtn.classList.contains('live')) {
-                // Stop live mode
-                goLiveBtn.textContent = '⏹️ Stop Live';
-                goLiveBtn.classList.remove('live');
-                goLiveBtn.style.background = 'linear-gradient(135deg, #6c757d, #495057)';
+            goLiveBtn.textContent = 'Going Live...';
+            goLiveBtn.disabled = true;
+            
+            // Get bot names
+            const botNames = getAllBotNames();
+            
+            // Simulate going live
+            addMessage(`🚀 Going LIVE with ${botCount} bots to ${serverName}!`, 'bot');
+            
+            const totalDelay = 3000 + (botCount * 800);
+            
+            setTimeout(() => {
+                goLiveBtn.textContent = 'LIVE!';
+                goLiveBtn.className = 'go-live-btn live';
                 
-                // Update all bot statuses to offline
-                const botCount = document.getElementById('botCount').value;
-                for (let i = 1; i <= botCount; i++) {
-                    updateBotStatus(i, 'offline');
-                }
-                
-                // Add to chat
-                addMessage('Live mode stopped. All bots are now offline.', 'bot');
-            } else {
-                // Start live mode
-                goLiveBtn.textContent = '🟢 LIVE';
-                goLiveBtn.classList.add('live');
-                
-                // Add to chat
-                addMessage('🚀 GOING LIVE! Bots are now deploying and connecting to the server...', 'bot');
-                
-                // Get bot names and simulate deployment process
-                const botNames = getAllBotNames();
-                
-                botNames.forEach((bot, index) => {
-                    const delay = (index + 1) * 2000; // 2 seconds apart
-                    
-                    setTimeout(() => {
-                        // Update bot status to connecting
-                        updateBotStatus(bot.id, 'connecting');
-                        addMessage(`🟡 ${bot.name} is connecting...`, 'bot');
-                        
-                        // After 1 second, set to online
-                        setTimeout(() => {
-                            updateBotStatus(bot.id, 'online');
-                            addMessage(`✅ ${bot.name} deployed successfully!`, 'bot');
-                        }, 1000);
-                    }, delay);
-                });
-                
-                // Final success message
-                const totalDelay = (botNames.length + 1) * 2000;
-                setTimeout(() => {
-                    const botNameList = botNames.map(bot => bot.name).join(', ');
-                    addMessage(`🎉 All bots (${botNameList}) are now LIVE and connected to play.mcfleet.net:25565!`, 'bot');
-                }, totalDelay);
-            }
+                addMessage(`🎉 All bots (${botNames.join(', ')}) are now LIVE and connected to ${serverIP}:${serverPort}!`, 'bot');
+            }, totalDelay);
         }
-        
-        // Initialize slider functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const botCountSlider = document.getElementById('botCount');
-            const sliderValue = document.getElementById('sliderValue');
-            
-            if (botCountSlider && sliderValue) {
-                botCountSlider.addEventListener('input', function() {
-                    const botCount = this.value;
-                    sliderValue.textContent = botCount + ' bots';
-                    updateBotNames(botCount);
-                });
-            }
-            
-            // Initialize bot names
-            updateBotNames(4);
-            
-            // Load existing deployments
-            loadExistingDeployments();
-        });
         
         // Load existing deployments from backend
         async function loadExistingDeployments() {
@@ -1686,21 +1636,29 @@
         // Load deployment data into form
         function loadDeploymentToForm(deployment) {
             if (deployment.deployment_name) {
-                document.getElementById('deploymentName').value = deployment.deployment_name;
+                const element = document.getElementById('deploymentName');
+                if (element) element.value = deployment.deployment_name;
             }
             if (deployment.bot_count) {
-                document.getElementById('botCount').value = deployment.bot_count;
-                document.getElementById('sliderValue').textContent = deployment.bot_count + ' bots';
-                updateBotNames(deployment.bot_count);
+                const element = document.getElementById('botCount');
+                if (element) {
+                    element.value = deployment.bot_count;
+                    const sliderValue = document.getElementById('sliderValue');
+                    if (sliderValue) sliderValue.textContent = deployment.bot_count + ' bots';
+                    updateBotNames(deployment.bot_count);
+                }
             }
             if (deployment.server_ip) {
-                document.getElementById('deploymentServerIP').value = deployment.server_ip;
+                const element = document.getElementById('deploymentServerIP');
+                if (element) element.value = deployment.server_ip;
             }
             if (deployment.server_name) {
-                document.getElementById('deploymentServerName').value = deployment.server_name;
+                const element = document.getElementById('deploymentServerName');
+                if (element) element.value = deployment.server_name;
             }
             if (deployment.server_port) {
-                document.getElementById('deploymentServerPort').value = deployment.server_port;
+                const element = document.getElementById('deploymentServerPort');
+                if (element) element.value = deployment.server_port;
             }
             
             // Load bot names if available
@@ -1747,66 +1705,45 @@
                 'Guardian', 'Scout', 'Navigator', 'Artisan'
             ];
             
-            return gamerNames[botNumber - 1] || `Bot${botNumber}`;
+            if (botNumber <= gamerNames.length) {
+                return gamerNames[botNumber - 1];
+            } else {
+                return `Bot${botNumber}`;
+            }
         }
         
         function createBotNameItem(botId, defaultName) {
-            const div = document.createElement('div');
-            div.className = 'bot-name-item';
+            const botItem = document.createElement('div');
+            botItem.className = 'bot-name-item';
+            botItem.innerHTML = `
+                <input type="text" 
+                       class="bot-name-input" 
+                       value="${defaultName}" 
+                       placeholder="Bot ${botId} name"
+                       data-bot-id="${botId}">
+                <div class="bot-status-indicator online" id="botStatus_${botId}">Online</div>
+            `;
             
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'bot-name-input';
-            input.placeholder = `Bot ${botId} name`;
-            input.value = defaultName;
-            input.dataset.botId = botId;
-            
-            const statusTag = document.createElement('span');
-            statusTag.className = 'status-tag offline';
-            statusTag.textContent = '🔴 Offline';
-            
-            div.appendChild(input);
-            div.appendChild(statusTag);
-            
-            return div;
+            return botItem;
         }
         
         function updateBotStatus(botId, status) {
-            const botItem = document.querySelector(`[data-bot-id="${botId}"]`);
-            if (!botItem) return;
-            
-            const statusTag = botItem.parentElement.querySelector('.status-tag');
-            if (!statusTag) return;
-            
-            // Remove existing status classes
-            statusTag.classList.remove('online', 'offline', 'connecting');
-            
-            // Add new status
-            switch (status) {
-                case 'online':
-                    statusTag.classList.add('online');
-                    statusTag.textContent = '🟢 Online';
-                    break;
-                case 'offline':
-                    statusTag.classList.add('offline');
-                    statusTag.textContent = '🔴 Offline';
-                    break;
-                case 'connecting':
-                    statusTag.classList.add('connecting');
-                    statusTag.textContent = '🟡 Connecting';
-                    break;
+            const statusElement = document.getElementById(`botStatus_${botId}`);
+            if (statusElement) {
+                statusElement.textContent = status;
+                statusElement.className = `bot-status-indicator ${status.toLowerCase()}`;
             }
         }
         
         function getAllBotNames() {
-            const botInputs = document.querySelectorAll('.bot-name-input');
+            const botNameInputs = document.querySelectorAll('.bot-name-input');
             const botNames = [];
             
-            botInputs.forEach(input => {
-                botNames.push({
-                    id: input.dataset.botId,
-                    name: input.value.trim() || input.placeholder
-                });
+            botNameInputs.forEach(input => {
+                const name = input.value.trim();
+                if (name) {
+                    botNames.push(name);
+                }
             });
             
             return botNames;
