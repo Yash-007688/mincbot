@@ -1,0 +1,14 @@
+{
+    "commands": {
+        "team_formation": {
+            "description": "Set team formation",
+            "format": "team_formation <formation_type>",
+            "example": "team_formation line"
+        },
+        "team_action": {
+            "description": "Perform team action",
+            "format": "team_action <action_type>",
+            "example": "team_action defend"
+        }
+    }
+} 

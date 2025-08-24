@@ -1,0 +1,18 @@
+    "commands": {
+        "move": {
+            "description": "Move bot to specific coordinates",
+            "format": "move <bot_name> <x> <y> <z>",
+            "example": "move Bot1 100 64 200"
+        },
+        "follow": {
+            "description": "Make bot follow another bot",
+            "format": "follow <bot_name> <target_bot>",
+            "example": "follow Bot1 Bot2"
+        },
+        "stop": {
+            "description": "Stop bot movement",
+            "format": "stop <bot_name>",
+            "example": "stop Bot1"
+        }
+    }
+} 

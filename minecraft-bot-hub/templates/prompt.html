@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat & Bot Vision - Minecraft Bot Hub</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f7f7f8;
+            color: #374151;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #202123;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #4a4b4d;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #4a4b4d;
+        }
+        
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #8B4513;
+        }
+        
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.2s ease;
+        }
+        
+        .new-chat-btn:hover {
+            background: #A0522D;
+        }
+        
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px;
+        }
+        
+        .chat-item {
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .chat-item:hover {
+            background: #2d2d30;
+        }
+        
+        .chat-item.active {
+            background: #343541;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid #4a4b4d;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #8B4513;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Chat Section */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #343541;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            background: #40414f;
+            border-bottom: 1px solid #565869;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chat-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .vision-toggle {
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .vision-toggle:hover {
+            background: #A0522D;
+        }
+        
+        .go-live-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .go-live-btn:hover {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .go-live-btn:active {
+            transform: translateY(0);
+        }
+        
+        .go-live-btn.live {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            animation: none;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .settings-toggle {
+            background: #40414f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .settings-toggle:hover {
+            background: #8B4513;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0 12px;
+        }
+        
+        .message.user .message-avatar {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .message.bot .message-avatar {
+            background: #10a37f;
+            color: white;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .message.user .message-content {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .message.bot .message-content {
+            background: #40414f;
+            color: white;
+        }
+        
+        .message-input-container {
+            padding: 20px;
+            background: #40414f;
+            border-top: 1px solid #565869;
+        }
+        
+        .message-input-wrapper {
+            position: relative;
+            max-width: 768px;
+            margin: 0 auto;
+        }
+        
+        .message-input {
+            width: 100%;
+            padding: 12px 50px 12px 16px;
+            border: 1px solid #565869;
+            border-radius: 12px;
+            background: #40414f;
+            color: white;
+            font-size: 16px;
+            resize: none;
+            min-height: 52px;
+            max-height: 200px;
+        }
+        
+        .message-input:focus {
+            outline: none;
+            border-color: #8B4513;
+        }
+        
+        .send-button {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .send-button:hover {
+            background: #A0522D;
+        }
+        
+        .send-button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        /* Vision Section */
+        .vision-section {
+            width: 400px;
+            background: #1a1a1a;
+            border-left: 1px solid #4a4b4d;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .vision-section.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+        
+        .vision-header {
+            padding: 20px;
+            background: #2d2d30;
+            border-bottom: 1px solid #4a4b4d;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .vision-grid {
+            flex: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            overflow-y: auto;
+        }
+        
+        .vision-feed {
+            background: #2d2d30;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #4a4b4d;
+        }
+        
+        .vision-feed-header {
+            padding: 12px 16px;
+            background: #40414f;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid #4a4b4d;
+        }
+        
+        .vision-feed-content {
+            height: 200px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .vision-placeholder {
+            text-align: center;
+        }
+        
+        .vision-placeholder .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .live-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .vision-section {
+                width: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .vision-section {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(100%);
+            }
+            
+            .vision-section.active {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Loading animation */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #10a37f;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Back to home button */
+        .back-home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1001;
+            transition: all 0.2s ease;
+        }
+        
+        .back-home-btn:hover {
+            background: #A0522D;
+        }
+        
+        /* Settings Section */
+        .settings-section {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: #1a1a1a;
+            border-left: 1px solid #4a4b4d;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .settings-section.active {
+            transform: translateX(0);
+        }
+        
+        .settings-header {
+            padding: 20px;
+            background: #2d2d30;
+            border-bottom: 1px solid #4a4b4d;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .settings-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .settings-close:hover {
+            background: #40414f;
+        }
+        
+        .settings-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .settings-group {
+            margin-bottom: 30px;
+        }
+        
+        .settings-group h3 {
+            color: #F5DEB3;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 8px;
+        }
+        
+        .form-field {
+            margin-bottom: 20px;
+        }
+        
+        .form-field label {
+            display: block;
+            color: #DEB887;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-field input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4a4b4d;
+            border-radius: 8px;
+            background: #2d2d30;
+            color: white;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .form-field input:focus {
+            outline: none;
+            border-color: #8B4513;
+            box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
+        }
+        
+        .form-field input::placeholder {
+            color: #6b7280;
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 12px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+        
+        .save-btn:hover {
+            background: #A0522D;
+        }
+        
+        .save-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .bot-list {
+            background: #2d2d30;
+            border-radius: 8px;
+            border: 1px solid #4a4b4d;
+            overflow: hidden;
+        }
+        
+        .bot-item {
+            padding: 15px;
+            border-bottom: 1px solid #4a4b4d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .bot-item:last-child {
+            border-bottom: none;
+        }
+        
+        .bot-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .bot-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10a37f;
+            animation: pulse 2s infinite;
+        }
+        
+        .bot-status.offline {
+            background: #ef4444;
+            animation: none;
+        }
+        
+        .bot-details h4 {
+            color: #F5DEB3;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .bot-details p {
+            color: #DEB887;
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        .bot-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .bot-action-btn {
+            background: #40414f;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .bot-action-btn:hover {
+            background: #8B4513;
+        }
+        
+        /* Bot Deployment */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        
+        .bot-count-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e1e5e9;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .bot-count-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #8B4513;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .bot-count-slider::-webkit-slider-thumb:hover {
+            background: #A0522D;
+            transform: scale(1.1);
+        }
+        
+        .slider-value {
+            font-weight: 600;
+            color: #8B4513;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        /* Bot Names Styling */
+        .bot-names-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .bot-name-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .bot-name-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #565869;
+            border-radius: 6px;
+            background: #40414f;
+            color: white;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .bot-name-input:focus {
+            outline: none;
+            border-color: #8B4513;
+            box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
+        }
+        
+        .bot-name-input::placeholder {
+            color: #8a8b8c;
+        }
+        
+        .status-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 80px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .status-tag.online {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+        
+        .status-tag.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .status-tag.connecting {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid #fbbf24;
+        }
+        
+        .bot-names-info {
+            margin-top: 8px;
+            color: #8a8b8c;
+            font-style: italic;
+        }
+        
+        .deploy-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .deploy-btn:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .deploy-btn:active {
+            transform: translateY(0);
+        }
+        
+        .deploy-btn.deploying {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            cursor: not-allowed;
+        }
+        
+        .connection-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .connection-status.connected {
+            background: rgba(16, 163, 127, 0.2);
+            color: #10a37f;
+            border: 1px solid #10a37f;
+        }
+        
+        .connection-status.disconnected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .refresh-btn {
+            background: #40414f;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+        }
+        
+        .refresh-btn:hover {
+            background: #8B4513;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-home-btn" onclick="window.location.href='index.html'">← Home</button>
+    
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">MINECRAFT BOT HUB</div>
+            </div>
+            
+            <button class="new-chat-btn" onclick="startNewChat()">+ New Chat</button>
+            
+            <div class="chat-history" id="chatHistory">
+                <div class="chat-item active">General Chat</div>
+                <div class="chat-item">Bot Vision Analysis</div>
+                <div class="chat-item">Minecraft World</div>
+                <div class="chat-item">AI Assistance</div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">U</div>
+                    <span>User</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <div class="chat-header">
+                    <div class="chat-title">AI Chat Assistant</div>
+                    <div class="header-actions">
+                        <button class="go-live-btn" onclick="goLive()" id="goLiveBtn">
+                            🚀 Go Live
+                        </button>
+                        <button class="vision-toggle" onclick="toggleVision()" id="visionToggle">
+                            👁️ Show Vision
+                        </button>
+                        <button class="settings-toggle" onclick="toggleSettings()" id="settingsToggle">
+                            ⚙️ Settings
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-content">
+                            Hello! I'm your AI assistant. I can help you with various tasks and analyze information from our bot vision systems. What would you like to know or do today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message-input-container">
+                    <div class="message-input-wrapper">
+                        <textarea 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Type your message here..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-button" onclick="sendMessage()" id="sendButton">
+                            ➤
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vision Section -->
+        <div class="vision-section" id="visionSection">
+            <div class="vision-header">
+                🤖 Live Bot Vision Streams
+            </div>
+            
+            <div class="vision-grid">
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Alpha - Main Camera
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">📹</div>
+                            <div>Live Stream</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Analyzing environment...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Beta - Thermal Vision
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">🔥</div>
+                            <div>Thermal Feed</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Temperature mapping...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Gamma - Depth Sensor
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">📐</div>
+                            <div>Depth Analysis</div>
+                            <div style="font-size: 12px; margin-top: 5px;">3D mapping...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vision-feed">
+                    <div class="vision-feed-header">
+                        Bot Delta - Object Detection
+                        <div class="live-indicator">LIVE</div>
+                    </div>
+                    <div class="vision-feed-content">
+                        <div class="vision-placeholder">
+                            <div class="icon">🎯</div>
+                            <div>Object Tracking</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Identifying objects...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Section -->
+    <div class="settings-section" id="settingsSection">
+        <div class="settings-header">
+            <span>⚙️ Settings & Configuration</span>
+            <button class="settings-close" onclick="toggleSettings()">×</button>
+        </div>
+        
+        <div class="settings-content">
+            <!-- Connection Status -->
+            <div class="connection-status connected" id="connectionStatus">
+                🟢 Connected to Server
+                <button class="refresh-btn" onclick="refreshConnection()">🔄</button>
+            </div>
+            
+            <!-- Server Configuration -->
+            <div class="settings-group">
+                <h3>🌐 Server Configuration</h3>
+                <div class="form-field">
+                    <label for="serverName">Server Name</label>
+                    <input type="text" id="serverName" placeholder="Enter server name" value="Minecraft Bot Hub">
+                </div>
+                <div class="form-field">
+                    <label for="serverPort">Server Port</label>
+                    <input type="number" id="serverPort" placeholder="Enter port number" value="25565">
+                </div>
+                <div class="form-field">
+                    <label for="serverIP">Server IP Address</label>
+                    <input type="text" id="serverIP" placeholder="Enter server IP" value="192.168.1.100">
+                </div>
+                <button class="save-btn" onclick="saveServerConfig()">💾 Save Configuration</button>
+            </div>
+            
+            <!-- Bot Management -->
+            <div class="settings-group">
+                <h3>🤖 Bot Management</h3>
+                <div class="bot-list" id="botList">
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status"></div>
+                            <div class="bot-details">
+                                <h4>Bot Alpha</h4>
+                                <p>IP: 192.168.1.101 | Port: 8080</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('alpha')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('alpha')">Restart</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status"></div>
+                            <div class="bot-details">
+                                <h4>Bot Beta</h4>
+                                <p>IP: 192.168.1.102 | Port: 8081</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('beta')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('beta')">Restart</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status"></div>
+                            <div class="bot-details">
+                                <h4>Bot Gamma</h4>
+                                <p>IP: 192.168.1.103 | Port: 8082</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('gamma')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('gamma')">Restart</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-item">
+                        <div class="bot-info">
+                            <div class="bot-status offline"></div>
+                            <div class="bot-details">
+                                <h4>Bot Delta</h4>
+                                <p>IP: 192.168.1.104 | Port: 8083</p>
+                            </div>
+                        </div>
+                        <div class="bot-actions">
+                            <button class="bot-action-btn" onclick="pingBot('delta')">Ping</button>
+                            <button class="bot-action-btn" onclick="restartBot('delta')">Restart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bot Deployment Configuration -->
+            <div class="settings-group">
+                <h3>🚀 Bot Deployment</h3>
+                <div class="form-field">
+                    <label for="deploymentName">Deployment Name</label>
+                    <input type="text" id="deploymentName" placeholder="Enter deployment name" value="MCFleet Main">
+                </div>
+                <div class="form-field">
+                    <label for="botCount">Number of Bots to Deploy</label>
+                    <div class="slider-container">
+                        <input type="range" id="botCount" min="1" max="20" value="4" class="bot-count-slider">
+                        <span class="slider-value" id="sliderValue">4 bots</span>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label for="botNames">Bot Names (Real Gamer Names)</label>
+                    <div class="bot-names-container">
+                        <!-- Bot names will be generated dynamically based on slider value -->
+                    </div>
+                    <div class="bot-names-info">
+                        <small>💡 Bot names will appear as real players on the server. Use creative gamer names!</small>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label for="deploymentServerIP">Server IP</label>
+                    <input type="text" id="deploymentServerIP" placeholder="Enter server IP" value="play.mcfleet.net">
+                </div>
+                <div class="form-field">
+                    <label for="deploymentServerName">Server Name</label>
+                    <input type="text" id="deploymentServerName" placeholder="Enter server name" value="mcfleet">
+                </div>
+                <div class="form-field">
+                    <label for="deploymentServerPort">Server Port</label>
+                    <input type="number" id="deploymentServerPort" placeholder="Enter server port" value="25565">
+                </div>
+                <button class="deploy-btn" onclick="deployBots()">🚀 Deploy Bots</button>
+            </div>
+            
+            <!-- Network Tools -->
+            <div class="settings-group">
+                <h3>🔧 Network Tools</h3>
+                <div class="form-field">
+                    <label for="pingTarget">Ping Target</label>
+                    <input type="text" id="pingTarget" placeholder="Enter IP or hostname" value="8.8.8.8">
+                </div>
+                <button class="save-btn" onclick="pingTarget()">📡 Test Connection</button>
+            </div>
+            
+            <!-- System Info -->
+            <div class="settings-group">
+                <h3>💻 System Information</h3>
+                <div class="form-field">
+                    <label>Current Time</label>
+                    <input type="text" id="currentTime" readonly value="Loading...">
+                </div>
+                <div class="form-field">
+                    <label>Uptime</label>
+                    <input type="text" id="uptime" readonly value="Loading...">
+                </div>
+                <div class="form-field">
+                    <label>Active Connections</label>
+                    <input type="text" id="activeConnections" readonly value="Loading...">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let isVisionVisible = true;
+        let chatHistory = [];
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupMessageInput();
+            simulateBotVision();
+        });
+        
+        function setupMessageInput() {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+                
+                // Enable/disable send button based on input
+                sendButton.disabled = !this.value.trim();
+            });
+            
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+        
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate AI response
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = generateAIResponse(message);
+                addMessage(response, 'bot');
+            }, 1000 + Math.random() * 2000);
+        }
+        
+        function addMessage(content, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'user' ? 'U' : 'AI';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Store in history
+            chatHistory.push({ sender, content, timestamp: new Date() });
+        }
+        
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = 'AI';
+            
+            const typingContent = document.createElement('div');
+            typingContent.className = 'message-content';
+            typingContent.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(typingContent);
+            chatMessages.appendChild(typingDiv);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        function generateAIResponse(userMessage) {
+            const responses = [
+                "I've analyzed your request through our brain system. Based on the current bot vision data, I can see that the environment is stable and all systems are operational.",
+                "Interesting question! Let me check the live bot vision streams. I can see multiple data points that suggest we should proceed with your request.",
+                "Based on the real-time analysis from our vision systems, I recommend the following approach. The bots are currently detecting optimal conditions for this operation.",
+                "I've processed your prompt through our AI brain. The bot vision streams show that we have sufficient data to provide you with a comprehensive response.",
+                "Excellent question! Our vision systems are actively monitoring the environment. Based on the live feeds, I can give you detailed insights about your request.",
+                "I've analyzed this through our advanced brain system. The bot vision data indicates that we have multiple perspectives on this situation, allowing for a well-informed response."
+            ];
+            
+            // Add some context-aware responses
+            if (userMessage.toLowerCase().includes('vision') || userMessage.toLowerCase().includes('see')) {
+                return "I'm currently monitoring the live bot vision streams. I can see multiple camera feeds showing real-time environmental data, thermal imaging, depth analysis, and object detection. What specific aspect would you like me to focus on?";
+            }
+            
+            if (userMessage.toLowerCase().includes('bot') || userMessage.toLowerCase().includes('ai')) {
+                return "Our AI bots are actively processing information through their vision systems. I can see live streams from Bot Alpha (main camera), Bot Beta (thermal vision), Bot Gamma (depth sensor), and Bot Delta (object detection). They're all working together to provide comprehensive environmental analysis.";
+            }
+            
+            if (userMessage.toLowerCase().includes('minecraft') || userMessage.toLowerCase().includes('block')) {
+                return "Ah, you're interested in the Minecraft-style interface! Our system combines the familiar blocky aesthetic with advanced AI capabilities. The bots can analyze block patterns, detect structures, and provide insights about the virtual world they're observing.";
+            }
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        function toggleVision() {
+            const visionSection = document.getElementById('visionSection');
+            const visionToggle = document.getElementById('visionToggle');
+            
+            if (isVisionVisible) {
+                visionSection.classList.add('collapsed');
+                visionToggle.textContent = '👁️ Show Vision';
+                isVisionVisible = false;
+            } else {
+                visionSection.classList.remove('collapsed');
+                visionToggle.textContent = '👁️ Hide Vision';
+                isVisionVisible = true;
+            }
+        }
+        
+        function startNewChat() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = `
+                <div class="message bot">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                        Hello! I'm your AI assistant. I can help you with various tasks and analyze information from our bot vision systems. What would you like to know or do today?
+                    </div>
+                </div>
+            `;
+            
+            chatHistory = [];
+            
+            // Update active chat
+            document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function simulateBotVision() {
+            // Simulate live updates in vision feeds
+            setInterval(() => {
+                const visionFeeds = document.querySelectorAll('.vision-feed-content');
+                visionFeeds.forEach((feed, index) => {
+                    if (Math.random() > 0.7) {
+                        feed.style.background = `linear-gradient(45deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)})`;
+                        setTimeout(() => {
+                            feed.style.background = '#1a1a1a';
+                        }, 500);
+                    }
+                });
+            }, 3000);
+        }
+        
+        // Add some sample chat history
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Settings functionality
+        let isSettingsVisible = false;
+        
+        function toggleSettings() {
+            const settingsSection = document.getElementById('settingsSection');
+            const settingsToggle = document.getElementById('settingsToggle');
+            
+            if (isSettingsVisible) {
+                settingsSection.classList.remove('active');
+                settingsToggle.textContent = '⚙️ Settings';
+                isSettingsVisible = false;
+            } else {
+                settingsSection.classList.add('active');
+                settingsToggle.textContent = '⚙️ Close';
+                isSettingsVisible = true;
+                updateSystemInfo();
+            }
+        }
+        
+        function saveServerConfig() {
+            const serverName = document.getElementById('serverName').value;
+            const serverPort = document.getElementById('serverPort').value;
+            const serverIP = document.getElementById('serverIP').value;
+            
+            if (!serverName || !serverPort || !serverIP) {
+                alert('Please fill in all server configuration fields');
+                return;
+            }
+            
+            // Simulate saving configuration
+            const saveBtn = document.querySelector('.save-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '💾 Saving...';
+            saveBtn.disabled = true;
+            
+            setTimeout(() => {
+                saveBtn.textContent = '✅ Saved!';
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }, 2000);
+                
+                // Add to chat
+                addMessage(`Server configuration updated: ${serverName} (${serverIP}:${serverPort})`, 'bot');
+            }, 1500);
+        }
+        
+        function pingBot(botName) {
+            const botItem = document.querySelector(`[onclick="pingBot('${botName}')"]`).closest('.bot-item');
+            const status = botItem.querySelector('.bot-status');
+            const pingBtn = botItem.querySelector('.bot-action-btn');
+            
+            // Simulate ping
+            pingBtn.textContent = 'Pinging...';
+            pingBtn.disabled = true;
+            
+            setTimeout(() => {
+                const isOnline = Math.random() > 0.2; // 80% chance of being online
+                
+                if (isOnline) {
+                    status.classList.remove('offline');
+                    status.style.background = '#10a37f';
+                    pingBtn.textContent = 'Online';
+                } else {
+                    status.style.background = '#ef4444';
+                    pingBtn.textContent = 'Offline';
+                }
+                
+                setTimeout(() => {
+                    pingBtn.textContent = 'Ping';
+                    pingBtn.disabled = false;
+                }, 2000);
+            }, 1000 + Math.random() * 2000);
+        }
+        
+        function restartBot(botName) {
+            const botItem = document.querySelector(`[onclick="restartBot('${botName}')`).closest('.bot-item');
+            const restartBtn = botItem.querySelector('.bot-action-btn:last-child');
+            const status = botItem.querySelector('.bot-status');
+            
+            // Simulate restart
+            restartBtn.textContent = 'Restarting...';
+            restartBtn.disabled = true;
+            status.style.background = '#f59e0b';
+            
+            setTimeout(() => {
+                status.style.background = '#10a37f';
+                restartBtn.textContent = 'Restart';
+                restartBtn.disabled = false;
+                
+                // Add to chat
+                addMessage(`Bot ${botName} has been restarted successfully.`, 'bot');
+            }, 3000);
+        }
+        
+        function pingTarget() {
+            const target = document.getElementById('pingTarget').value;
+            if (!target) {
+                alert('Please enter a target IP or hostname');
+                return;
+            }
+            
+            const pingBtn = document.querySelector('[onclick="pingTarget()"]');
+            const originalText = pingBtn.textContent;
+            pingBtn.textContent = '📡 Pinging...';
+            pingBtn.disabled = true;
+            
+            setTimeout(() => {
+                const pingTime = Math.floor(Math.random() * 100) + 10; // 10-110ms
+                pingBtn.textContent = `📡 ${pingTime}ms`;
+                
+                setTimeout(() => {
+                    pingBtn.textContent = originalText;
+                    pingBtn.disabled = false;
+                }, 3000);
+                
+                // Add to chat
+                addMessage(`Ping to ${target}: ${pingTime}ms`, 'bot');
+            }, 1000 + Math.random() * 2000);
+        }
+        
+        function refreshConnection() {
+            const statusDiv = document.getElementById('connectionStatus');
+            const refreshBtn = statusDiv.querySelector('.refresh-btn');
+            
+            refreshBtn.style.transform = 'rotate(360deg)';
+            refreshBtn.style.transform = 'rotate(360deg)';
+            refreshBtn.style.transition = 'transform 1s ease';
+            
+            setTimeout(() => {
+                refreshBtn.style.transform = 'rotate(0deg)';
+                statusDiv.classList.remove('connected', 'disconnected');
+                statusDiv.classList.add('connected');
+                statusDiv.innerHTML = '🟢 Connected to Server <button class="refresh-btn" onclick="refreshConnection()">🔄</button>';
+            }, 1000);
+        }
+        
+        function updateSystemInfo() {
+            // Update current time
+            const now = new Date();
+            document.getElementById('currentTime').value = now.toLocaleString();
+            
+            // Update uptime (simulated)
+            const uptimeHours = Math.floor(Math.random() * 24) + 1;
+            const uptimeMinutes = Math.floor(Math.random() * 60);
+            document.getElementById('uptime').value = `${uptimeHours}h ${uptimeMinutes}m`;
+            
+            // Update active connections
+            const connections = Math.floor(Math.random() * 50) + 10;
+            document.getElementById('activeConnections').value = `${connections} connections`;
+        }
+        
+        // Update system info every minute
+        setInterval(updateSystemInfo, 60000);
+        
+        // Bot deployment functionality
+        function deployBots() {
+            const deploymentName = document.getElementById('deploymentName').value;
+            const botCount = document.getElementById('botCount').value;
+            const serverIP = document.getElementById('deploymentServerIP').value;
+            const serverName = document.getElementById('deploymentServerName').value;
+            const serverPort = document.getElementById('deploymentServerPort').value;
+            const botNames = getAllBotNames();
+            
+            if (!deploymentName || !botCount || !serverIP || !serverName || !serverPort) {
+                alert('Please fill in all deployment fields');
+                return;
+            }
+            
+            const deployBtn = document.querySelector('.deploy-btn');
+            const originalText = deployBtn.textContent;
+            deployBtn.textContent = '🚀 Deploying...';
+            deployBtn.disabled = true;
+            deployBtn.classList.add('deploying');
+            
+            // Create deployment data
+            const deploymentData = {
+                deployment_name: deploymentName,
+                bot_count: parseInt(botCount),
+                server_ip: serverIP,
+                server_name: serverName,
+                server_port: parseInt(serverPort),
+                bot_names: botNames.map(bot => bot.name),
+                configuration: {
+                    auto_restart: true,
+                    max_bots: 20,
+                    deployment_zone: 'main',
+                    priority: 'high'
+                }
+            };
+            
+            // Send deployment to backend
+            createDeployment(deploymentData, deployBtn, originalText, botNames);
+        }
+        
+        // Create deployment in backend
+        async function createDeployment(deploymentData, deployBtn, originalText, botNames) {
+            try {
+                const response = await fetch('/api/deployments/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(deploymentData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Success - update button
+                    deployBtn.textContent = '✅ Deployed!';
+                    deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    
+                    // Add to chat with bot names
+                    const botNameList = botNames.map(bot => bot.name).join(', ');
+                    addMessage(`Successfully deployed ${deploymentData.bot_count} bots (${botNameList}) to ${deploymentData.server_name} (${deploymentData.server_ip}:${deploymentData.server_port})`, 'bot');
+                    
+                    // Reset button after delay
+                    setTimeout(() => {
+                        deployBtn.textContent = originalText;
+                        deployBtn.disabled = false;
+                        deployBtn.classList.remove('deploying');
+                        deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    }, 2000);
+                    
+                } else {
+                    // Error - show message and reset button
+                    alert('Deployment failed: ' + data.error);
+                    deployBtn.textContent = originalText;
+                    deployBtn.disabled = false;
+                    deployBtn.classList.remove('deploying');
+                    deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                }
+                
+            } catch (error) {
+                console.error('Deployment error:', error);
+                alert('Deployment failed. Please try again.');
+                deployBtn.textContent = originalText;
+                deployBtn.disabled = false;
+                deployBtn.classList.remove('deploying');
+                deployBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+            }
+        }
+        
+        // Go Live functionality
+        function goLive() {
+            const goLiveBtn = document.getElementById('goLiveBtn');
+            const originalText = goLiveBtn.textContent;
+            
+            if (goLiveBtn.classList.contains('live')) {
+                // Stop live mode
+                goLiveBtn.textContent = '⏹️ Stop Live';
+                goLiveBtn.classList.remove('live');
+                goLiveBtn.style.background = 'linear-gradient(135deg, #6c757d, #495057)';
+                
+                // Update all bot statuses to offline
+                const botCount = document.getElementById('botCount').value;
+                for (let i = 1; i <= botCount; i++) {
+                    updateBotStatus(i, 'offline');
+                }
+                
+                // Add to chat
+                addMessage('Live mode stopped. All bots are now offline.', 'bot');
+            } else {
+                // Start live mode
+                goLiveBtn.textContent = '🟢 LIVE';
+                goLiveBtn.classList.add('live');
+                
+                // Add to chat
+                addMessage('🚀 GOING LIVE! Bots are now deploying and connecting to the server...', 'bot');
+                
+                // Get bot names and simulate deployment process
+                const botNames = getAllBotNames();
+                
+                botNames.forEach((bot, index) => {
+                    const delay = (index + 1) * 2000; // 2 seconds apart
+                    
+                    setTimeout(() => {
+                        // Update bot status to connecting
+                        updateBotStatus(bot.id, 'connecting');
+                        addMessage(`🟡 ${bot.name} is connecting...`, 'bot');
+                        
+                        // After 1 second, set to online
+                        setTimeout(() => {
+                            updateBotStatus(bot.id, 'online');
+                            addMessage(`✅ ${bot.name} deployed successfully!`, 'bot');
+                        }, 1000);
+                    }, delay);
+                });
+                
+                // Final success message
+                const totalDelay = (botNames.length + 1) * 2000;
+                setTimeout(() => {
+                    const botNameList = botNames.map(bot => bot.name).join(', ');
+                    addMessage(`🎉 All bots (${botNameList}) are now LIVE and connected to play.mcfleet.net:25565!`, 'bot');
+                }, totalDelay);
+            }
+        }
+        
+        // Initialize slider functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const botCountSlider = document.getElementById('botCount');
+            const sliderValue = document.getElementById('sliderValue');
+            
+            if (botCountSlider && sliderValue) {
+                botCountSlider.addEventListener('input', function() {
+                    const botCount = this.value;
+                    sliderValue.textContent = botCount + ' bots';
+                    updateBotNames(botCount);
+                });
+            }
+            
+            // Initialize bot names
+            updateBotNames(4);
+            
+            // Load existing deployments
+            loadExistingDeployments();
+        });
+        
+        // Load existing deployments from backend
+        async function loadExistingDeployments() {
+            try {
+                const response = await fetch('/api/deployments/list');
+                const data = await response.json();
+                
+                if (data.deployments && data.deployments.length > 0) {
+                    // Load the most recent deployment
+                    const latestDeployment = data.deployments[0];
+                    loadDeploymentToForm(latestDeployment);
+                }
+            } catch (error) {
+                console.log('No existing deployments or error loading:', error);
+            }
+        }
+        
+        // Load deployment data into form
+        function loadDeploymentToForm(deployment) {
+            if (deployment.deployment_name) {
+                document.getElementById('deploymentName').value = deployment.deployment_name;
+            }
+            if (deployment.bot_count) {
+                document.getElementById('botCount').value = deployment.bot_count;
+                document.getElementById('sliderValue').textContent = deployment.bot_count + ' bots';
+                updateBotNames(deployment.bot_count);
+            }
+            if (deployment.server_ip) {
+                document.getElementById('deploymentServerIP').value = deployment.server_ip;
+            }
+            if (deployment.server_name) {
+                document.getElementById('deploymentServerName').value = deployment.server_name;
+            }
+            if (deployment.server_port) {
+                document.getElementById('deploymentServerPort').value = deployment.server_port;
+            }
+            
+            // Load bot names if available
+            if (deployment.configuration && deployment.configuration.bot_names) {
+                loadBotNamesToForm(deployment.configuration.bot_names);
+            }
+        }
+        
+        // Load bot names into form inputs
+        function loadBotNamesToForm(botNames) {
+            const container = document.querySelector('.bot-names-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            botNames.forEach((botName, index) => {
+                const botItem = createBotNameItem(index + 1, botName);
+                container.appendChild(botItem);
+            });
+        }
+        
+        // Bot names management
+        function updateBotNames(botCount) {
+            const container = document.querySelector('.bot-names-container');
+            if (!container) return;
+            
+            // Clear existing bot names
+            container.innerHTML = '';
+            
+            // Generate bot names based on count
+            for (let i = 1; i <= botCount; i++) {
+                const botName = generateBotName(i);
+                const botItem = createBotNameItem(i, botName);
+                container.appendChild(botItem);
+            }
+        }
+        
+        function generateBotName(botNumber) {
+            const gamerNames = [
+                'IronMiner', 'WoodCutter', 'StoneBreaker', 'DiamondHunter',
+                'NetherExplorer', 'EndVoyager', 'RedstoneMaster', 'Enchanter',
+                'PotionBrewer', 'Archer', 'Swordsman', 'Miner',
+                'Farmer', 'Builder', 'Explorer', 'Trader',
+                'Guardian', 'Scout', 'Navigator', 'Artisan'
+            ];
+            
+            return gamerNames[botNumber - 1] || `Bot${botNumber}`;
+        }
+        
+        function createBotNameItem(botId, defaultName) {
+            const div = document.createElement('div');
+            div.className = 'bot-name-item';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'bot-name-input';
+            input.placeholder = `Bot ${botId} name`;
+            input.value = defaultName;
+            input.dataset.botId = botId;
+            
+            const statusTag = document.createElement('span');
+            statusTag.className = 'status-tag offline';
+            statusTag.textContent = '🔴 Offline';
+            
+            div.appendChild(input);
+            div.appendChild(statusTag);
+            
+            return div;
+        }
+        
+        function updateBotStatus(botId, status) {
+            const botItem = document.querySelector(`[data-bot-id="${botId}"]`);
+            if (!botItem) return;
+            
+            const statusTag = botItem.parentElement.querySelector('.status-tag');
+            if (!statusTag) return;
+            
+            // Remove existing status classes
+            statusTag.classList.remove('online', 'offline', 'connecting');
+            
+            // Add new status
+            switch (status) {
+                case 'online':
+                    statusTag.classList.add('online');
+                    statusTag.textContent = '🟢 Online';
+                    break;
+                case 'offline':
+                    statusTag.classList.add('offline');
+                    statusTag.textContent = '🔴 Offline';
+                    break;
+                case 'connecting':
+                    statusTag.classList.add('connecting');
+                    statusTag.textContent = '🟡 Connecting';
+                    break;
+            }
+        }
+        
+        function getAllBotNames() {
+            const botInputs = document.querySelectorAll('.bot-name-input');
+            const botNames = [];
+            
+            botInputs.forEach(input => {
+                botNames.push({
+                    id: input.dataset.botId,
+                    name: input.value.trim() || input.placeholder
+                });
+            });
+            
+            return botNames;
+        }
+    </script>
+</body>
+</html>

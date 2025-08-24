@@ -1,0 +1,245 @@
+{
+    "commands": {
+        "mine": {
+            "description": "Mine specific block type",
+            "format": "mine <bot_name> <block_type>",
+            "example": "mine Bot1 diamond_ore",
+            "python_handler": "handle_mine_command",
+            "parameters": {
+                "block_type": ["stone", "coal_ore", "iron_ore", "gold_ore", "diamond_ore", "emerald_ore", "redstone_ore", "lapis_ore"]
+            }
+        },
+        "build": {
+            "description": "Build structure",
+            "format": "build <bot_name> <structure_type>",
+            "example": "build Bot1 house",
+            "python_handler": "handle_build_command",
+            "parameters": {
+                "structure_type": ["house", "tower", "bridge", "wall", "farm", "shelter", "storage"]
+            }
+        },
+        "collect": {
+            "description": "Collect items",
+            "format": "collect <bot_name> <item_type>",
+            "example": "collect Bot1 wood",
+            "python_handler": "handle_collect_command",
+            "parameters": {
+                "item_type": ["wood", "stone", "food", "water", "seeds", "flowers", "wool"]
+            }
+        },
+        "craft": {
+            "description": "Craft items",
+            "format": "craft <bot_name> <item_type> <quantity>",
+            "example": "craft Bot1 wooden_planks 64",
+            "python_handler": "handle_craft_command",
+            "parameters": {
+                "item_type": ["wooden_planks", "sticks", "torch", "crafting_table", "furnace", "chest", "bed"],
+                "quantity": "number"
+            }
+        },
+        "farm": {
+            "description": "Farm crops or animals",
+            "format": "farm <bot_name> <farm_type>",
+            "example": "farm Bot1 wheat",
+            "python_handler": "handle_farm_command",
+            "parameters": {
+                "farm_type": ["wheat", "carrots", "potatoes", "beetroot", "chicken", "cow", "sheep"]
+            }
+        },
+        "defend": {
+            "description": "Defend area or entity",
+            "format": "defend <bot_name> <target>",
+            "example": "defend Bot1 base",
+            "python_handler": "handle_defend_command",
+            "parameters": {
+                "target": ["base", "player", "village", "farm", "storage"]
+            }
+        },
+        "explore": {
+            "description": "Explore area",
+            "format": "explore <bot_name> <area_type>",
+            "example": "explore Bot1 cave",
+            "python_handler": "handle_explore_command",
+            "parameters": {
+                "area_type": ["cave", "surface", "ocean", "forest", "desert", "mountain"]
+            }
+        },
+        "trade": {
+            "description": "Trade with villagers",
+            "format": "trade <bot_name> <item_type>",
+            "example": "trade Bot1 emerald",
+            "python_handler": "handle_trade_command",
+            "parameters": {
+                "item_type": ["emerald", "diamond", "gold", "iron", "food", "tools", "armor"]
+            }
+        },
+        "enchant": {
+            "description": "Enchant items",
+            "format": "enchant <bot_name> <item_type> <enchantment>",
+            "example": "enchant Bot1 diamond_sword sharpness",
+            "python_handler": "handle_enchant_command",
+            "parameters": {
+                "item_type": ["sword", "pickaxe", "axe", "armor", "bow"],
+                "enchantment": ["sharpness", "efficiency", "protection", "power", "unbreaking"]
+            }
+        },
+        "breed": {
+            "description": "Breed animals",
+            "format": "breed <bot_name> <animal_type>",
+            "example": "breed Bot1 cow",
+            "python_handler": "handle_breed_command",
+            "parameters": {
+                "animal_type": ["cow", "sheep", "chicken", "pig", "rabbit"]
+            }
+        },
+        "smelt": {
+            "description": "Smelt items in furnace",
+            "format": "smelt <bot_name> <item_type> <quantity>",
+            "example": "smelt Bot1 iron_ore 64",
+            "python_handler": "handle_smelt_command",
+            "parameters": {
+                "item_type": ["iron_ore", "gold_ore", "sand", "clay", "cobblestone"],
+                "quantity": "number"
+            }
+        },
+        "vision": {
+            "description": "Manage bot vision system",
+            "format": "vision <bot_name> <action> [parameters]",
+            "example": "vision Bot1 analyze",
+            "python_handler": "handle_vision_command",
+            "parameters": {
+                "action": ["analyze", "toggle", "status", "calibrate", "focus"]
+            }
+        },
+        "camera": {
+            "description": "Control bot camera settings",
+            "format": "camera <bot_name> <setting> <value>",
+            "example": "camera Bot1 zoom 2x",
+            "python_handler": "handle_camera_command",
+            "parameters": {
+                "setting": ["zoom", "focus", "exposure", "filter", "mode"],
+                "value": ["auto", "manual", "night", "thermal", "depth"]
+            }
+        },
+        "settings": {
+            "description": "Manage bot settings and configuration",
+            "format": "settings <bot_name> <category> <setting> <value>",
+            "example": "settings Bot1 network ip 192.168.1.105",
+            "python_handler": "handle_settings_command",
+            "parameters": {
+                "category": ["network", "vision", "behavior", "safety", "performance"],
+                "setting": ["ip", "port", "enabled", "threshold", "limit"]
+            }
+        },
+        "monitor": {
+            "description": "Monitor bot performance and status",
+            "format": "monitor <bot_name> <metric>",
+            "example": "monitor Bot1 health",
+            "python_handler": "handle_monitor_command",
+            "parameters": {
+                "metric": ["health", "performance", "vision", "network", "inventory", "all"]
+            }
+        },
+        "optimize": {
+            "description": "Optimize bot performance",
+            "format": "optimize <bot_name> <aspect>",
+            "example": "optimize Bot1 vision",
+            "python_handler": "handle_optimize_command",
+            "parameters": {
+                "aspect": ["vision", "movement", "inventory", "pathfinding", "all"]
+            }
+        },
+        "backup": {
+            "description": "Backup bot data and configuration",
+            "format": "backup <bot_name> <type>",
+            "example": "backup Bot1 full",
+            "python_handler": "handle_backup_command",
+            "parameters": {
+                "type": ["full", "config", "inventory", "vision", "memory"]
+            }
+        },
+        "restore": {
+            "description": "Restore bot from backup",
+            "format": "restore <bot_name> <backup_id>",
+            "example": "restore Bot1 backup_20241201",
+            "python_handler": "handle_restore_command",
+            "parameters": {
+                "backup_id": "string"
+            }
+        },
+        "update": {
+            "description": "Update bot firmware or configuration",
+            "format": "update <bot_name> <component>",
+            "example": "update Bot1 vision_system",
+            "python_handler": "handle_update_command",
+            "parameters": {
+                "component": ["firmware", "vision_system", "ai_model", "config", "all"]
+            }
+        },
+        "diagnose": {
+            "description": "Run diagnostic tests on bot",
+            "format": "diagnose <bot_name> <test_type>",
+            "example": "diagnose Bot1 vision",
+            "python_handler": "handle_diagnose_command",
+            "parameters": {
+                "test_type": ["vision", "movement", "network", "ai", "full", "quick"]
+            }
+        },
+        "calibrate": {
+            "description": "Calibrate bot systems",
+            "format": "calibrate <bot_name> <system>",
+            "example": "calibrate Bot1 camera",
+            "python_handler": "handle_calibrate_command",
+            "parameters": {
+                "system": ["camera", "sensors", "movement", "vision", "all"]
+            }
+        },
+        "sync": {
+            "description": "Synchronize bot with other bots or server",
+            "format": "sync <bot_name> <target>",
+            "example": "sync Bot1 server",
+            "python_handler": "handle_sync_command",
+            "parameters": {
+                "target": ["server", "team", "vision", "inventory", "all"]
+            }
+        }
+    },
+    "command_processing": {
+        "type": "natural_language",
+        "description": "Process natural language commands like ChatGPT",
+        "example_commands": [
+            "Make Bot1 go to the diamond mine",
+            "Tell all bots to gather wood",
+            "Have Bot2 build a house near the river",
+            "Make Bot3 follow Bot1",
+            "Teleport Bot1 to my location",
+            "Save this spot as 'base'",
+            "Make all bots defend the village",
+            "Have Bot1 craft some tools",
+            "Tell Bot2 to farm wheat",
+            "Make Bot3 explore the cave"
+        ],
+        "output_format": {
+            "type": "natural_command",
+            "target": "all_bots.js",
+            "action": "process_natural_command"
+        }
+    },
+    "command_categories": {
+        "movement": ["go", "walk", "run", "teleport", "follow", "explore", "patrol"],
+        "building": ["build", "construct", "place", "create", "make"],
+        "gathering": ["gather", "collect", "mine", "farm", "harvest"],
+        "crafting": ["craft", "make", "create", "build"],
+        "combat": ["attack", "defend", "protect", "guard"],
+        "team": ["follow", "help", "assist", "work with"],
+        "location": ["save", "mark", "remember", "store"],
+        "communication": ["tell", "say", "chat", "message"]
+    },
+    "command_parameters": {
+        "locations": ["here", "there", "base", "home", "village", "mine", "farm"],
+        "items": ["wood", "stone", "diamond", "food", "tools", "armor"],
+        "structures": ["house", "tower", "bridge", "wall", "farm", "shelter"],
+        "actions": ["gather", "build", "craft", "mine", "farm", "defend"],
+        "quantities": ["some", "a few", "many", "all", "lots of"]
+    }
+} 

@@ -1,0 +1,135 @@
+{
+  "network": {
+    "base_subnet": "10.0.0.0/8",
+    "port_range": [8000, 9000],
+    "rotation_strategy": "random",
+    "max_concurrent_connections": 50,
+    "connection_timeout": 30,
+    "dns_servers": [
+      "8.8.8.8",
+      "1.1.1.1",
+      "208.67.222.222",
+      "9.9.9.9",
+      "76.76.19.19"
+    ],
+    "use_tor": false,
+    "tor_ports": [9050, 9051]
+  },
+  "bots": {
+    "alpha": {
+      "rotation_interval": 300,
+      "proxy_enabled": true,
+      "vpn_enabled": false,
+      "stealth_mode": true,
+      "proxy_rotation_interval": 180,
+      "vpn_rotation_interval": 600,
+      "max_proxy_failures": 3,
+      "connection_retry_attempts": 5
+    },
+    "beta": {
+      "rotation_interval": 240,
+      "proxy_enabled": true,
+      "vpn_enabled": true,
+      "stealth_mode": true,
+      "proxy_rotation_interval": 120,
+      "vpn_rotation_interval": 480,
+      "max_proxy_failures": 2,
+      "connection_retry_attempts": 3
+    },
+    "gamma": {
+      "rotation_interval": 180,
+      "proxy_enabled": true,
+      "vpn_enabled": false,
+      "stealth_mode": true,
+      "proxy_rotation_interval": 90,
+      "vpn_rotation_interval": 720,
+      "max_proxy_failures": 4,
+      "connection_retry_attempts": 7
+    },
+    "delta": {
+      "rotation_interval": 120,
+      "proxy_enabled": true,
+      "vpn_enabled": true,
+      "stealth_mode": true,
+      "proxy_rotation_interval": 60,
+      "vpn_rotation_interval": 360,
+      "max_proxy_failures": 1,
+      "connection_retry_attempts": 2
+    }
+  },
+  "security": {
+    "enable_ip_rotation": true,
+    "enable_proxy_rotation": true,
+    "enable_vpn_rotation": true,
+    "enable_stealth_mode": true,
+    "enable_dynamic_ports": true,
+    "enable_connection_obfuscation": true,
+    "max_ip_history_size": 100,
+    "ip_history_cleanup_interval": 3600,
+    "proxy_validation_timeout": 10,
+    "vpn_connection_timeout": 15
+  },
+  "proxy": {
+    "sources": [
+      "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt",
+      "https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt",
+      "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/proxies.txt",
+      "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies.txt",
+      "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt"
+    ],
+    "refresh_interval": 1800,
+    "validation_enabled": true,
+    "max_proxies_per_bot": 20,
+    "proxy_types": ["http", "https", "socks4", "socks5"],
+    "geolocation_filtering": false,
+    "speed_test_enabled": true,
+    "min_speed_kbps": 1000
+  },
+  "vpn": {
+    "endpoints": [
+      "vpn1.minecrafthub.com:1194",
+      "vpn2.minecrafthub.com:1194",
+      "vpn3.minecrafthub.com:1194",
+      "vpn4.minecrafthub.com:1194",
+      "vpn5.minecrafthub.com:1194",
+      "vpn6.minecrafthub.com:1194",
+      "vpn7.minecrafthub.com:1194",
+      "vpn8.minecrafthub.com:1194"
+    ],
+    "rotation_interval": 600,
+    "connection_timeout": 15,
+    "max_connection_attempts": 3,
+    "enable_failover": true,
+    "health_check_interval": 300
+  },
+  "monitoring": {
+    "enable_logging": true,
+    "log_level": "INFO",
+    "log_file": "bot_ip_manager.log",
+    "enable_metrics": true,
+    "metrics_interval": 60,
+    "enable_alerts": true,
+    "alert_thresholds": {
+      "failed_rotations": 3,
+      "proxy_failures": 5,
+      "vpn_failures": 2,
+      "connection_timeouts": 10
+    }
+  },
+  "advanced": {
+    "enable_machine_learning": false,
+    "ml_model_path": "models/ip_rotation_model.pkl",
+    "enable_behavioral_analysis": true,
+    "enable_threat_detection": true,
+    "enable_automated_response": true,
+    "response_actions": [
+      "force_rotation",
+      "change_proxy",
+      "change_vpn",
+      "increase_stealth",
+      "emergency_shutdown"
+    ]
+  },
+  "last_updated": "2024-12-01T00:00:00Z",
+  "version": "1.0.0"
+}

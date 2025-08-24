@@ -1,0 +1,19 @@
+{
+    "commands": {
+        "mine": {
+            "description": "Mine specific block type",
+            "format": "mine <bot_name> <block_type>",
+            "example": "mine Bot1 diamond_ore"
+        },
+        "build": {
+            "description": "Build structure",
+            "format": "build <bot_name> <structure_type>",
+            "example": "build Bot1 house"
+        },
+        "collect": {
+            "description": "Collect items",
+            "format": "collect <bot_name> <item_type>",
+            "example": "collect Bot1 wood"
+        }
+    }
+} 
