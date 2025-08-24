@@ -1,0 +1,15 @@
+# Bot Brain System Dependencies
+# Core Python packages for the intelligent bot management system
+
+# No external dependencies required - uses only Python standard library
+# The system is designed to work with Python 3.7+ out of the box
+
+# Optional: For enhanced functionality, you can install these packages:
+# asyncio-mqtt==0.13.0  # For MQTT communication with Node.js bots
+# websockets==11.0.3    # For WebSocket communication
+# pydantic==2.5.0       # For enhanced data validation
+# fastapi==0.104.1      # For REST API endpoints
+# uvicorn==0.24.0       # For running the FastAPI server
+
+# For now, the system works with standard library only
+# Run: python bot_brain.py to test the system
