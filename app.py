@@ -552,6 +552,10 @@ def generate_enhanced_ai_response(message):
     if any(word in message_lower for word in ['spawn', 'respawn', 'location', 'where', 'coordinates', 'cords']):
         return generate_spawn_location_response()
     
+    # Check for queue-related queries for Moon City
+    if ('queue' in message_lower) and ("moon city" in message_lower or "survival moon city" in message_lower):
+        return generate_moon_city_queue_response()
+    
     # Check for world-related queries
     if any(word in message_lower for word in ['world', 'big world', 'server', 'area', 'zone']):
         return generate_world_detection_response()
@@ -590,6 +594,42 @@ def generate_spawn_location_response():
 • Use `/warp <area>` to teleport between zones
 • Use `/home` to set personal spawn points
 • Each area has unique features and resources!"""
+
+def generate_moon_city_queue_response():
+    """Return Moon City queue status details (stub/static for now)."""
+    # Static stub data that could later be wired to a real data source
+    queue_info = {
+        "location": "Moon City",
+        "mode": "Survival",
+        "has_queue": True,
+        "queue_length": 3,
+        "estimated_wait_minutes": 5,
+        "last_updated": datetime.now().isoformat()
+    }
+    return (
+        "🛰️ Moon City Queue Status\n\n"
+        f"• Location: {queue_info['location']} ({queue_info['mode']})\n"
+        f"• Queue present: {'Yes' if queue_info['has_queue'] else 'No'}\n"
+        f"• People in queue: {queue_info['queue_length']}\n"
+        f"• Estimated wait: {queue_info['estimated_wait_minutes']} min\n"
+        f"• Updated: {queue_info['last_updated']}"
+    )
+
+@app.route('/api/queues/moon-city', methods=['GET'])
+def get_moon_city_queue():
+    """API endpoint to fetch Moon City queue status (stub)."""
+    data = {
+        "location": "Moon City",
+        "mode": "Survival",
+        "has_queue": True,
+        "queue_length": 3,
+        "estimated_wait_minutes": 5,
+        "last_updated": datetime.now().isoformat()
+    }
+    return jsonify({
+        "success": True,
+        "queue": data
+    })
 
 def generate_world_detection_response():
     """Generate response for world detection and navigation"""
