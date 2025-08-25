@@ -17,6 +17,13 @@ import random
 import sys
 from dataclasses import asdict
 
+# Optional RCON client
+try:
+    from mcrcon import MCRcon
+    RCON_AVAILABLE = True
+except Exception:
+    RCON_AVAILABLE = False
+
 # Import our AI commands system
 try:
     from ai_commands.bot_ip_manager import BotIPManager
@@ -56,6 +63,26 @@ app.config['SESSION_TYPE'] = 'filesystem'
 
 # Initialize SocketIO for real-time communication
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+def send_rcon_command(command: str):
+    """Send a command over RCON if enabled and available. Returns (success, message)."""
+    try:
+        from config import get_config
+        cfg = get_config()()
+        if not getattr(cfg, 'RCON_ENABLED', False):
+            return (False, 'RCON disabled')
+        if not RCON_AVAILABLE:
+            return (False, 'RCON client not installed')
+        host = getattr(cfg, 'RCON_HOST', '127.0.0.1')
+        port = getattr(cfg, 'RCON_PORT', 25575)
+        password = getattr(cfg, 'RCON_PASSWORD', '')
+        if not password:
+            return (False, 'RCON password not set')
+        with MCRcon(host, password, port=port) as rcon:
+            resp = rcon.command(command)
+        return (True, resp)
+    except Exception as e:
+        return (False, str(e))
 
 # Global variables
 bot_manager = None
@@ -461,11 +488,34 @@ def execute_bot_command(bot_id):
         parameters = data.get('parameters', {})
         
         if command:
+            # If RCON is enabled, attempt to send a real command
+            if command in ('tp', 'tphere', 'warp'):
+                rcon_map = {
+                    'tp': lambda p: f"/tp {p.get('player','')}",
+                    'tphere': lambda p: f"/tphere {p.get('player','')}",
+                    'warp': lambda p: f"/warp {p.get('destination','')}",
+                }
+                cmd_builder = rcon_map.get(command)
+                if cmd_builder:
+                    rcon_cmd = cmd_builder(parameters or {})
+                    ok, msg = send_rcon_command(rcon_cmd)
+                    mock_result = bot_manager.execute_command(bot_id, command, parameters)
+                    return jsonify({"success": True, "result": mock_result, "rcon": {"ok": ok, "message": msg}})
             result = bot_manager.execute_command(bot_id, command, parameters)
             return jsonify({"success": True, "result": result})
         else:
             return jsonify({"error": "No command specified"}), 400
     return jsonify({"error": "Bot manager not available"}), 500
+
+@app.route('/api/rcon/command', methods=['POST'])
+def api_rcon_command():
+    """Send a raw RCON command (when enabled)."""
+    data = request.get_json() or {}
+    command = data.get('command', '').strip()
+    if not command:
+        return jsonify({"error": "No command provided"}), 400
+    ok, msg = send_rcon_command(command)
+    return jsonify({"success": ok, "response": msg})
 
 @app.route('/api/bots/<bot_id>/location', methods=['GET'])
 def get_bot_location(bot_id):
