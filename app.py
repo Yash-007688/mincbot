@@ -17,6 +17,13 @@ import random
 import sys
 from dataclasses import asdict
 
+# Optional RCON client
+try:
+    from mcrcon import MCRcon
+    RCON_AVAILABLE = True
+except Exception:
+    RCON_AVAILABLE = False
+
 # Import our AI commands system
 try:
     from ai_commands.bot_ip_manager import BotIPManager
@@ -57,6 +64,26 @@ app.config['SESSION_TYPE'] = 'filesystem'
 # Initialize SocketIO for real-time communication
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+def send_rcon_command(command: str):
+    """Send a command over RCON if enabled and available. Returns (success, message)."""
+    try:
+        from config import get_config
+        cfg = get_config()()
+        if not getattr(cfg, 'RCON_ENABLED', False):
+            return (False, 'RCON disabled')
+        if not RCON_AVAILABLE:
+            return (False, 'RCON client not installed')
+        host = getattr(cfg, 'RCON_HOST', '127.0.0.1')
+        port = getattr(cfg, 'RCON_PORT', 25575)
+        password = getattr(cfg, 'RCON_PASSWORD', '')
+        if not password:
+            return (False, 'RCON password not set')
+        with MCRcon(host, password, port=port) as rcon:
+            resp = rcon.command(command)
+        return (True, resp)
+    except Exception as e:
+        return (False, str(e))
+
 # Global variables
 bot_manager = None
 action_handler = None
@@ -84,6 +111,7 @@ class BotManager:
     def __init__(self):
         self.bots = {}
         self.bot_ips = {}
+        self.bot_locations = {}
         
         # Initialize management systems
         self.server_manager = None
@@ -164,6 +192,14 @@ class BotManager:
         for bot_id, config in mock_bots.items():
             self.bots[bot_id] = config
             self.bot_ips[bot_id] = config
+            # Initialize simple location tracking for each mock bot
+            self.bot_locations[bot_id] = {
+                'coordinates': (0, 64, 0),
+                'location_name': 'Spawn',
+                'last_target': None,
+                'last_updated': datetime.now().isoformat(),
+                'world': 'survival-1'
+            }
         
         logger.info("Created mock bots for testing")
     
@@ -193,11 +229,51 @@ class BotManager:
         """Execute a command on a specific bot"""
         if bot_id in self.bots:
             if AI_SYSTEM_AVAILABLE and hasattr(self.bots[bot_id], 'execute_action'):
-                return self.bots[bot_id].execute_action(command, parameters or {})
+                result = self.bots[bot_id].execute_action(command, parameters or {})
+                # Best-effort update of local location tracker based on command semantics
+                self._update_location_tracker(bot_id, command, parameters or {})
+                return result
             else:
                 # Mock command execution
+                self._update_location_tracker(bot_id, command, parameters or {})
                 return f"Mock command '{command}' executed on {bot_id}"
         return f"Bot {bot_id} not found"
+
+    def _update_location_tracker(self, bot_id, command, parameters):
+        """Update simple location/target info for a bot based on high-level commands."""
+        try:
+            if bot_id not in self.bot_locations:
+                self.bot_locations[bot_id] = {
+                    'coordinates': (0, 64, 0),
+                    'location_name': 'Spawn',
+                    'last_target': None,
+                    'last_updated': datetime.now().isoformat()
+                }
+            info = self.bot_locations[bot_id]
+            if command == 'warp':
+                destination = (parameters or {}).get('destination', '').lower()
+                if 'moon city' in destination:
+                    # Static coordinates stub for Moon City
+                    info['coordinates'] = (1500, 64, 1500)
+                    info['location_name'] = 'Moon City'
+                    info['world'] = 'survival-2'
+                else:
+                    info['location_name'] = f"Warp: {(parameters or {}).get('destination', 'unknown')}"
+                info['last_target'] = None
+                info['last_updated'] = datetime.now().isoformat()
+            elif command == 'tp':
+                player = (parameters or {}).get('player')
+                info['last_target'] = f"player:{player}" if player else 'player:unknown'
+                # Keep coordinates as-is; in a real system, this would be updated from the game server
+                info['location_name'] = f"Near {player}" if player else 'Teleport'
+                info['last_updated'] = datetime.now().isoformat()
+            else:
+                # Other commands do not affect location tracking in this stub
+                pass
+            self.bot_locations[bot_id] = info
+        except Exception:
+            # Non-fatal; do not break command flow
+            pass
     
     def rotate_bot_ip(self, bot_id):
         """Rotate IP for a specific bot"""
@@ -412,10 +488,51 @@ def execute_bot_command(bot_id):
         parameters = data.get('parameters', {})
         
         if command:
+            # If RCON is enabled, attempt to send a real command
+            if command in ('tp', 'tphere', 'warp'):
+                rcon_map = {
+                    'tp': lambda p: f"/tp {p.get('player','')}",
+                    'tphere': lambda p: f"/tphere {p.get('player','')}",
+                    'warp': lambda p: f"/warp {p.get('destination','')}",
+                }
+                cmd_builder = rcon_map.get(command)
+                if cmd_builder:
+                    rcon_cmd = cmd_builder(parameters or {})
+                    ok, msg = send_rcon_command(rcon_cmd)
+                    mock_result = bot_manager.execute_command(bot_id, command, parameters)
+                    return jsonify({"success": True, "result": mock_result, "rcon": {"ok": ok, "message": msg}})
             result = bot_manager.execute_command(bot_id, command, parameters)
             return jsonify({"success": True, "result": result})
         else:
             return jsonify({"error": "No command specified"}), 400
+    return jsonify({"error": "Bot manager not available"}), 500
+
+@app.route('/api/rcon/command', methods=['POST'])
+def api_rcon_command():
+    """Send a raw RCON command (when enabled)."""
+    data = request.get_json() or {}
+    command = data.get('command', '').strip()
+    if not command:
+        return jsonify({"error": "No command provided"}), 400
+    ok, msg = send_rcon_command(command)
+    return jsonify({"success": ok, "response": msg})
+
+@app.route('/api/bots/<bot_id>/location', methods=['GET'])
+def get_bot_location(bot_id):
+    """API endpoint to get a bot's current tracked location (stub)."""
+    if bot_manager:
+        info = getattr(bot_manager, 'bot_locations', {}).get(bot_id)
+        if not info:
+            return jsonify({"error": "Location not available"}), 404
+        x, y, z = info.get('coordinates', (0, 0, 0))
+        return jsonify({
+            "bot_id": bot_id,
+            "location_name": info.get('location_name'),
+            "coordinates": {"x": x, "y": y, "z": z},
+            "last_target": info.get('last_target'),
+            "last_updated": info.get('last_updated'),
+            "world": info.get('world')
+        })
     return jsonify({"error": "Bot manager not available"}), 500
 
 @app.route('/api/settings/server', methods=['POST'])
@@ -552,6 +669,10 @@ def generate_enhanced_ai_response(message):
     if any(word in message_lower for word in ['spawn', 'respawn', 'location', 'where', 'coordinates', 'cords']):
         return generate_spawn_location_response()
     
+    # Check for queue-related queries for Moon City
+    if ('queue' in message_lower) and ("moon city" in message_lower or "survival moon city" in message_lower):
+        return generate_moon_city_queue_response()
+    
     # Check for world-related queries
     if any(word in message_lower for word in ['world', 'big world', 'server', 'area', 'zone']):
         return generate_world_detection_response()
@@ -590,6 +711,42 @@ def generate_spawn_location_response():
 • Use `/warp <area>` to teleport between zones
 • Use `/home` to set personal spawn points
 • Each area has unique features and resources!"""
+
+def generate_moon_city_queue_response():
+    """Return Moon City queue status details (stub/static for now)."""
+    # Static stub data that could later be wired to a real data source
+    queue_info = {
+        "location": "Moon City",
+        "mode": "Survival",
+        "has_queue": True,
+        "queue_length": 3,
+        "estimated_wait_minutes": 5,
+        "last_updated": datetime.now().isoformat()
+    }
+    return (
+        "🛰️ Moon City Queue Status\n\n"
+        f"• Location: {queue_info['location']} ({queue_info['mode']})\n"
+        f"• Queue present: {'Yes' if queue_info['has_queue'] else 'No'}\n"
+        f"• People in queue: {queue_info['queue_length']}\n"
+        f"• Estimated wait: {queue_info['estimated_wait_minutes']} min\n"
+        f"• Updated: {queue_info['last_updated']}"
+    )
+
+@app.route('/api/queues/moon-city', methods=['GET'])
+def get_moon_city_queue():
+    """API endpoint to fetch Moon City queue status (stub)."""
+    data = {
+        "location": "Moon City",
+        "mode": "Survival",
+        "has_queue": True,
+        "queue_length": 3,
+        "estimated_wait_minutes": 5,
+        "last_updated": datetime.now().isoformat()
+    }
+    return jsonify({
+        "success": True,
+        "queue": data
+    })
 
 def generate_world_detection_response():
     """Generate response for world detection and navigation"""

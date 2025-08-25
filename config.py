@@ -74,6 +74,12 @@ class Config:
     BACKUP_INTERVAL = int(os.environ.get('BACKUP_INTERVAL', 3600))  # 1 hour
     BACKUP_RETENTION_DAYS = int(os.environ.get('BACKUP_RETENTION_DAYS', 7))
 
+    # RCON Configuration (optional)
+    RCON_ENABLED = os.environ.get('RCON_ENABLED', 'False').lower() == 'true'
+    RCON_HOST = os.environ.get('RCON_HOST', '127.0.0.1')
+    RCON_PORT = int(os.environ.get('RCON_PORT', 25575))
+    RCON_PASSWORD = os.environ.get('RCON_PASSWORD', '')
+
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
