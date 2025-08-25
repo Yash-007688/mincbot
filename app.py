@@ -170,7 +170,8 @@ class BotManager:
                 'coordinates': (0, 64, 0),
                 'location_name': 'Spawn',
                 'last_target': None,
-                'last_updated': datetime.now().isoformat()
+                'last_updated': datetime.now().isoformat(),
+                'world': 'survival-1'
             }
         
         logger.info("Created mock bots for testing")
@@ -228,6 +229,7 @@ class BotManager:
                     # Static coordinates stub for Moon City
                     info['coordinates'] = (1500, 64, 1500)
                     info['location_name'] = 'Moon City'
+                    info['world'] = 'survival-2'
                 else:
                     info['location_name'] = f"Warp: {(parameters or {}).get('destination', 'unknown')}"
                 info['last_target'] = None
@@ -478,7 +480,8 @@ def get_bot_location(bot_id):
             "location_name": info.get('location_name'),
             "coordinates": {"x": x, "y": y, "z": z},
             "last_target": info.get('last_target'),
-            "last_updated": info.get('last_updated')
+            "last_updated": info.get('last_updated'),
+            "world": info.get('world')
         })
     return jsonify({"error": "Bot manager not available"}), 500
 
