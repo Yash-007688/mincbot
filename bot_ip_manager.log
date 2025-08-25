@@ -12,3 +12,4 @@
 2025-08-25 07:41:20,339 - INFO - Default user 'yash' already exists
 2025-08-25 07:41:20,339 - INFO - Database Manager initialized successfully
 2025-08-25 07:41:20,339 - INFO - Database Manager initialized successfully
+2025-08-25 07:45:00,366 - ERROR - Error saving config: Object of type datetime is not JSON serializable
