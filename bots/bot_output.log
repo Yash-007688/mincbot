@@ -1,0 +1,201 @@
+nohup: ignoring input
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Mineflayer detected that you are using a deprecated event (physicTick)! Please use this event (physicsTick) instead.
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
+Error: getaddrinfo ENOTFOUND survival-2
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'survival-2'
+}
+[PvP] [undefined] Error: getaddrinfo ENOTFOUND survival-2
+[PvP] [undefined] Disconnected
