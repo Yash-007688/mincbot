@@ -1,0 +1,10 @@
+{
+  "players": [],
+  "bots": [
+    {
+      "uuid": "295b3348-567c-42b8-98ad-6d2fdb82924c",
+      "username": "ironminer",
+      "display_name": "IronMiner",
+      "is_bot": true,
+      "is_online": true,
+      "last_seen": 
