@@ -84,6 +84,7 @@ class BotManager:
     def __init__(self):
         self.bots = {}
         self.bot_ips = {}
+        self.bot_locations = {}
         
         # Initialize management systems
         self.server_manager = None
@@ -164,6 +165,13 @@ class BotManager:
         for bot_id, config in mock_bots.items():
             self.bots[bot_id] = config
             self.bot_ips[bot_id] = config
+            # Initialize simple location tracking for each mock bot
+            self.bot_locations[bot_id] = {
+                'coordinates': (0, 64, 0),
+                'location_name': 'Spawn',
+                'last_target': None,
+                'last_updated': datetime.now().isoformat()
+            }
         
         logger.info("Created mock bots for testing")
     
@@ -193,11 +201,50 @@ class BotManager:
         """Execute a command on a specific bot"""
         if bot_id in self.bots:
             if AI_SYSTEM_AVAILABLE and hasattr(self.bots[bot_id], 'execute_action'):
-                return self.bots[bot_id].execute_action(command, parameters or {})
+                result = self.bots[bot_id].execute_action(command, parameters or {})
+                # Best-effort update of local location tracker based on command semantics
+                self._update_location_tracker(bot_id, command, parameters or {})
+                return result
             else:
                 # Mock command execution
+                self._update_location_tracker(bot_id, command, parameters or {})
                 return f"Mock command '{command}' executed on {bot_id}"
         return f"Bot {bot_id} not found"
+
+    def _update_location_tracker(self, bot_id, command, parameters):
+        """Update simple location/target info for a bot based on high-level commands."""
+        try:
+            if bot_id not in self.bot_locations:
+                self.bot_locations[bot_id] = {
+                    'coordinates': (0, 64, 0),
+                    'location_name': 'Spawn',
+                    'last_target': None,
+                    'last_updated': datetime.now().isoformat()
+                }
+            info = self.bot_locations[bot_id]
+            if command == 'warp':
+                destination = (parameters or {}).get('destination', '').lower()
+                if 'moon city' in destination:
+                    # Static coordinates stub for Moon City
+                    info['coordinates'] = (1500, 64, 1500)
+                    info['location_name'] = 'Moon City'
+                else:
+                    info['location_name'] = f"Warp: {(parameters or {}).get('destination', 'unknown')}"
+                info['last_target'] = None
+                info['last_updated'] = datetime.now().isoformat()
+            elif command == 'tp':
+                player = (parameters or {}).get('player')
+                info['last_target'] = f"player:{player}" if player else 'player:unknown'
+                # Keep coordinates as-is; in a real system, this would be updated from the game server
+                info['location_name'] = f"Near {player}" if player else 'Teleport'
+                info['last_updated'] = datetime.now().isoformat()
+            else:
+                # Other commands do not affect location tracking in this stub
+                pass
+            self.bot_locations[bot_id] = info
+        except Exception:
+            # Non-fatal; do not break command flow
+            pass
     
     def rotate_bot_ip(self, bot_id):
         """Rotate IP for a specific bot"""
@@ -416,6 +463,23 @@ def execute_bot_command(bot_id):
             return jsonify({"success": True, "result": result})
         else:
             return jsonify({"error": "No command specified"}), 400
+    return jsonify({"error": "Bot manager not available"}), 500
+
+@app.route('/api/bots/<bot_id>/location', methods=['GET'])
+def get_bot_location(bot_id):
+    """API endpoint to get a bot's current tracked location (stub)."""
+    if bot_manager:
+        info = getattr(bot_manager, 'bot_locations', {}).get(bot_id)
+        if not info:
+            return jsonify({"error": "Location not available"}), 404
+        x, y, z = info.get('coordinates', (0, 0, 0))
+        return jsonify({
+            "bot_id": bot_id,
+            "location_name": info.get('location_name'),
+            "coordinates": {"x": x, "y": y, "z": z},
+            "last_target": info.get('last_target'),
+            "last_updated": info.get('last_updated')
+        })
     return jsonify({"error": "Bot manager not available"}), 500
 
 @app.route('/api/settings/server', methods=['POST'])
