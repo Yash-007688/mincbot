@@ -15,12 +15,37 @@ const RETARGET_MS = process.env.RETARGET_MS ? Number(process.env.RETARGET_MS) : 
 const LOG_PREFIX = process.env.LOG_PREFIX || '[PvP]'
 const EXCLUDE_NAMES = new Set((process.env.EXCLUDE_NAMES || '').split(',').map(s => s.trim()).filter(Boolean))
 
+// Authentication settings
+const AUTH_MODE = process.env.AUTH_MODE || 'offline' // 'offline', 'microsoft', 'mojang'
+const EMAIL = process.env.EMAIL || ''
+const PASSWORD = process.env.PASSWORD || ''
+
 /**
  * Create a single bot instance with PvP + pathfinder behavior
  */
 function spawnBot(index) {
   const username = `${BASE_NAME}${index}`
-  const bot = createBot({ host: HOST, port: PORT, username, version: VERSION || undefined })
+  
+  // Bot configuration with authentication
+  const botConfig = {
+    host: HOST,
+    port: PORT,
+    username,
+    version: VERSION || undefined
+  }
+  
+  // Add authentication if configured
+  if (AUTH_MODE === 'microsoft' && EMAIL && PASSWORD) {
+    botConfig.auth = 'microsoft'
+    botConfig.email = EMAIL
+    botConfig.password = PASSWORD
+  } else if (AUTH_MODE === 'mojang' && EMAIL && PASSWORD) {
+    botConfig.auth = 'mojang'
+    botConfig.email = EMAIL
+    botConfig.password = PASSWORD
+  }
+  
+  const bot = createBot(botConfig)
 
   bot.loadPlugin(pathfinder)
   bot.loadPlugin(pvp)
