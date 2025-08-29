@@ -94,7 +94,7 @@ class CommandHandler:
         self.categories = {
             "movement": ["tp", "home", "spawn", "warp", "tpa", "tpahere"],
             "land": ["claim", "unclaim", "info", "list", "trust", "untrust"],
-            "economy": ["balance", "pay", "shop", "sell", "buy", "auction"],
+            "economy": ["balance", "pay", "shop", "sell", "buy", "auction", "daily", "quest", "mine"],
             "items": ["kit", "give", "take", "repair", "enchant", "rename"],
             "social": ["msg", "tell", "reply", "ignore", "friend", "party"],
             "admin": ["ban", "kick", "mute", "op", "deop", "restart"],
@@ -328,6 +328,50 @@ class CommandHandler:
                 "examples": ["/weather", "/weather clear"],
                 "enabled": True,
                 "handler": "handle_weather_command"
+            },
+            "sell": {
+                "description": "Sell items for money",
+                "usage": "/sell <item> <quantity>",
+                "aliases": ["trade"],
+                "permissions": ["command.sell"],
+                "cooldown": 0,
+                "category": "economy",
+                "examples": ["/sell diamond 5", "/sell stone 64"],
+                "enabled": True,
+                "handler": "handle_sell_command"
+            },
+            "daily": {
+                "description": "Claim daily reward",
+                "usage": "/daily",
+                "aliases": ["reward"],
+                "permissions": ["command.daily"],
+                "cooldown": 86400,  # 24 hours
+                "category": "economy",
+                "examples": ["/daily"],
+                "enabled": True,
+                "handler": "handle_daily_command"
+            },
+            "quest": {
+                "description": "Manage quests for rewards",
+                "usage": "/quest <list|accept|complete> [quest_name]",
+                "aliases": ["mission"],
+                "permissions": ["command.quest"],
+                "cooldown": 0,
+                "category": "economy",
+                "examples": ["/quest list", "/quest accept Mining Master", "/quest complete Farmer"],
+                "enabled": True,
+                "handler": "handle_quest_command"
+            },
+            "mine": {
+                "description": "Mine resources for money",
+                "usage": "/mine <resource> [quantity]",
+                "aliases": ["dig"],
+                "permissions": ["command.mine"],
+                "cooldown": 0,
+                "category": "economy",
+                "examples": ["/mine stone 64", "/mine diamond 1"],
+                "enabled": True,
+                "handler": "handle_mine_command"
             }
         }
         
@@ -973,6 +1017,170 @@ class CommandHandler:
             }
         else:
             return {"message": "Invalid weather type. Use: clear, rain, or thunder", "data": None}
+    
+    # Earning Commands for Survival Mode
+    
+    def handle_sell_command(self, context: CommandContext) -> Dict[str, any]:
+        """Handle sell command - sell items for money"""
+        if len(context.arguments) < 2:
+            return {"message": "Usage: /sell <item> <quantity>", "data": None}
+        
+        item_id = context.arguments[0].lower()
+        try:
+            quantity = int(context.arguments[1])
+        except ValueError:
+            return {"message": "Invalid quantity. Use a number.", "data": None}
+        
+        if quantity <= 0:
+            return {"message": "Quantity must be positive", "data": None}
+        
+        if self.inventory_manager:
+            # Check if player has the item
+            if self.inventory_manager.has_item_in_inventory(context.player_uuid, item_id, quantity):
+                # Get item value
+                item_value = self.inventory_manager.get_item_value(item_id)
+                total_value = item_value * quantity
+                
+                # Remove item and add money
+                if self.inventory_manager.remove_item_from_inventory(context.player_uuid, item_id, quantity):
+                    if self.inventory_manager.add_money(context.player_uuid, total_value, f"Sold {quantity}x {item_id}"):
+                        return {
+                            "message": f"Sold {quantity}x {item_id} for {total_value} dollars!",
+                            "data": {"item": item_id, "quantity": quantity, "value": total_value}
+                        }
+                    else:
+                        # Rollback item removal if money addition failed
+                        self.inventory_manager.add_item_to_inventory(context.player_uuid, item_id, quantity)
+                        return {"message": "Failed to process sale", "data": None}
+                else:
+                    return {"message": f"You don't have {quantity}x {item_id}", "data": None}
+            else:
+                return {"message": f"You don't have {quantity}x {item_id}", "data": None}
+        else:
+            return {"message": "Economy system not available", "data": None}
+    
+    def handle_daily_command(self, context: CommandContext) -> Dict[str, any]:
+        """Handle daily command - claim daily reward"""
+        if self.inventory_manager:
+            # Check if player can claim daily reward (implement cooldown logic here)
+            daily_reward = 100  # Base daily reward
+            bonus_multiplier = 1.0
+            
+            # Add bonus for consecutive days (simplified)
+            if hasattr(context, 'consecutive_days'):
+                bonus_multiplier = 1 + (context.consecutive_days * 0.1)
+            
+            total_reward = int(daily_reward * bonus_multiplier)
+            
+            if self.inventory_manager.add_money(context.player_uuid, total_reward, "Daily reward"):
+                return {
+                    "message": f"Daily reward claimed! You earned {total_reward} dollars!",
+                    "data": {"reward": total_reward, "bonus_multiplier": bonus_multiplier}
+                }
+            else:
+                return {"message": "Failed to claim daily reward", "data": None}
+        else:
+            return {"message": "Economy system not available", "data": None}
+    
+    def handle_quest_command(self, context: CommandContext) -> Dict[str, any]:
+        """Handle quest command - complete quests for money"""
+        if not context.arguments:
+            return {"message": "Usage: /quest <list|accept|complete> [quest_name]", "data": None}
+        
+        action = context.arguments[0].lower()
+        
+        if action == "list":
+            available_quests = [
+                {"name": "Mining Master", "description": "Mine 100 stone blocks", "reward": 500, "type": "mining"},
+                {"name": "Farmer", "description": "Harvest 50 wheat", "reward": 300, "type": "farming"},
+                {"name": "Builder", "description": "Place 200 blocks", "reward": 400, "type": "building"},
+                {"name": "Explorer", "description": "Travel 1000 blocks", "reward": 200, "type": "exploration"}
+            ]
+            return {
+                "message": "Available quests:\n" + "\n".join([f"{q['name']}: {q['description']} - Reward: {q['reward']} dollars" for q in available_quests]),
+                "data": {"quests": available_quests}
+            }
+        
+        elif action == "accept":
+            if len(context.arguments) < 2:
+                return {"message": "Usage: /quest accept <quest_name>", "data": None}
+            quest_name = context.arguments[1]
+            return {"message": f"Quest '{quest_name}' accepted! Check your progress with /quest status", "data": {"quest": quest_name, "status": "accepted"}}
+        
+        elif action == "complete":
+            if len(context.arguments) < 2:
+                return {"message": "Usage: /quest complete <quest_name>", "data": None}
+            quest_name = context.arguments[1]
+            
+            # Simulate quest completion and reward
+            quest_rewards = {
+                "Mining Master": 500,
+                "Farmer": 300,
+                "Builder": 400,
+                "Explorer": 200
+            }
+            
+            if quest_name in quest_rewards:
+                reward = quest_rewards[quest_name]
+                if self.inventory_manager.add_money(context.player_uuid, reward, f"Quest completion: {quest_name}"):
+                    return {
+                        "message": f"Quest '{quest_name}' completed! You earned {reward} dollars!",
+                        "data": {"quest": quest_name, "reward": reward}
+                    }
+                else:
+                    return {"message": "Failed to claim quest reward", "data": None}
+            else:
+                return {"message": f"Quest '{quest_name}' not found", "data": None}
+        
+        else:
+            return {"message": "Invalid action. Use: list, accept, or complete", "data": None}
+    
+    def handle_mine_command(self, context: CommandContext) -> Dict[str, any]:
+        """Handle mine command - mine resources for money"""
+        if not context.arguments:
+            return {"message": "Usage: /mine <resource> [quantity]", "data": None}
+        
+        resource = context.arguments[0].lower()
+        quantity = int(context.arguments[1]) if len(context.arguments) > 1 else 1
+        
+        if quantity <= 0:
+            return {"message": "Quantity must be positive", "data": None}
+        
+        # Resource values (dollars per unit)
+        resource_values = {
+            "stone": 1,
+            "coal": 2,
+            "iron": 5,
+            "gold": 10,
+            "diamond": 100,
+            "emerald": 80,
+            "redstone": 3,
+            "lapis": 15
+        }
+        
+        if resource in resource_values:
+            value_per_unit = resource_values[resource]
+            total_value = value_per_unit * quantity
+            
+            # Simulate mining (in real implementation, this would check actual inventory)
+            if self.inventory_manager:
+                # Add the mined resource to inventory
+                if self.inventory_manager.add_item_to_inventory(context.player_uuid, resource, quantity):
+                    # Give money for mining effort
+                    mining_reward = int(total_value * 0.5)  # 50% of item value as mining reward
+                    if self.inventory_manager.add_money(context.player_uuid, mining_reward, f"Mining reward: {quantity}x {resource}"):
+                        return {
+                            "message": f"You mined {quantity}x {resource} and earned {mining_reward} dollars!",
+                            "data": {"resource": resource, "quantity": quantity, "reward": mining_reward, "item_value": total_value}
+                        }
+                    else:
+                        return {"message": f"Mined {quantity}x {resource} but failed to get reward", "data": None}
+                else:
+                    return {"message": "Failed to add mined resource to inventory", "data": None}
+            else:
+                return {"message": "Inventory system not available", "data": None}
+        else:
+            return {"message": f"Unknown resource: {resource}. Available: {', '.join(resource_values.keys())}", "data": None}
     
     # Utility Methods
     
