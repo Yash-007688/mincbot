@@ -62,3 +62,67 @@
 2025-08-29 16:04:54,955 - INFO - Database Manager initialized successfully
 2025-08-29 16:05:00,568 - ERROR - Error saving config: Object of type datetime is not JSON serializable
 2025-08-29 16:05:00,956 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:22:49,666 - ERROR - Error loading config: Expecting value: line 10 column 20 (char 223)
+2025-08-29 16:22:49,666 - INFO - Creating default server configuration...
+2025-08-29 16:22:49,667 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:22:49,667 - INFO - Initialized 10 default commands
+2025-08-29 16:22:49,667 - INFO - Background update tasks started
+2025-08-29 16:22:49,667 - INFO - Server Manager initialized successfully
+2025-08-29 16:22:49,668 - INFO - Loaded 5 items, 0 inventories, 0 accounts
+2025-08-29 16:22:49,668 - INFO - Initialized 5 default items
+2025-08-29 16:22:49,668 - ERROR - Error initializing management systems: 'InventoryManager' object has no attribute 'initialize_default_inventories'
+2025-08-29 16:22:49,668 - INFO - Created mock bots for testing
+2025-08-29 16:22:49,668 - INFO - Database tables initialized successfully
+2025-08-29 16:22:49,669 - INFO - Default user 'yash' already exists
+2025-08-29 16:22:49,669 - INFO - Database Manager initialized successfully
+2025-08-29 16:22:49,669 - INFO - Database Manager initialized successfully
+2025-08-29 16:22:50,374 - ERROR - Error loading config: Expecting value: line 10 column 20 (char 223)
+2025-08-29 16:22:50,374 - INFO - Creating default server configuration...
+2025-08-29 16:22:50,374 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:22:50,374 - INFO - Initialized 10 default commands
+2025-08-29 16:22:50,375 - INFO - Background update tasks started
+2025-08-29 16:22:50,375 - INFO - Server Manager initialized successfully
+2025-08-29 16:22:50,375 - INFO - Loaded 5 items, 0 inventories, 0 accounts
+2025-08-29 16:22:50,375 - INFO - Initialized 5 default items
+2025-08-29 16:22:50,375 - ERROR - Error initializing management systems: 'InventoryManager' object has no attribute 'initialize_default_inventories'
+2025-08-29 16:22:50,375 - INFO - Created mock bots for testing
+2025-08-29 16:22:50,375 - INFO - Database tables initialized successfully
+2025-08-29 16:22:50,376 - INFO - Default user 'yash' already exists
+2025-08-29 16:22:50,376 - INFO - Database Manager initialized successfully
+2025-08-29 16:22:50,376 - INFO - Database Manager initialized successfully
+2025-08-29 16:25:00,397 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:25:00,693 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:30:00,445 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:30:00,742 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:35:00,492 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:35:00,788 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:37:53,891 - ERROR - Error loading config: Expecting value: line 10 column 20 (char 223)
+2025-08-29 16:37:53,891 - INFO - Creating default server configuration...
+2025-08-29 16:37:53,892 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:37:53,892 - INFO - Initialized 10 default commands
+2025-08-29 16:37:53,892 - INFO - Background update tasks started
+2025-08-29 16:37:53,892 - INFO - Server Manager initialized successfully
+2025-08-29 16:37:53,892 - INFO - Loaded 5 items, 0 inventories, 0 accounts
+2025-08-29 16:37:53,892 - INFO - Initialized 5 default items
+2025-08-29 16:37:53,892 - ERROR - Error initializing management systems: 'InventoryManager' object has no attribute 'initialize_default_inventories'
+2025-08-29 16:37:53,892 - INFO - Created mock bots for testing
+2025-08-29 16:37:53,893 - INFO - Database tables initialized successfully
+2025-08-29 16:37:53,893 - INFO - Default user 'yash' already exists
+2025-08-29 16:37:53,893 - INFO - Database Manager initialized successfully
+2025-08-29 16:37:53,893 - INFO - Database Manager initialized successfully
+2025-08-29 16:39:17,737 - INFO - Created session for user: yash
+2025-08-29 16:40:00,835 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:40:47,612 - ERROR - Error loading config: Expecting value: line 10 column 20 (char 223)
+2025-08-29 16:40:47,612 - INFO - Creating default server configuration...
+2025-08-29 16:40:47,613 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-08-29 16:40:47,613 - INFO - Initialized 10 default commands
+2025-08-29 16:40:47,613 - INFO - Background update tasks started
+2025-08-29 16:40:47,613 - INFO - Server Manager initialized successfully
+2025-08-29 16:40:47,614 - INFO - Loaded 5 items, 0 inventories, 0 accounts
+2025-08-29 16:40:47,614 - INFO - Initialized 5 default items
+2025-08-29 16:40:47,614 - ERROR - Error initializing management systems: 'InventoryManager' object has no attribute 'initialize_default_inventories'
+2025-08-29 16:40:47,614 - INFO - Created mock bots for testing
+2025-08-29 16:40:47,614 - INFO - Database tables initialized successfully
+2025-08-29 16:40:47,614 - INFO - Default user 'yash' already exists
+2025-08-29 16:40:47,615 - INFO - Database Manager initialized successfully
+2025-08-29 16:40:47,615 - INFO - Database Manager initialized successfully
