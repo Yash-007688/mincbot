@@ -1,0 +1,134 @@
+{
+  "items": [
+    {
+      "item_id": "stone",
+      "name": "stone",
+      "display_name": "Stone",
+      "type": "block",
+      "stack_size": 64,
+      "durability": null,
+      "max_durability": null,
+      "enchantments": [],
+      "lore": [
+        "A basic building block"
+      ],
+      "rarity": "common",
+      "value": 1.0,
+      "craftable": true,
+      "tradeable": true,
+      "weight": 1.0,
+      "tags": [
+        "building",
+        "mining"
+      ]
+    },
+    {
+      "item_id": "diamond",
+      "name": "diamond",
+      "display_name": "Diamond",
+      "type": "material",
+      "stack_size": 64,
+      "durability": null,
+      "max_durability": null,
+      "enchantments": [],
+      "lore": [
+        "A precious gem"
+      ],
+      "rarity": "rare",
+      "value": 100.0,
+      "craftable": false,
+      "tradeable": true,
+      "weight": 0.5,
+      "tags": [
+        "valuable",
+        "mining"
+      ]
+    },
+    {
+      "item_id": "diamond_sword",
+      "name": "diamond_sword",
+      "display_name": "Diamond Sword",
+      "type": "weapon",
+      "stack_size": 1,
+      "durability": 1561,
+      "max_durability": 1561,
+      "enchantments": [],
+      "lore": [
+        "A powerful weapon"
+      ],
+      "rarity": "rare",
+      "value": 500.0,
+      "craftable": true,
+      "tradeable": true,
+      "weight": 2.0,
+      "tags": [
+        "weapon",
+        "combat"
+      ]
+    },
+    {
+      "item_id": "bread",
+      "name": "bread",
+      "display_name": "Bread",
+      "type": "food",
+      "stack_size": 64,
+      "durability": null,
+      "max_durability": null,
+      "enchantments": [],
+      "lore": [
+        "Basic food item"
+      ],
+      "rarity": "common",
+      "value": 5.0,
+      "craftable": true,
+      "tradeable": true,
+      "weight": 0.5,
+      "tags": [
+        "food",
+        "farming"
+      ]
+    },
+    {
+      "item_id": "iron_pickaxe",
+      "name": "iron_pickaxe",
+      "display_name": "Iron Pickaxe",
+      "type": "tool",
+      "stack_size": 1,
+      "durability": 250,
+      "max_durability": 250,
+      "enchantments": [],
+      "lore": [
+        "A mining tool"
+      ],
+      "rarity": "uncommon",
+      "value": 150.0,
+      "craftable": true,
+      "tradeable": true,
+      "weight": 1.5,
+      "tags": [
+        "tool",
+        "mining"
+      ]
+    }
+  ],
+  "inventories": [],
+  "economy_accounts": [],
+  "server_economy": {
+    "currency_name": "Coins",
+    "currency_symbol": "C",
+    "starting_balance": 1000.0,
+    "interest_rate": 0.05,
+    "transaction_fee": 0.01,
+    "max_transaction_amount": 1000000.0,
+    "inflation_rate": 0.02,
+    "market_update_interval": 3600
+  },
+  "market_prices": {
+    "stone": 1.0,
+    "diamond": 100.0,
+    "diamond_sword": 500.0,
+    "bread": 5.0,
+    "iron_pickaxe": 150.0
+  },
+  "last_updated": "2025-08-29T15:49:38.429512"
+}
