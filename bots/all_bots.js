@@ -82,6 +82,26 @@ class CommandProcessor {
         }
     }
 
+    loadCommandCategories() {
+        // Return default command categories
+        return {
+            'movement': ['tp', 'follow', 'unfollow', 'goto'],
+            'chat': ['chat', 'say', 'whisper'],
+            'status': ['status', 'health', 'inventory'],
+            'admin': ['kick', 'ban', 'teleport']
+        };
+    }
+
+    loadCommandParameters() {
+        // Return default command parameters
+        return {
+            'tp': ['target', 'x', 'y', 'z'],
+            'follow': ['target'],
+            'chat': ['message'],
+            'status': []
+        };
+    }
+
     // Process incoming commands
     async processCommand(commandData) {
         const { type, action, target, params, username } = commandData;
