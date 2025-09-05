@@ -10,6 +10,7 @@
         "dotenv": "^16.5.0",
         "express": "^4.21.2",
         "minecraft-data": "^3.89.0",
+        "minecraft-server-util": "^5.4.4",
         "mineflayer": "^4.29.0",
         "mineflayer-pathfinder": "^2.4.5",
         "prismarine-physics": "^1.10.0",
