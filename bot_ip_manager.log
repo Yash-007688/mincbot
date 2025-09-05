@@ -126,3 +126,33 @@
 2025-08-29 16:40:47,614 - INFO - Default user 'yash' already exists
 2025-08-29 16:40:47,615 - INFO - Database Manager initialized successfully
 2025-08-29 16:40:47,615 - INFO - Database Manager initialized successfully
+2025-09-05 12:10:24,932 - ERROR - Error loading config: Expecting value: line 10 column 20 (char 223)
+2025-09-05 12:10:24,932 - INFO - Creating default server configuration...
+2025-09-05 12:10:24,932 - ERROR - Error saving config: Object of type datetime is not JSON serializable
+2025-09-05 12:10:24,932 - INFO - Initialized 10 default commands
+2025-09-05 12:10:24,933 - INFO - Background update tasks started
+2025-09-05 12:10:24,933 - INFO - Server Manager initialized successfully
+2025-09-05 12:10:24,933 - INFO - Loaded 5 items, 0 inventories, 0 accounts
+2025-09-05 12:10:24,933 - INFO - Initialized 5 default items
+2025-09-05 12:10:24,933 - ERROR - Error initializing management systems: 'InventoryManager' object has no attribute 'initialize_default_inventories'
+2025-09-05 12:10:24,933 - INFO - Created mock bots for testing
+2025-09-05 12:10:24,934 - INFO - Database tables initialized successfully
+2025-09-05 12:10:24,934 - INFO - Default user 'yash' already exists
+2025-09-05 12:10:24,934 - INFO - Database Manager initialized successfully
+2025-09-05 12:10:24,934 - INFO - Database Manager initialized successfully
+2025-09-05 12:10:24,947 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.30.0.2:5000
+2025-09-05 12:10:24,947 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-05 12:10:26,240 - INFO - 127.0.0.1 - - [05/Sep/2025 12:10:26] "GET / HTTP/1.1" 200 -
+2025-09-05 12:10:37,905 - INFO - 127.0.0.1 - - [05/Sep/2025 12:10:37] "[31m[1mPOST /api/deployments/create HTTP/1.1[0m" 401 -
+2025-09-05 12:10:47,986 - INFO - 127.0.0.1 - - [05/Sep/2025 12:10:47] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+2025-09-05 12:10:53,574 - INFO - Created session for user: yash
+2025-09-05 12:10:53,575 - INFO - 127.0.0.1 - - [05/Sep/2025 12:10:53] "POST /auth/login HTTP/1.1" 200 -
+2025-09-05 12:10:57,184 - INFO - Created bot deployment: Find Ro9ie Mission (ID: 2)
+2025-09-05 12:10:57,185 - INFO - 127.0.0.1 - - [05/Sep/2025 12:10:57] "POST /api/deployments/create HTTP/1.1" 200 -
+2025-09-05 12:10:59,483 - INFO - Updated deployment 2 status to: deploying
+2025-09-05 12:10:59,486 - INFO - Updated deployment 2 status to: active
+2025-09-05 12:10:59,487 - INFO - 127.0.0.1 - - [05/Sep/2025 12:10:59] "POST /api/deployments/2/deploy HTTP/1.1" 200 -
+2025-09-05 12:11:03,914 - INFO - 127.0.0.1 - - [05/Sep/2025 12:11:03] "GET /api/deployments/list HTTP/1.1" 200 -
